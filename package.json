@@ -1,0 +1,45 @@
+{
+  "name": "stellar-election",
+  "version": "1.0.0",
+  "description": "Stellar election smart contract ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stasbar/stellar-voting.git"
+  },
+  "keywords": [
+    "stellar",
+    "smart",
+    "contract",
+    "blockchain",
+    "voting",
+    "election"
+  ],
+  "author": "Stanislaw Baranski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stasbar/stellar-voting/issues"
+  },
+  "homepage": "https://github.com/stasbar/stellar-voting#readme",
+  "dependencies": {
+    "prettier": "^1.19.1",
+    "stellar-sdk": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-react-hooks": "^1.7.0",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}
