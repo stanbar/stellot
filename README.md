@@ -14,10 +14,10 @@ in 7 diigts precision in human-friendly form).
 
 ## Token distribution
 
-Votes can exchange thier ID for 1 (seen by user as 0.0000001) __VOTE__ token.
+Votes can exchange thier ID for 1 (seen by user as 0.0000001) _VOTE_ token.
 User can do with this token whatever he want, ideally vote for one of eligible
 parties, but nothing prevent him for transfering this token to any other
-account, such as family member. Since it already happends in current __analog__
+account, such as family member. Since it already happends in current "analog"
 voting model, it should not be considered as system flaw, rather as a feature.
 
 
