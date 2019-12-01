@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Voting Stellar</title>
+    <meta name="description" content="Voting system build on stellar network">
+    <meta name="author" content="Stanislaw Baranski">
+  </head>
+  <body>
+    <div id="app">
+      <h2>Voting system build on stellar network</h2>
+
+      <h2>{{ distributionAccountId }}</h2>
+      <ul>
+        <li v-for="balance in balances">{{ balance.asset_type }}: {{ balance.balance }}
+          <span v-if="balance.asset_type === 'native'"><strong>{{ balance.balance }} LUM</strong></span>
+        </li>
+      </ul>
+
+      <h2>Parties</h2>
+      <ul>
+        <li v-for="party in parties">{{ party }}</li>
+      </ul>
+    </div>
+
+    <script src="https://unpkg.com/vue"></script>
+    <script>
+      const app = new Vue({
+        el: '#app',
+        data: {
+          distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
+          parties: ['Left', 'Right', 'Liberity', 'Authority'],
+          balances: [],
+        },
+        created() {
+          fetch('https://horizon-testnet.stellar.org/accounts/GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU')
+            .then(response => response.json())
+            .then(json => {
+              this.balances = json.balances
+            })
+        }
+      })
+    </script>
+  </body>
+</html>
