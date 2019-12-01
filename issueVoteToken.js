@@ -71,11 +71,33 @@ async function setHomeDomain(homeDomain) {
   console.log(response)
 }
 
+await lockSupply() {
+  const issuer = await server.loadAccount(issuerKeypair.publicKey())
+  const transaction = new StellarSdk.TransactionBuilder(issuer, {
+    fee: 100,
+    networkPassphrase: StellarSdk.Networks.TESTNET,
+  })
+    .addOperation(StellarSdk.Operation.setOptions({
+      masterWeight: 0,
+      lowThreshold: 1,
+      medThreshold: 1,
+      highThreshold: 1,
+    }))
+    .setTimeout(60) // seconds
+    .build()
+
+  transaction.sign(issuerKeypair)
+  const response = await server.submitTransaction(transaction)
+  console.log(response)
+}
+
 async function performFlow() {
   try {
-    await createTrustlineDistributionToIssuingAccount()
-    await giveTheDistributionAccountTheTokens(100)
-    await setHomeDomain('voting.stasbar.com')
+    // await createTrustlineDistributionToIssuingAccount()
+    // await giveTheDistributionAccountTheTokens(100)
+    // await setHomeDomain('voting.stasbar.com')
+    await lockSupply()
+
   } catch (e) {
     console.error(e)
   }
