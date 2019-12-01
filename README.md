@@ -1,6 +1,7 @@
 # Stellar Voting
 
 Votting dapp on stellar network.
+Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 
 ## Concept overview
 
