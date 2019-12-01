@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -12,15 +12,22 @@
 
       <h2>{{ distributionAccountId }}</h2>
       <ul>
-        <li v-for="balance in balances">{{ balance.asset_type }}: {{ balance.balance }}
-          <span v-if="balance.asset_type === 'native'"><strong>{{ balance.balance }} LUM</strong></span>
+        <li v-for="balance in balances">
+          <span v-if="balance.asset_type === 'native'">LUM: {{ balance.balance }}</span>
+          <span v-else>{{ balance.asset_code }} {{ balance.balance }}</span>
         </li>
       </ul>
 
       <h2>Parties</h2>
       <ul>
-        <li v-for="party in parties">{{ party }}</li>
+        <li v-for="party in parties">
+          {{ party.name }} {{ party.votes }}
+          <button @click="party.votes += 1">
+          </button>
+
+        </li>
       </ul>
+      {{ totalVotes }}
     </div>
 
     <script src="https://unpkg.com/vue"></script>
@@ -29,8 +36,18 @@
         el: '#app',
         data: {
           distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
-          parties: ['Left', 'Right', 'Liberity', 'Authority'],
+          parties: [
+            {name : 'Left', votes: 0},
+            {name : 'Right', votes: 0},
+            {name : 'Liberity', votes: 0},
+            {name : 'Authority', votes: 0},
+          ],
           balances: [],
+        },
+        computed: {
+          totalVotes(){
+            return this.parties.reduce((sum, party) => { return sum + party.votes}, 0)
+          }
         },
         created() {
           fetch('https://horizon-testnet.stellar.org/accounts/GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU')
