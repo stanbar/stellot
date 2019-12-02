@@ -1,10 +1,11 @@
 {
-  "name": "stellar-election",
+  "name": "stellar-voting",
   "version": "1.0.0",
   "description": "Stellar election smart contract ",
   "main": "index.js",
   "scripts": {
-    "start": "node ."
+    "start": "node -r dotenv/config .",
+    "start-server": "DEBUG=server:* node -r dotenv/config ./bin/www"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,11 @@
   },
   "homepage": "https://github.com/stasbar/stellar-voting#readme",
   "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^8.2.0",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1",
     "prettier": "^1.19.1",
     "stellar-sdk": "^3.3.0"
   },
