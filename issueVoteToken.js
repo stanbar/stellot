@@ -1,13 +1,11 @@
 const StellarSdk = require('stellar-sdk')
 
 // The source account is the account we will be signing and sending from.
-const issuerSecretKey =
-  'SB3IU2OST7MSXTYYQNFZDLBI6ZLQQLOOZFEDQCQHBMALAEGEDGTTKK7B'
+const issuerSecretKey = process.env.ISSUE_SECRET_KEY
 // 'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH'
 const issuerKeypair = StellarSdk.Keypair.fromSecret(issuerSecretKey)
 
-const distributionSecretKey =
-  'SBQ5HMAGX4CIQMIZ3IXOLQHLAEL5NLOWXMU4T2LTKMDLG4WU4IYDTHJN'
+const distributionSecretKey = process.env.DISTRIBUTION_SECRET_KEY
 // 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU'
 const distributionKeypair = StellarSdk.Keypair.fromSecret(distributionSecretKey)
 
@@ -16,7 +14,7 @@ const distributionKeypair = StellarSdk.Keypair.fromSecret(distributionSecretKey)
 const server = new StellarSdk.Server('https://horizon-testnet.stellar.org')
 
 const voteToken = new StellarSdk.Asset(
-  'Vote01122019',
+  process.env.ASSET_NAME,
   issuerKeypair.publicKey(),
 )
 
