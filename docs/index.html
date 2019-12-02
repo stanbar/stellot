@@ -1,30 +1,39 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Voting Stellar</title>
-    <meta name="description" content="Voting system build on stellar network">
-    <meta name="author" content="Stanislaw Baranski">
+    <meta name="description" content="Voting system build on stellar network" />
+    <meta name="author" content="Stanislaw Baranski" />
   </head>
+
   <body>
     <div id="app">
-      <h2>Voting system build on stellar network</h2>
-
+      <h1>Voting system build on stellar network</h2>
       <h2>{{ distributionAccountId }}</h2>
-      <ul>
-        <li v-for="balance in balances">
-          <span v-if="balance.asset_type === 'native'">LUM: {{ balance.balance }}</span>
-          <span v-else>{{ balance.asset_code }} {{ balance.balance }}</span>
-        </li>
-      </ul>
+      Tokens remaining: {{ tokensRemaining }}
+      <br/>
+
+      <h1>Issue a vote token</h2>
+      <form @submit.prevent="onIssueTokenSubmit">
+        <label for="pesel">PESEL:</label>
+        <input id="pesel" type="text" placeholder="95031801245" v-model="pesel" required/>
+        <br/>
+
+        <label for="address">Stellar Address:</label>
+        <input id="address" placeholder="GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU" type="text" v-model="address" required/>
+
+        <br/>
+        <input type="submit" value="Submit"/>
+      </form>
+      <br/>
 
       <h2>Parties</h2>
       <ul>
-        <li v-for="party in parties">
+        <li v-for="party in parties" :key="party.name">
+          <input type="number" v-model.number="party.votes" />
           {{ party.name }} {{ party.votes }}
-          <button @click="party.votes += 1">
-          </button>
-
+          <button @click="party.votes += 1">Add</button>
         </li>
       </ul>
       {{ totalVotes }}
@@ -35,27 +44,77 @@
       const app = new Vue({
         el: '#app',
         data: {
-          distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
+          distributionAccountId:
+            'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
+          issuerAccountId:'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH',
+          assetCode: 'Vote01122019',
           parties: [
-            {name : 'Left', votes: 0},
-            {name : 'Right', votes: 0},
-            {name : 'Liberity', votes: 0},
-            {name : 'Authority', votes: 0},
+            {
+              name: 'PiS',
+              address:
+                'GCY4TQKOGQ7DL5ZOSF3FEQ2NPN2N3LHDHS7TRU5Y4QKVLOVJVCJRK3SM',
+            },
+            {
+              name: 'PO',
+              address:
+                'GDW5VG4ASNEV5SBH2LSGMRPQLJYIMO7DJD7YY2ELN6CKSZYXT2IMBPYR',
+            },
+            {
+              name: 'Konfederacja',
+              address:
+                'GBT5LTIVSBBN3JZMVPJ6ANKECXOSNY2C7DSBJBKWE6EP6LD5AFJNJZGB',
+            },
+            {
+              name: 'Authoritarianism',
+              address:
+                'GBYKYTZQHKV5HAV5WFBNOWRWQK3TNWFFZV6VCBEDKXIZXCYG6JSLQ4VL',
+            },
           ],
-          balances: [],
+          tokensRemaining : 0,
+          pesel: undefined,
+          address: undefined
+        },
+        async created() {
+          const res = await fetch(
+            `https://horizon-testnet.stellar.org/accounts/${this.distributionAccountId}`,
+          )
+          const json = await res.json()
+          const balance = json.balances.find((balance =>
+            balance.asset_code === this.assetCode && balance.asset_issuer === this.issuerAccountId))
+          const tokensRemaining = Math.round(balance.balance * 10 ** 7)
+          this.tokensRemaining = tokensRemaining
         },
         computed: {
-          totalVotes(){
-            return this.parties.reduce((sum, party) => { return sum + party.votes}, 0)
+          totalVotes() {
+            return this.parties.reduce((sum, party) => {
+              return sum + party.votes
+            }, 0)
+          },
+        },
+        methods: {
+          async onIssueTokenSubmit() {
+            const address = this.address
+            const pesel = this.pesel
+            const request = { address, pesel}
+            console.log(request)
+            try {
+              const response = await fetch('/issueToken', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(request)
+              })
+              if(response.ok){
+                console.log('Successfully assigned vote token')
+              }else{
+                console.error('Failed to assign vote token')
+              }
+            } catch (e) {
+              console.error(e)
+            }
           }
         },
-        created() {
-          fetch('https://horizon-testnet.stellar.org/accounts/GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU')
-            .then(response => response.json())
-            .then(json => {
-              this.balances = json.balances
-            })
-        }
       })
     </script>
   </body>
