@@ -57,7 +57,6 @@ async function sendTokenFromDistributionToAddress(address, pesel) {
     )
     .setTimeout(60) // seconds
     .build()
-  log(transaction)
 
   transaction.sign(distributionKeypair)
   return stellar.submitTransaction(transaction)
