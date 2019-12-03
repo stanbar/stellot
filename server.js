@@ -41,11 +41,12 @@ async function ensureEligableForVote(address, pesel) {
 }
 
 async function sendTokenFromDistributionToAddress(address, pesel) {
+  log(`sending token to ${address} pesel: ${pesel}`)
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
-    memo: pesel,
+    memo: new StellarSdk.Memo(StellarSdk.MemoText, pesel),
   })
     .addOperation(
       StellarSdk.Operation.payment({
@@ -56,20 +57,26 @@ async function sendTokenFromDistributionToAddress(address, pesel) {
     )
     .setTimeout(60) // seconds
     .build()
+  log(transaction)
 
   transaction.sign(distributionKeypair)
   return stellar.submitTransaction(transaction)
 }
 
 app.post('/issueToken', async (req, res) => {
-  const { address, pesel } = req.body
-  log(`address: ${address} pesel: ${pesel}`)
-  if (!address || !pesel) {
-    res.sendStatus(400).end()
-  } else {
-    ensureEligableForVote(address, pesel)
-    await sendTokenFromDistributionToAddress(address, pesel)
-    res.sendStatus(200).end()
+  try {
+    const { address, pesel } = req.body
+    log(`address: ${address} pesel: ${pesel}`)
+    if (!address || !pesel) {
+      res.sendStatus(400).end()
+    } else {
+      ensureEligableForVote(address, pesel)
+      await sendTokenFromDistributionToAddress(address, pesel)
+      res.sendStatus(200).end()
+    }
+  } catch (e) {
+    log(e)
+    res.sendStatus(500).end()
   }
 })
 

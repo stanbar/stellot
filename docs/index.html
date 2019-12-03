@@ -1,3 +1,6 @@
+<!-- Test Account -->
+<!-- GAM7ZPJQOM345NBLEZY23UN2ORHLJ6XMFZOTENGLGCBF6JNNWUXBU6QN -->
+<!-- SBOMRZ4BFPU2PZTAFSQIMRLUMX5RQDXYVJRACPEG5D4PIANYJ7MUBSH2 -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,6 +15,7 @@
       <h1>Voting system build on stellar network</h2>
       <h2>{{ distributionAccountId }}</h2>
       Tokens remaining: {{ tokensRemaining }}
+      <button @click="trustIssuer">Trust issuer</button>
       <br/>
 
       <h1>Issue a vote token</h2>
@@ -92,6 +96,9 @@
           },
         },
         methods: {
+          async trustIssuer() {
+            // TODO
+          },
           async onIssueTokenSubmit() {
             const address = this.address
             const pesel = this.pesel
