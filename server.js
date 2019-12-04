@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const StellarSdk = require('stellar-sdk')
 const log = require('debug')('server:app')
+const crypto = require('crypto')
 
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
 
@@ -76,6 +77,37 @@ app.post('/issueToken', async (req, res) => {
   } catch (e) {
     log(e)
     res.sendStatus(500).end()
+  }
+})
+
+const database = {
+  admin: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
+}
+
+let lastKey
+
+app.get('/generateKey', async (req, res) => {
+  const buf = crypto.randomBytes(32)
+  const key = buf.toString('hex')
+  log(`generated key: ${key}`)
+  lastKey = key
+  res.send({ key })
+})
+
+app.post('/login', async (req, res) => {
+  const { login, password } = req.body
+
+  const calculatedHash = crypto
+    .createHash('sha256')
+    .update(database[login] + lastKey)
+    .digest('hex')
+
+  log(`calculated hash: ${calculatedHash}`)
+
+  if (calculatedHash === password) {
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(401)
   }
 })
 
