@@ -24,7 +24,12 @@ async function createTrustlineDistributionToIssuingAccount() {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
   })
-    .addOperation(StellarSdk.Operation.changeTrust({ asset: voteToken }))
+    .addOperation(
+      StellarSdk.Operation.changeTrust({
+        asset: voteToken,
+        limit: '0.0000100',
+      }),
+    )
     .setTimeout(60) // seconds
     .build()
 
@@ -69,18 +74,20 @@ async function setHomeDomain(homeDomain) {
   console.log(response)
 }
 
-await lockSupply() {
+async function lockSupply() {
   const issuer = await server.loadAccount(issuerKeypair.publicKey())
   const transaction = new StellarSdk.TransactionBuilder(issuer, {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
   })
-    .addOperation(StellarSdk.Operation.setOptions({
-      masterWeight: 0,
-      lowThreshold: 1,
-      medThreshold: 1,
-      highThreshold: 1,
-    }))
+    .addOperation(
+      StellarSdk.Operation.setOptions({
+        masterWeight: 0,
+        lowThreshold: 1,
+        medThreshold: 1,
+        highThreshold: 1,
+      }),
+    )
     .setTimeout(60) // seconds
     .build()
 
@@ -91,11 +98,10 @@ await lockSupply() {
 
 async function performFlow() {
   try {
-    // await createTrustlineDistributionToIssuingAccount()
+    await createTrustlineDistributionToIssuingAccount()
     // await giveTheDistributionAccountTheTokens(100)
     // await setHomeDomain('voting.stasbar.com')
-    await lockSupply()
-
+    // await lockSupply()
   } catch (e) {
     console.error(e)
   }
