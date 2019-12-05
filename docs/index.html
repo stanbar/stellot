@@ -14,124 +14,83 @@
 
   <body>
     <div id="app" class="container">
-      <h1>Voting system build on stellar network</h2>
-      <h2>{{ distributionAccountId }}</h2>
-      Tokens remaining: {{ tokensRemaining }}
-      <button @click="trustIssuer" class="btn btn-primary">Trust issuer</button>
+      <div id="identify">
+        <h1>Voting system build on stellar network</h1>
+        <h2>Please login with Profil Zaufany</h2>
+        <input type="text" class="form-control" id="pesel" placeholder="95031805255" value="95031805255"/>
+        <input type="text" class="form-control" id="account-id" placeholder="GAM7ZPJQOM345NBLEZY23UN2ORHLJ6XMFZOTENGLGCBF6JNNWUXBU6QN" value="GAM7ZPJQOM345NBLEZY23UN2ORHLJ6XMFZOTENGLGCBF6JNNWUXBU6QN"></input>
+        <button id="nextIdentify" class="btn btn-primary next">Next</button>
+      </div>
+
+      <div id="trustline">
+        <h2>In order to get vote token you need to create trustline to vote token issuer</h2>
+        <h4 id="issuerAccountId"></h4>
+				<div>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#trustlineModal"> Create trustline </button>
+					<div class="modal fade" id="trustlineModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+                  <div class="form-group">
+                    <label for="secret">SECRET:</label>
+                    <input id="secret" type="text" value="SBOMRZ4BFPU2PZTAFSQIMRLUMX5RQDXYVJRACPEG5D4PIANYJ7MUBSH2" required class="form-control"/>
+                  </div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="button" id="trustIssuerButton" class="btn btn-primary">Save changes</button>
+								</div>
+							</div>
+						</div>
+					</div>
+        </div>
+        Tokens remaining: <span id="tokensRemaining"></span>
+        <div id="trust-status-trusted" class="alert alert-success d-none" role="alert">
+          You already trust this issuer
+        </div>
+        <div id="trust-status-not-trusted" class="alert alert-danger  d-none" role="alert">
+          You have not created trustline with this issuer
+        </div>
+        <br/>
+        <button class="btn btn-light back">Back</button>
+        <button class="btn btn-primary next">Next</button>
+      </div>
+
+      <div id="issue">
+        <h2>Issue a vote token</h2>
+        <h4 >Your balance: <span id="vote-tokens-balance"></span></h4>
+        <button id="issueTokenButton" type="button" class="btn btn-primary">
+<span class="spinner-border spinner-border-sm d-none" id="issueTokenSpinner" role="status" aria-hidden="true"></span>
+Request token
+</button>
+      <button class="btn btn-light back">Back</button>
+      <button class="btn btn-primary next">Next</button>
+      </div>
       <br/>
 
-      <h2>Issue a vote token</h2>
-      <form @submit.prevent="onIssueTokenSubmit">
-        <div class="form-group">
-					<label for="pesel">PESEL:</label>
-					<input id="pesel" type="text" placeholder="95031801245" v-model="pesel" required class="form-control"/>
-				</div>
-        <br/>
+      <div id="vote">
+      <h2>Vote on party</h2>
+      <button class="btn btn-light back">Back</button>
+      <button class="btn btn-primary next">Next</button>
+      </div>
 
-        <div class="form-group">
-					<label for="address">Stellar Address:</label>
-					<input id="address" placeholder="GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU" type="text" v-model="address" required class="form-control"/>
-				</div>
-
-        <br/>
-        <input type="submit" value="Submit"/>
-      </form>
-      <br/>
-
-      <h2>Parties</h2>
-      <ul>
-        <li v-for="party in parties" :key="party.name">
-          <input type="number" v-model.number="party.votes" />
-          {{ party.name }} {{ party.votes }}
-          <button @click="party.votes += 1">Add</button>
-        </li>
-      </ul>
-      {{ totalVotes }}
+      <div id="results">
+      <h2>Results</h2>
+      <button class="btn btn-light back">Back</button>
+      </div>
     </div>
 
     <script src="https://unpkg.com/vue"></script>
-    <script>
-      const app = new Vue({
-        el: '#app',
-        data: {
-          distributionAccountId:
-            'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
-          issuerAccountId:'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH',
-          assetCode: 'Vote01122019',
-          parties: [
-            {
-              name: 'PiS',
-              address:
-                'GCY4TQKOGQ7DL5ZOSF3FEQ2NPN2N3LHDHS7TRU5Y4QKVLOVJVCJRK3SM',
-            },
-            {
-              name: 'PO',
-              address:
-                'GDW5VG4ASNEV5SBH2LSGMRPQLJYIMO7DJD7YY2ELN6CKSZYXT2IMBPYR',
-            },
-            {
-              name: 'Konfederacja',
-              address:
-                'GBT5LTIVSBBN3JZMVPJ6ANKECXOSNY2C7DSBJBKWE6EP6LD5AFJNJZGB',
-            },
-            {
-              name: 'Authoritarianism',
-              address:
-                'GBYKYTZQHKV5HAV5WFBNOWRWQK3TNWFFZV6VCBEDKXIZXCYG6JSLQ4VL',
-            },
-          ],
-          tokensRemaining : 0,
-          pesel: undefined,
-          address: undefined
-        },
-        async created() {
-          const res = await fetch(
-            `https://horizon-testnet.stellar.org/accounts/${this.distributionAccountId}`,
-          )
-          const json = await res.json()
-          const balance = json.balances.find((balance =>
-            balance.asset_code === this.assetCode && balance.asset_issuer === this.issuerAccountId))
-          const tokensRemaining = Math.round(balance.balance * 10 ** 7)
-          this.tokensRemaining = tokensRemaining
-        },
-        computed: {
-          totalVotes() {
-            return this.parties.reduce((sum, party) => {
-              return sum + party.votes
-            }, 0)
-          },
-        },
-        methods: {
-          async trustIssuer() {
-            // TODO
-          },
-          async onIssueTokenSubmit() {
-            const address = this.address
-            const pesel = this.pesel
-            const request = { address, pesel}
-            console.log(request)
-            try {
-              const response = await fetch('/issueToken', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(request)
-              })
-              if(response.ok){
-                console.log('Successfully assigned vote token')
-              }else{
-                console.error('Failed to assign vote token')
-              }
-            } catch (e) {
-              console.error(e)
-            }
-          }
-        },
-      })
-    </script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/3.0.1/stellar-sdk.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="./app.js"></script>
   </body>
 </html>

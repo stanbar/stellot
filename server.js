@@ -20,24 +20,58 @@ const distributionKeypair = StellarSdk.Keypair.fromSecret(
 )
 const voteToken = new StellarSdk.Asset(
   'Vote01122019',
-  distributionKeypair.publicKey(),
+  process.env.ISSUE_PUBLIC_KEY,
 )
 
-async function ensureNotIssued(address, pesel) {
+async function isAlreadyIssuedToPesel(pesel) {
+  log(`checking against pesel: ${pesel}`)
+  const transactions = await stellar
+    .transactions()
+    .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
+    .call()
+  const relevantTransactions = transactions.records.filter(
+    transaction => transaction.memo_type === 'text',
+  )
+  relevantTransactions.forEach(transaction => {
+    log({ pesel: transaction.memo })
+  })
+  const isAlreadyIssued = relevantTransactions.some(txn => txn.memo === pesel)
+  log(`isAlreadyIssued to pesel: ${isAlreadyIssued}`)
+  return isAlreadyIssued
+}
+
+async function isAlreadyIssuedToAddress(address) {
+  log(`checking against address: ${address}`)
   const payments = await stellar
     .payments()
     .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
     .call()
 
-  payments.records.forEach(payment => {
+  const relevantPayments = payments.records.filter(
+    payment =>
+      payment.type === 'payment' &&
+      payment.asset_code === process.env.ASSET_NAME,
+  )
+  relevantPayments.forEach(payment => {
     log({
       id: payment.id,
+      to: payment.to,
+      from: payment.from,
+      amount: payment.amount,
     })
   })
+  const isAlreadyIssued = relevantPayments.some(
+    payment => payment.to === address,
+  )
+  log(`isAlreadyIssued to account: ${isAlreadyIssued}`)
+  return isAlreadyIssued
 }
 
-async function ensureEligableForVote(address, pesel) {
-  ensureNotIssued(address, pesel)
+async function isNotIssued(address, pesel) {
+  const issuedToAddress = await isAlreadyIssuedToAddress(address)
+  const issuedToPesel = await isAlreadyIssuedToPesel(pesel)
+  log(`DEBUG isNotIssued ${!issuedToAddress && !issuedToPesel}`)
+  return true //TODO For debug purposes only !!!
 }
 
 async function sendTokenFromDistributionToAddress(address, pesel) {
@@ -63,19 +97,22 @@ async function sendTokenFromDistributionToAddress(address, pesel) {
 }
 
 app.post('/issueToken', async (req, res) => {
-  try {
-    const { address, pesel } = req.body
-    log(`address: ${address} pesel: ${pesel}`)
-    if (!address || !pesel) {
-      res.sendStatus(400).end()
-    } else {
-      ensureEligableForVote(address, pesel)
+  const { address, pesel } = req.body
+  log(`address: ${address} pesel: ${pesel}`)
+  if (!address || !pesel) {
+    return res.sendStatus(400).end()
+  }
+  const isEligableForVote = await isNotIssued(address, pesel)
+  if (!isEligableForVote) {
+    res.sendStatus(405)
+  } else {
+    try {
       await sendTokenFromDistributionToAddress(address, pesel)
       res.sendStatus(200).end()
+    } catch (e) {
+      log(e)
+      res.sendStatus(500).end()
     }
-  } catch (e) {
-    log(e)
-    res.sendStatus(500).end()
   }
 })
 
