@@ -38,13 +38,13 @@
 								</div>
 								<div class="modal-body">
                   <div class="form-group">
-                    <label for="secret">SECRET:</label>
+                    <label for="secret">Secret:</label>
                     <input id="secret" type="text" value="SBOMRZ4BFPU2PZTAFSQIMRLUMX5RQDXYVJRACPEG5D4PIANYJ7MUBSH2" required class="form-control"/>
                   </div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button type="button" id="trustIssuerButton" class="btn btn-primary">Save changes</button>
+									<button type="button" id="trustIssuerButton" class="btn btn-primary">Sign and send trust</button>
 								</div>
 							</div>
 						</div>
@@ -66,7 +66,7 @@
         <h2>Issue a vote token</h2>
         <h4 >Your balance: <span id="vote-tokens-balance"></span></h4>
         <button id="issueTokenButton" type="button" class="btn btn-primary">
-<span class="spinner-border spinner-border-sm d-none" id="issueTokenSpinner" role="status" aria-hidden="true"></span>
+<span class="spinner-border spinner-border-sm d-none" id="voteSpinnerSending" role="status" aria-hidden="true"></span>
 Request token
 </button>
       <button class="btn btn-light back">Back</button>
@@ -76,10 +76,35 @@ Request token
 
       <div id="vote">
       <h2>Vote on party</h2>
+      <div class="modal fade" id="voteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="secret">Secret:</label>
+                <input id="vote-secret" type="text" value="SBOMRZ4BFPU2PZTAFSQIMRLUMX5RQDXYVJRACPEG5D4PIANYJ7MUBSH2" required class="form-control"/>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" id="signVoteButton" class="btn btn-primary">Sign and send vote</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <ul id="party-list" class="list-group">
 			</ul>
+      <div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#voteModal">Vote</button>
+      <div/>
       <button class="btn btn-light back">Back</button>
-      <button id="voteOnParty" class="btn btn-primary next">Next</button>
+      <button class="btn btn-primary next">Next</button>
       </div>
 
       <div id="results">

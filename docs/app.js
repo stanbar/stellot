@@ -58,6 +58,7 @@ async function fetchTrustlineInformation() {
 }
 
 async function fetchAccountTokenBalance(accountId) {
+  console.log(`fetching balance for ${accountId}`)
   const userAccount = await stellar
     .accounts()
     .accountId(accountId)
@@ -71,30 +72,30 @@ async function fetchAccountTokenBalance(accountId) {
     // asset_issuer differ
   )
 
-  return balance
+  console.log(`found balance ${balance.balance} on address ${accountId}`)
+
+  if (balance) {
+    return Math.round(balance.balance * 10 ** 7)
+  }
+  return undefined
 }
 
 async function fetchVoteTokensBalance() {
   const accountId = $('#account-id').val()
-  const balance = fetchAccountTokenBalance(accountId)
+  const balance = await fetchAccountTokenBalance(accountId)
 
   if (balance) {
-    const tokensRemaining = Math.round(balance.balance * 10 ** 7)
-    $('#vote-tokens-balance').text(tokensRemaining)
+    $('#vote-tokens-balance').text(balance)
   } else {
     $('#vote-tokens-balance').text(
-      "You didn't created trustline to token issuer",
+      "Cou don't have any votes left or you didn't create trustline to token issuer",
     )
   }
 }
 
 async function fetchDistributorTokensBalance() {
-  const balance = fetchAccountTokenBalance(distributionAccountId)
-
-  if (balance) {
-    const tokensRemaining = Math.round(balance.balance * 10 ** 7)
-    $('#tokensRemaining').text(tokensRemaining)
-  }
+  const balance = await fetchAccountTokenBalance(distributionAccountId)
+  $('#tokensRemaining').text(balance)
 }
 
 async function trustIssuer() {
@@ -152,19 +153,23 @@ async function issueToken() {
 }
 
 let selectedParty = undefined
-
 async function createPartiesList() {
   const partiesWithVotes = await Promise.all(
     parties.map(async party => {
+      console.log(
+        `fetching balance for party ${party.name} for accoundId ${party.accountId}`,
+      )
+      const votesCount = await fetchAccountTokenBalance(party.accountId)
       return {
         ...party,
-        votes: await fetchAccountTokenBalance(party.accountId),
+        votes: votesCount,
       }
     }),
   )
 
   const list = $('#party-list')
-  partiesWithVotes.map(party => {
+  partiesWithVotes.forEach(party => {
+    console.log({ party })
     const li = $('<li/>')
       .addClass(
         'list-group-item list-group-item-action d-flex justify-content-between align-items-center',
@@ -186,9 +191,29 @@ async function createPartiesList() {
   })
 }
 
-async function voteOnParty() {
+async function signAndSendVote() {
   console.log(`vote on party ${selectedParty.name}`)
-  // TODO create transaction and allow user to sign and send it
+  const secret = $('#vote-secret').val()
+  const keypair = StellarSdk.Keypair.fromSecret(secret)
+  $('vote-secret').text(null)
+  const account = await stellar.loadAccount(keypair.publicKey())
+  const transaction = new StellarSdk.TransactionBuilder(account, {
+    fee: 100,
+    networkPassphrase: StellarSdk.Networks.TESTNET,
+  })
+    .addOperation(
+      StellarSdk.Operation.payment({
+        destination: selectedParty.accountId,
+        asset: voteToken,
+        amount: '0.0000001',
+      }),
+    )
+    .setTimeout(60) // seconds
+    .build()
+
+  transaction.sign(keypair)
+  const response = await stellar.submitTransaction(transaction)
+  $('#voteModal').modal('hide')
 }
 
 function render() {
@@ -224,6 +249,10 @@ $('#voteOnParty').click(() => {
 
 $('#trustIssuerButton').click(() => {
   trustIssuer()
+})
+
+$('#signVoteButton').click(() => {
+  signAndSendVote()
 })
 
 $('#issuerAccountId').text(issuerAccountId)
