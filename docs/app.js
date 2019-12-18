@@ -1,3 +1,6 @@
+/* global $ */
+/* global StellarSdk */
+/* global fetch */
 const sections = ['identify', 'trustline', 'issue', 'vote', 'results']
 let currentSectionIndex = 0
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
@@ -7,6 +10,29 @@ const issuerAccountId =
   'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH'
 
 const voteToken = new StellarSdk.Asset('Vote01122019', issuerAccountId)
+
+const parties = [
+  {
+    name: 'Konfederacja',
+    accountId: 'GCEWJNP7W42FNGWGSMU75QRLULFNZJTYF7OI4SFRB5DSZTNJZ4XIS4CD',
+    secretKey: 'SCBIQX44X5XPV7BMYOS2QHAJM4LTLHPSLM7DDBQVCBWDATN3CJMX6667',
+  },
+  {
+    name: 'PO',
+    accountId: 'GCLV566GMF6RX6RHO363ZV7BFZVI4P3HCEN4A6UJT7YYNG5RHWNJ7HVH',
+    secretKey: 'SAI7VAFEYLF6PC2CDXEETCNB3POXV7XPU3PIPOL4QLM3OKM5FGWZVFTD',
+  },
+  {
+    name: 'PiS',
+    accountId: 'GCELKO5BJZGTGRKXDI6TKKF7CCYEKHCGLQJMDAANGMNL23RBGLBWGV74',
+    secretKey: 'SAYV5PNWIFHRQF4IFDU5SFAWB3CQ43NXSKDLLINUYVH6KFIZQJ2U5UZT',
+  },
+  {
+    name: 'SLD',
+    accountId: 'GAS4Z3SY4KDMDBWCWVYAGDSTG47WJA6SSQIHDYIMR32K5X4WIRRYNWY5',
+    secretKey: 'SDAMDKHTJPFLZ72VPCNO2YS4SFIHADYDJZPXL3XTXUJV5JOZORACRUWB',
+  },
+]
 
 async function fetchTrustlineInformation() {
   const accountId = $('#account-id').val()
@@ -31,18 +57,26 @@ async function fetchTrustlineInformation() {
   }
 }
 
-async function fetchVoteTokensBalance() {
-  const accountId = $('#account-id').val()
+async function fetchAccountTokenBalance(accountId) {
   const userAccount = await stellar
     .accounts()
     .accountId(accountId)
     .call()
 
   const balance = userAccount.balances.find(
-    balance =>
-      balance.asset_code === voteToken.code &&
-      balance.asset_issuer === voteToken.issuer,
+    aBalance =>
+      aBalance.asset_code === voteToken.code &&
+      aBalance.asset_issuer === voteToken.issuer,
+    // distribution account issued this token from issuer account so the
+    // asset_issuer differ
   )
+
+  return balance
+}
+
+async function fetchVoteTokensBalance() {
+  const accountId = $('#account-id').val()
+  const balance = fetchAccountTokenBalance(accountId)
 
   if (balance) {
     const tokensRemaining = Math.round(balance.balance * 10 ** 7)
@@ -55,18 +89,7 @@ async function fetchVoteTokensBalance() {
 }
 
 async function fetchDistributorTokensBalance() {
-  const userAccount = await stellar
-    .accounts()
-    .accountId(distributionAccountId)
-    .call()
-
-  const balance = userAccount.balances.find(
-    aBalance =>
-      aBalance.asset_code === voteToken.code &&
-      aBalance.asset_issuer === voteToken.issuer,
-    // distribution account issued this token from issuer account so the
-    // asset_issuer differ
-  )
+  const balance = fetchAccountTokenBalance(distributionAccountId)
 
   if (balance) {
     const tokensRemaining = Math.round(balance.balance * 10 ** 7)
@@ -128,6 +151,45 @@ async function issueToken() {
   }
 }
 
+let selectedParty = undefined
+
+async function createPartiesList() {
+  const partiesWithVotes = await Promise.all(
+    parties.map(async party => {
+      return {
+        ...party,
+        votes: await fetchAccountTokenBalance(party.accountId),
+      }
+    }),
+  )
+
+  const list = $('#party-list')
+  partiesWithVotes.map(party => {
+    const li = $('<li/>')
+      .addClass(
+        'list-group-item list-group-item-action d-flex justify-content-between align-items-center',
+      )
+      .text(party.name)
+      .click(() => {
+        selectedParty = party
+        $('#party-list > li').removeClass('active')
+        li.addClass('active')
+      })
+      .appendTo(list)
+
+    $('<span/>')
+      .addClass('badge badge-primary badge-pill')
+      .text(party.votes || 0)
+      .appendTo(li)
+
+    return li
+  })
+}
+
+async function voteOnParty() {
+  console.log(`vote on party ${selectedParty.name}`)
+}
+
 function render() {
   $(`#${sections[currentSectionIndex]}`).show()
 
@@ -150,9 +212,14 @@ $('.back').click(() => {
 render()
 
 fetchDistributorTokensBalance()
+createPartiesList()
 
 $('#issueTokenButton').click(() => {
   issueToken()
+})
+
+$('#voteOnParty').click(() => {
+  voteOnParty()
 })
 
 $('#trustIssuerButton').click(() => {
