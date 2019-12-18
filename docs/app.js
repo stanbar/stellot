@@ -188,6 +188,7 @@ async function createPartiesList() {
 
 async function voteOnParty() {
   console.log(`vote on party ${selectedParty.name}`)
+  // TODO create transaction and allow user to sign and send it
 }
 
 function render() {
@@ -197,6 +198,10 @@ function render() {
     .filter((_value, index) => index !== currentSectionIndex)
     .forEach(value => $(`#${value}`).hide())
 }
+
+render()
+fetchDistributorTokensBalance()
+createPartiesList()
 
 $('.next').click(() => {
   currentSectionIndex = (currentSectionIndex + 1) % sections.length
@@ -208,11 +213,6 @@ $('.back').click(() => {
     currentSectionIndex - 1 >= 0 ? currentSectionIndex - 1 : 0
   render()
 })
-
-render()
-
-fetchDistributorTokensBalance()
-createPartiesList()
 
 $('#issueTokenButton').click(() => {
   issueToken()
