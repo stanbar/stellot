@@ -1,6 +1,7 @@
 /* global $ */
 /* global StellarSdk */
 /* global fetch */
+/* global d3 */
 const sections = ['identify', 'trustline', 'issue', 'vote', 'results']
 let currentSectionIndex = 0
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
@@ -153,6 +154,7 @@ async function issueToken() {
 }
 
 let selectedParty = undefined
+let results = undefined
 async function createPartiesList() {
   const partiesWithVotes = await Promise.all(
     parties.map(async party => {
@@ -166,6 +168,7 @@ async function createPartiesList() {
       }
     }),
   )
+  results = partiesWithVotes
 
   const list = $('#party-list')
   partiesWithVotes.forEach(party => {
@@ -216,12 +219,73 @@ async function signAndSendVote() {
   $('#voteModal').modal('hide')
 }
 
-function render() {
-  $(`#${sections[currentSectionIndex]}`).show()
+function createResultsPlot() {
+  // set the dimensions and margins of the graph
+  const margin = { top: 30, right: 30, bottom: 70, left: 60 }
+  const width = 460 - margin.left - margin.right
+  const height = 400 - margin.top - margin.bottom
+  // append the svg object to the body of the page
+  const svg = d3
+    .select('#resultsPlot')
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`)
+  // X axis
+  const x = d3
+    .scaleBand()
+    .range([0, width])
+    .domain(results.map(party => party.name))
+    .padding(0.2)
+  svg
+    .append('g')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .attr('transform', 'translate(-10,0)rotate(-45)')
+    .style('text-anchor', 'end')
 
+  // Add Y axis
+  const y = d3
+    .scaleLinear()
+    .domain([
+      0,
+      results.reduce((prev, current) => prev + (current.votes || 0), 0),
+    ])
+    .range([height, 0])
+  svg.append('g').call(d3.axisLeft(y))
+
+  // Bars
+  svg
+    .selectAll('mybar')
+    .data(results)
+    .enter()
+    .append('rect')
+    .attr('x', party => x(party.name))
+    .attr('y', party => y(party.votes || 0))
+    .attr('width', x.bandwidth())
+    .attr('height', party => height - y(party.votes || 0))
+    .attr('fill', '#69b3a2')
+}
+
+const onStart = {
+  identify: () => {},
+  trustline: () => {},
+  issue: () => {},
+  vote: () => {},
+  results: () => {
+    createResultsPlot()
+  },
+}
+
+function render() {
   sections
     .filter((_value, index) => index !== currentSectionIndex)
     .forEach(value => $(`#${value}`).hide())
+
+  $(`#${sections[currentSectionIndex]}`).show()
+  onStart[sections[currentSectionIndex]]()
 }
 
 render()
