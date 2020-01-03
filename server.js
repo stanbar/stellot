@@ -116,4 +116,24 @@ app.post('/issueToken', async (req, res) => {
   }
 })
 
+const userDb = {
+  stasbar: { password: 'password', pesel: 95031801212 },
+  user: { password: 'password', pesel: 12345678989 },
+}
+
+app.post('/login', (req, res) => {
+  const { login, password } = req.body
+  log(`login: ${login} password: ${password}`)
+  if (!login || !password) {
+    return res.sendStatus(400).end()
+  }
+  const user = userDb[login]
+  if (user) {
+    if (user.password === password) {
+      return res.json({ pesel: user.pesel }).end()
+    }
+  }
+  return res.sendStatus(405)
+})
+
 module.exports = app
