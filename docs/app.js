@@ -2,7 +2,18 @@
 /* global StellarSdk */
 /* global fetch */
 /* global d3 */
-const sections = ['identify', 'trustline', 'issue', 'vote', 'results']
+const sections = {
+  manual: [
+    'identify',
+    'enterStellarAddress',
+    'trustline',
+    'issue',
+    'vote',
+    'results',
+  ],
+  simple: ['identify', 'vote', 'results'],
+}
+let mode
 let currentSectionIndex = 0
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
 const distributionAccountId =
@@ -69,8 +80,6 @@ async function fetchAccountTokenBalance(accountId) {
     aBalance =>
       aBalance.asset_code === voteToken.code &&
       aBalance.asset_issuer === voteToken.issuer,
-    // distribution account issued this token from issuer account so the
-    // asset_issuer differ
   )
 
   console.log(`found balance ${balance.balance} on address ${accountId}`)
@@ -120,6 +129,11 @@ async function trustIssuer() {
   transaction.sign(keypair)
   $('#spinnerSending').removeClass('d-none')
   const response = await stellar.submitTransaction(transaction)
+  if (!response.ok) {
+    console.log('Successfully submited transaction to network')
+  } else {
+    console.error('Failed to submit transaction to network')
+  }
   $('#trustlineModal').modal('hide')
   $('#spinnerSending').addClass('d-none')
   fetchVoteTokensBalance()
@@ -127,10 +141,10 @@ async function trustIssuer() {
 
 async function issueToken() {
   const address = $('#account-id').val()
-  const pesel = $('#pesel').val()
+  const pesel = $('#pesel').text()
   const request = { address, pesel }
   try {
-    $('#issueTokenSpinner').removeClass('d-none')
+    $('#voteSpinnerSending').removeClass('d-none')
     $('#issueTokenButton').prop('disabled', true)
     const response = await fetch('/issueToken', {
       method: 'POST',
@@ -148,13 +162,13 @@ async function issueToken() {
   } catch (e) {
     console.error(e)
   } finally {
-    $('#issueTokenSpinner').addClass('d-none')
+    $('#voteSpinnerSending').addClass('d-none')
     $('#issueTokenButton').prop('disabled', false)
   }
 }
 
-let selectedParty = undefined
-let results = undefined
+let selectedParty
+let results
 async function createPartiesList() {
   const partiesWithVotes = await Promise.all(
     parties.map(async party => {
@@ -199,6 +213,8 @@ async function signAndSendVote() {
   const secret = $('#vote-secret').val()
   const keypair = StellarSdk.Keypair.fromSecret(secret)
   $('vote-secret').text(null)
+  $('#signAndSendSpinner').removeClass('d-none')
+  $('#signVoteButton').prop('disabled', true)
   const account = await stellar.loadAccount(keypair.publicKey())
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
@@ -216,6 +232,8 @@ async function signAndSendVote() {
 
   transaction.sign(keypair)
   const response = await stellar.submitTransaction(transaction)
+  $('#signAndSendSpinner').addClass('d-none')
+  $('#signVoteButton').prop('disabled', false)
   $('#voteModal').modal('hide')
 }
 
@@ -225,6 +243,7 @@ function createResultsPlot() {
   const width = 460 - margin.left - margin.right
   const height = 400 - margin.top - margin.bottom
   // append the svg object to the body of the page
+  d3.select('svg').remove()
   const svg = d3
     .select('#resultsPlot')
     .append('svg')
@@ -269,10 +288,57 @@ function createResultsPlot() {
     .attr('fill', '#69b3a2')
 }
 
+async function loginWithPz() {
+  console.log('login with pz')
+  const login = $('#login').val()
+  const password = $('#password').val()
+  const request = { login, password }
+  try {
+    $('#loginSpinner').removeClass('d-none')
+    $('#loginWithPz').prop('disabled', true)
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    })
+    const data = await response.json()
+    console.log({ pesel: data.pesel })
+    $('#pesel').text(data.pesel)
+    $('#btnManualMode').prop('disabled', false)
+    $('#btnSimpleVote').prop('disabled', false)
+    // setUserPesel(response.body.pesel)
+    if (response.ok) {
+      console.log('Successfully logged in')
+    } else {
+      console.error('Failed to login')
+    }
+    $('#loginWithPzModal').modal('hide')
+  } catch (e) {
+    console.error(e)
+  } finally {
+    $('#loginSpinner').addClass('d-none')
+    $('#loginWithPz').prop('disabled', false)
+  }
+}
+
 const onStart = {
-  identify: () => {},
-  trustline: () => {},
-  issue: () => {},
+  identify: () => {
+    const login = $('#login').val()
+    if (!login) {
+      $('#btnManualMode').prop('disabled', true)
+      $('#btnSimpleVote').prop('disabled', true)
+    }
+  },
+  enterStellarAddress: () => {},
+  trustline: () => {
+    fetchDistributorTokensBalance()
+    fetchTrustlineInformation()
+  },
+  issue: () => {
+    fetchVoteTokensBalance()
+  },
   vote: () => {},
   results: () => {
     createResultsPlot()
@@ -280,20 +346,28 @@ const onStart = {
 }
 
 function render() {
-  sections
+  sections.simple
+    .concat(sections.manual)
     .filter((_value, index) => index !== currentSectionIndex)
     .forEach(value => $(`#${value}`).hide())
 
-  $(`#${sections[currentSectionIndex]}`).show()
-  onStart[sections[currentSectionIndex]]()
+  if (!mode) {
+    $(`#identify`).show()
+    onStart.identify()
+  } else {
+    console.log(sections[mode][currentSectionIndex])
+    console.log(mode)
+    console.log(currentSectionIndex)
+    $(`#${sections[mode][currentSectionIndex]}`).show()
+    onStart[sections[mode][currentSectionIndex]]()
+  }
 }
 
 render()
-fetchDistributorTokensBalance()
 createPartiesList()
 
 $('.next').click(() => {
-  currentSectionIndex = (currentSectionIndex + 1) % sections.length
+  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
   render()
 })
 
@@ -307,10 +381,6 @@ $('#issueTokenButton').click(() => {
   issueToken()
 })
 
-$('#voteOnParty').click(() => {
-  voteOnParty()
-})
-
 $('#trustIssuerButton').click(() => {
   trustIssuer()
 })
@@ -319,9 +389,19 @@ $('#signVoteButton').click(() => {
   signAndSendVote()
 })
 
-$('#issuerAccountId').text(issuerAccountId)
-
-$('#nextIdentify').click(() => {
-  fetchTrustlineInformation()
-  fetchVoteTokensBalance()
+$('#loginWithPz').click(() => {
+  loginWithPz()
 })
+
+$('#btnSimpleVote').click(() => {
+  mode = 'simple'
+  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
+  render()
+})
+$('#btnManualMode').click(() => {
+  mode = 'manual'
+  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
+  render()
+})
+
+$('#issuerAccountId').text(issuerAccountId)
