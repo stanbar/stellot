@@ -1,10 +1,20 @@
 # Stellar Voting
 
-Votting dapp on stellar network.
+Election voting system backed by decentralized [stellar blockchain
+network](http://stellar.org/).
+
 Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 
-## Concept overview
+## Overview
 
+Blockchain as a technology provide three major properties that are highly
+desirable in applications like election voting. Those properties are:
+_immutability_ which ensures that noone can modify the data once wrote into
+blockchain\*, there might be concerns if this property is trully desirable for
+everyone, but I assume this system is designed for healthly subjects, thus I'll
+not focus on this topic. Another property is _transparency_ that allow everyone
+validate the election correctness and calculate results by it's own, reducing
+level of trust to authorities. //todo
 We assume that the number of eligible voters is equal to 100 (it will be easier
 to demonstrate), thus we should create 100 tokens.
 In order to prevent spending only part of token we will issue the smallest
