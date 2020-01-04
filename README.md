@@ -13,7 +13,7 @@ _immutability_ which ensures that noone can modify the data once wrote into
 blockchain\*, there might be concerns if this property is trully desirable for
 everyone, but I assume this system is designed for healthly subjects, thus I'll
 not focus on this topic. Another property is _transparency_ that allow everyone
-validate the election correctness and calculate results by it's own. 
+validate the election correctness and calculate results by it's own.
 In consequences one can __distrust authorities__, while __trust voting
 results__.
 
@@ -36,29 +36,37 @@ Currently the most popular application of smart contract is token
 issuance. Those tokens can represent any arbitrary asset either in virtual or
 physical world. One can create tokens for funding his startup; hence token
 represent company shares. This pattern is called ICO (Initial Coin Offering) or
-STO (Security Token Offering) alluding to IPO (Initial Public Offering).
+STO (Security Token Offering), alluding to IPO (Initial Public Offering).
 Another one can issue tokens backed by physical asset like national currency;
 bypassing slow and expensive international transfers and taxes from
 exchanging cryptocurrencies with physical national currencies. This pattern is
 called Stable Coin.
 There are many other applications to tokens particulary _vote as a token_ used
-here in my survey.
-
-## Vote as a token
-
-Vote is some kind of asset, therefore it's applicable for "tokenization".
+here in this survey.
 
 ## Stellar platform
 
-Ethereum provide high flexibility mainly because it's fully fledged smart
+Ethereum provide high flexibility, mainly because it's fully fledged smart
 contracts ecosystem, particulary it's turing-complete Solidity language.
-Stellar is yet another blockchain platform, here specializing in asset
-tokenization. I choosed stellar not because I beleve it's the most suitable
-platform for this kind of applications, but because I don't need flexibility of
-fully fledged ethereum smart contracts ecosystem, particulary it's
-turing-complete Solidity language. In addition, stellar is easier, faster and
-cheaper.  assume that the number of
-eligible voters is equal to 100 (it will be easier
+While Stellar is blockchain platform specializing in asset tokenization, it's
+easier, cheaper, faster and provide facilities for restricting token
+distribution only to eligable users. I don't state that Stellar is better for
+vote tokenization, but it's enought for this simple election system.
+
+## System design
+
+The goal of the system is to provide the highest level of transparency, while
+keeping sensitive data private. Additionaly it should be illegal to issue more
+than one vote token to one person. Thus it should be way of identyfying and
+authorizing voters. I decided to use government authorized polish system "Profil
+Zaufany" as an identification provider, with the assumption that every eligable
+voter is registered there.
+The total number of vote tokens should be limited to total number of eligable
+voters. I assume that this number is publictly available in the day of election. 
+
+## Implementation description
+
+I assume that the number of eligible voters is equal to 100 (it will be easier
 to demonstrate), thus we should create 100 tokens.
 In order to prevent spending only part of token we will issue the smallest
 indivisible amount possible in
