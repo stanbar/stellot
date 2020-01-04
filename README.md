@@ -62,7 +62,16 @@ authorizing voters. I decided to use government authorized polish system "Profil
 Zaufany" as an identification provider, with the assumption that every eligable
 voter is registered there.
 The total number of vote tokens should be limited to total number of eligable
-voters. I assume that this number is publictly available in the day of election. 
+voters. I assume that this number is publictly available in the day of election.
+In consequences everyone is able to verify that there were no more token issued.
+Vote token exchanging is permited intentionally, and treated as a feature.
+It's no different from traditional election system that some people deleage thier
+vote decision to one family member. Here it's possible to send the token and let
+the receiver to perform vote on thy behalf. This decition can possible allow
+unhealthly vote trading, but it is possible in traditional system anyway.
+Stellar is capable of limiting users who are eligable to receive tokens, but I
+decide to not use this feature, since authorization is allows to verify users
+who are able to issue token.
 
 ## Implementation description
 
