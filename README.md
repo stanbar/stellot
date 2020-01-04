@@ -35,22 +35,30 @@ infrastructure.
 Currently the most popular application of smart contract is token
 issuance. Those tokens can represent any arbitrary asset either in virtual or
 physical world. One can create tokens for funding his startup; hence token
-represent company shares. This pattern is called ICO (Initial Coin Offering)
-alluding to IPO (Initial Public Offering).
+represent company shares. This pattern is called ICO (Initial Coin Offering) or
+STO (Security Token Offering) alluding to IPO (Initial Public Offering).
 Another one can issue tokens backed by physical asset like national currency;
 bypassing slow and expensive international transfers and taxes from
-cryptocurrency exchanges. This pattern is called Stable Coin. There are many
-other applications to tokens particulary _vote as a token_ used here in my
-survey.
+exchanging cryptocurrencies with physical national currencies. This pattern is
+called Stable Coin.
+There are many other applications to tokens particulary _vote as a token_ used
+here in my survey.
 
 ## Vote as a token
 
-In this survey I will try to "tokenize" election vote.
+Vote is some kind of asset, therefore it's applicable for "tokenization".
 
 ## Stellar platform
 
-Stellar is one of many blockchain platform We
-assume that the number of eligible voters is equal to 100 (it will be easier
+Ethereum provide high flexibility mainly because it's fully fledged smart
+contracts ecosystem, particulary it's turing-complete Solidity language.
+Stellar is yet another blockchain platform, here specializing in asset
+tokenization. I choosed stellar not because I beleve it's the most suitable
+platform for this kind of applications, but because I don't need flexibility of
+fully fledged ethereum smart contracts ecosystem, particulary it's
+turing-complete Solidity language. In addition, stellar is easier, faster and
+cheaper.  assume that the number of
+eligible voters is equal to 100 (it will be easier
 to demonstrate), thus we should create 100 tokens.
 In order to prevent spending only part of token we will issue the smallest
 indivisible amount possible in
