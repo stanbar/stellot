@@ -69,9 +69,11 @@ It's no different from traditional election system that some people deleage thie
 vote decision to one family member. Here it's possible to send the token and let
 the receiver to perform vote on thy behalf. This decition can possible allow
 unhealthly vote trading, but it is possible in traditional system anyway.
-Stellar is capable of limiting users who are eligable to receive tokens, but I
-decide to not use this feature, since authorization is allows to verify users
-who are able to issue token.
+Stellar is capable of [limiting
+users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization)
+who are eligable to receive tokens, but I can not see any benefits from using
+it. Additionaly user authorization is done by external service (Profil Zaufany)
+which verify users who are eligable for token issuance.
 
 ## Implementation description
 
