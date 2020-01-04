@@ -13,8 +13,10 @@ _immutability_ which ensures that noone can modify the data once wrote into
 blockchain\*, there might be concerns if this property is trully desirable for
 everyone, but I assume this system is designed for healthly subjects, thus I'll
 not focus on this topic. Another property is _transparency_ that allow everyone
-validate the election correctness and calculate results by it's own, reducing
-level of trust to authorities. //todo
+validate the election correctness and calculate results by it's own. 
+In consequences one can __distrust authorities__, while __trust voting
+results__.
+
 We assume that the number of eligible voters is equal to 100 (it will be easier
 to demonstrate), thus we should create 100 tokens.
 In order to prevent spending only part of token we will issue the smallest
