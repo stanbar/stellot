@@ -17,7 +17,40 @@ validate the election correctness and calculate results by it's own.
 In consequences one can __distrust authorities__, while __trust voting
 results__.
 
-We assume that the number of eligible voters is equal to 100 (it will be easier
+## Introduction
+
+Blockchain initialy introduced by Satoshi Nakamoto in [Bitcoin
+Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application,
+i.e. ledger for transfering Bitcoin. 5 years later Vitalik Buterin
+[proposed](https://bitcointalk.org/index.php?topic=428589.0) generalization to
+this concept by allowing to process not only transactions, but also so called
+"smart contracts" which are in fact scripts run on ethereum platform. Those
+"scripts" are executed and validated by all ethereum node, and use blockchain as
+a persistant storage. This innovation allowed to create domain specific
+behaviour top of ethereum blockchain, levereging already existing
+infrastructure.
+
+## Tokens
+
+Currently the most popular application of smart contract is token
+issuance. Those tokens can represent any arbitrary asset either in virtual or
+physical world. One can create tokens for funding his startup; hence token
+represent company shares. This pattern is called ICO (Initial Coin Offering)
+alluding to IPO (Initial Public Offering).
+Another one can issue tokens backed by physical asset like national currency;
+bypassing slow and expensive international transfers and taxes from
+cryptocurrency exchanges. This pattern is called Stable Coin. There are many
+other applications to tokens particulary _vote as a token_ used here in my
+survey.
+
+## Vote as a token
+
+In this survey I will try to "tokenize" election vote.
+
+## Stellar platform
+
+Stellar is one of many blockchain platform We
+assume that the number of eligible voters is equal to 100 (it will be easier
 to demonstrate), thus we should create 100 tokens.
 In order to prevent spending only part of token we will issue the smallest
 indivisible amount possible in
