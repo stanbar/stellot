@@ -119,7 +119,8 @@ publish frontend app with it's hash (ideally on IPFS)
 Each user who authorize itself by Profil Zaufany will have created an account
 with trustline to distribution account and balance of 1 VOTE token. The user
 then can decide if he wants to send this token to one of listed parties or send
-it to someone else.
+it to someone else. // On maybe don't allow to send tokens, just don't show
+secret to user, but then whats the point ?
 
 Votes can exchange thier ID for 1 (seen by user as 0.0000001) _VOTE_ token.
 User can do with this token whatever he want, ideally vote for one of eligible
