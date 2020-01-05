@@ -80,11 +80,8 @@ which verify users who are eligable for token issuance.
 Ideally the system should only consist of frontend webpage that allows users to
 interact with stellar blockchain which would be "open decentralized backend" for
 our system. Unfortunatelly proposed system require central server for authorizing
-vote token issuance, thus becoming single point of failure. This flaw could be
-solved i.e. by using Ethereum smart contract with embeded list of eligable
-adresses (or better thier hashes for privacy); while this might work for small
-list of adresses, can become overkill for election when we take cost of such
-huge smart contract into account.
+vote token issuance, thus becoming single point of failure. This flaw is
+addressed at the end of this survey.
 
 ## Authorization
 
@@ -111,7 +108,18 @@ indivisible amount possible in
 scaled down by a factor of 10,000,000 (It allows to represent decimal numbers
 in 7 diigts precision in human-friendly form).
 
+## Bootstrapping
+
+Create asset
+Set proper asset data to frontend and backend.
+publish frontend app with it's hash (ideally on IPFS)
+
 ## Token distribution
+
+Each user who authorize itself by Profil Zaufany will have created an account
+with trustline to distribution account and balance of 1 VOTE token. The user
+then can decide if he wants to send this token to one of listed parties or send
+it to someone else.
 
 Votes can exchange thier ID for 1 (seen by user as 0.0000001) _VOTE_ token.
 User can do with this token whatever he want, ideally vote for one of eligible
@@ -122,6 +130,13 @@ voting model, it should not be considered as system flaw, rather as a feature.
 
 smallest value: 0.0000001
 max value: 922,337,203,685.4775807
+
+## Fully Decentralized Application
+
+This Flaw could be solved i.e. by using Ethereum smart contract with embeded
+list of eligable adresses (or better thier hashes for privacy); while this might
+work for small list of adresses, can become overkill for election when we take
+cost of such huge smart contract into account.  
 
 ## Resources
 
