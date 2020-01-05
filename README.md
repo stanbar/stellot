@@ -65,15 +65,41 @@ The total number of vote tokens should be limited to total number of eligable
 voters. I assume that this number is publictly available in the day of election.
 In consequences everyone is able to verify that there were no more token issued.
 Vote token exchanging is permited intentionally, and treated as a feature.
-It's no different from traditional election system that some people deleage thier
-vote decision to one family member. Here it's possible to send the token and let
-the receiver to perform vote on thy behalf. This decition can possible allow
-unhealthly vote trading, but it is possible in traditional system anyway.
-Stellar is capable of [limiting
+It's no different from traditional election system where some people deleage thier
+vote decision to one family member who tell them what should they vote on. In
+this system it's possible to send the token and let the receiver to perform vote
+on thy behalf. This decition can possible allow unhealthly vote trading, but it
+is possible in traditional system anyway. Stellar is capable of [limiting
 users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization)
 who are eligable to receive tokens, but I can not see any benefits from using
 it. Additionaly user authorization is done by external service (Profil Zaufany)
 which verify users who are eligable for token issuance.
+
+## System architecture
+
+Ideally the system should only consist of frontend webpage that allows users to
+interact with stellar blockchain which would be "open decentralized backend" for
+our system. Unfortunatelly proposed system require central server for authorizing
+vote token issuance, thus becoming single point of failure. This flaw could be
+solved i.e. by using Ethereum smart contract with embeded list of eligable
+adresses (or better thier hashes for privacy); while this might work for small
+list of adresses, can become overkill for election when we take cost of such
+huge smart contract into account.
+
+## Authorization
+
+Blockchain platform can ensure it's trust and determinism by leveraging it's
+other properties like immutability   world everything should be contained in
+blockchain, which is often impractical and/or expensive. For example one could
+encode all eligable user addresses in smart contract and then allow redeeming
+vote token only to address which is present is eligable addresses list. But this
+process would be very expensive But they are
+attentives that preserve most of the open Blockchains pillars, for example data
+storage, can be delegated to ipfs, when content is identified by it's hash.
+Other aspects like identity due to thier centralized nature sems to be nearly
+impossible to fit this decentralized world, nevertheless there are some attempts
+to leverage Blockchain trust in identity domain. At the moment we need to create
+hybrid systems, that uses plain old web 2.0 or wrappers like oracle's.
 
 ## Implementation description
 
