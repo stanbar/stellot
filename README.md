@@ -140,6 +140,17 @@ list of eligable adresses (or better thier hashes for privacy); while this might
 work for small list of adresses, can become overkill for election when we take
 cost of such huge smart contract into account.  
 
+## Installation
+
+Install:
+```npm install```
+
+Start:
+```npm run start```
+
+Website will be available on `localhost:3000`
+
+
 ## Resources
 
 - [Source Code](https://github.com/stasbar/stellar-voting)
