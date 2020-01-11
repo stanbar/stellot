@@ -109,11 +109,15 @@ async function fetchDistributorTokensBalance() {
 }
 
 async function createAccount() {
+  console.log('createAccount')
   const keypair = StellarSdk.Keypair.random()
-  $('secret').text(keypair.secret())
-  $('account-id').text(keypair.publicKey())
+  $('#secret').val(keypair.secret())
+  $('#vote-secret').val(keypair.secret())
+  $('#account-id').val(keypair.publicKey())
+
+  const address = $('#account-id').val()
   const pesel = $('#pesel').text()
-  const request = { keypair.publicKey(), pesel }
+  const request = { address, pesel }
   try {
     const response = await fetch('/createAccount', {
       method: 'POST',
@@ -133,9 +137,9 @@ async function createAccount() {
 }
 
 async function trustIssuer() {
+  console.log('trustIssuer')
   const secret = $('#secret').val()
   const keypair = StellarSdk.Keypair.fromSecret(secret)
-  $('secret').text(null)
   const account = await stellar.loadAccount(keypair.publicKey())
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
@@ -238,7 +242,6 @@ async function signAndSendVote() {
   console.log(`vote on party ${selectedParty.name}`)
   const secret = $('#vote-secret').val()
   const keypair = StellarSdk.Keypair.fromSecret(secret)
-  $('vote-secret').text(null)
   $('#signAndSendSpinner').removeClass('d-none')
   $('#signVoteButton').prop('disabled', true)
   const account = await stellar.loadAccount(keypair.publicKey())
@@ -423,9 +426,12 @@ $('#loginWithPz').click(() => {
   loginWithPz()
 })
 
-$('#btnSimpleVote').click(() => {
+$('#btnSimpleVote').click(async () => {
   mode = 'simple'
   currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
+  await createAccount()
+  await trustIssuer()
+  await issueToken()
   render()
 })
 $('#btnManualMode').click(() => {

@@ -53,12 +53,12 @@ async function isAlreadyIssuedToAddress(address) {
       payment.asset_code === process.env.ASSET_NAME,
   )
   relevantPayments.forEach(payment => {
-    log({
-      id: payment.id,
-      to: payment.to,
-      from: payment.from,
-      amount: payment.amount,
-    })
+    // log({
+    //   id: payment.id,
+    //   to: payment.to,
+    //   from: payment.from,
+    //   amount: payment.amount,
+    // })
   })
   const isAlreadyIssued = relevantPayments.some(
     payment => payment.to === address,
@@ -84,7 +84,7 @@ async function createAccount(address, pesel) {
     .addOperation(
       StellarSdk.Operation.createAccount({
         destination: address,
-        startingBalance: 200,
+        startingBalance: '1.5000200', // 1 XML for minimum acocunt balance 0.5 for trustline and 200 for two transactions fee: changeTrust and token payment
       }),
     )
     .setTimeout(60) // seconds
@@ -136,7 +136,7 @@ app.post('/issueToken', async (req, res) => {
   }
 })
 
-app.post('/fundAccount', async (req, res) => {
+app.post('/createAccount', async (req, res) => {
   const { address, pesel } = req.body
   log(`address: ${address} pesel: ${pesel}`)
   if (!address || !pesel) {
@@ -148,10 +148,12 @@ app.post('/fundAccount', async (req, res) => {
   } else {
     try {
       await createAccount(address, pesel)
-      res.sendStatus(200).end()
+      return res.sendStatus(200).end()
     } catch (e) {
       log(e)
-      res.sendStatus(500).end()
+      log(e.response.data)
+      console.error({ result_codes: e.response.data.extras.result_codes })
+      return res.sendStatus(500).end()
     }
   }
 })
