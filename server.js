@@ -74,6 +74,26 @@ async function isNotIssued(address, pesel) {
   return true //TODO For debug purposes only !!!
 }
 
+async function createAccount(address, pesel) {
+  const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
+  const transaction = new StellarSdk.TransactionBuilder(account, {
+    fee: 100,
+    networkPassphrase: StellarSdk.Networks.TESTNET,
+    memo: new StellarSdk.Memo(StellarSdk.MemoText, pesel),
+  })
+    .addOperation(
+      StellarSdk.Operation.createAccount({
+        destination: address,
+        startingBalance: 200,
+      }),
+    )
+    .setTimeout(60) // seconds
+    .build()
+
+  transaction.sign(distributionKeypair)
+  return stellar.submitTransaction(transaction)
+}
+
 async function sendTokenFromDistributionToAddress(address, pesel) {
   log(`sending token to ${address} pesel: ${pesel}`)
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
@@ -108,6 +128,26 @@ app.post('/issueToken', async (req, res) => {
   } else {
     try {
       await sendTokenFromDistributionToAddress(address, pesel)
+      res.sendStatus(200).end()
+    } catch (e) {
+      log(e)
+      res.sendStatus(500).end()
+    }
+  }
+})
+
+app.post('/fundAccount', async (req, res) => {
+  const { address, pesel } = req.body
+  log(`address: ${address} pesel: ${pesel}`)
+  if (!address || !pesel) {
+    return res.sendStatus(400).end()
+  }
+  const isEligableForVote = await isNotIssued(address, pesel)
+  if (!isEligableForVote) {
+    res.sendStatus(405)
+  } else {
+    try {
+      await createAccount(address, pesel)
       res.sendStatus(200).end()
     } catch (e) {
       log(e)
