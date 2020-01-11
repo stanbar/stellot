@@ -99,9 +99,9 @@ async function lockSupply() {
 async function performFlow() {
   try {
     await createTrustlineDistributionToIssuingAccount()
-    // await giveTheDistributionAccountTheTokens(100)
-    // await setHomeDomain('voting.stasbar.com')
-    // await lockSupply()
+    await giveTheDistributionAccountTheTokens(100)
+    await setHomeDomain('voting.stasbar.com')
+    await lockSupply()
   } catch (e) {
     console.error(e)
   }
