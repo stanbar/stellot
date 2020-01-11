@@ -388,9 +388,6 @@ function render() {
     $(`#identify`).show()
     onStart.identify()
   } else {
-    console.log(sections[mode][currentSectionIndex])
-    console.log(mode)
-    console.log(currentSectionIndex)
     $(`#${sections[mode][currentSectionIndex]}`).show()
     onStart[sections[mode][currentSectionIndex]]()
   }
@@ -399,15 +396,23 @@ function render() {
 render()
 createPartiesList()
 
-$('.next').click(() => {
+function showNextPage() {
   currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
   render()
-})
+}
 
-$('.back').click(() => {
+function showPreviousPage() {
   currentSectionIndex =
     currentSectionIndex - 1 >= 0 ? currentSectionIndex - 1 : 0
   render()
+}
+
+$('.next').click(() => {
+  showNextPage()
+})
+
+$('.back').click(() => {
+  showPreviousPage()
 })
 
 $('#issueTokenButton').click(() => {
@@ -428,16 +433,36 @@ $('#loginWithPz').click(() => {
 
 $('#btnSimpleVote').click(async () => {
   mode = 'simple'
-  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
+  $('#simpleVoteProgressbar').attr('aria-valuenow', '0')
   await createAccount()
+  $('#simpleVoteProgressbar')
+    .attr('aria-valuenow', '1')
+    .css('width', '33%')
   await trustIssuer()
+  $('#simpleVoteProgressbar')
+    .attr('aria-valuenow', '2')
+    .css('width', '66%')
   await issueToken()
-  render()
+  $('#simpleVoteProgressbar')
+    .attr('aria-valuenow', '3')
+    .css('width', '100%')
+  showNextPage()
+  $('#simpleVoteProgressbar')
+    .attr('aria-valuenow', '0')
+    .css('width', '0%')
 })
+
 $('#btnManualMode').click(() => {
   mode = 'manual'
-  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length
-  render()
+  showNextPage()
+})
+
+$('#btnVote').click(async e => {
+  if (mode === 'simple') {
+    e.preventDefault()
+    await signAndSendVote()
+    showNextPage()
+  }
 })
 
 $('#issuerAccountId').text(issuerAccountId)
