@@ -72,31 +72,37 @@ on thy behalf. This decition can possible allow unhealthly vote trading, but it
 is possible in traditional system anyway. Stellar is capable of [limiting
 users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization)
 who are eligable to receive tokens, but I can not see any benefits from using
-it. Additionaly user authorization is done by external service (Profil Zaufany)
-which verify users who are eligable for token issuance.
+it. Additionaly user authentication is done by external service (Profil
+Zaufany), and authorization is done via our backend which verify if user is
+eligable for token issuance.
 
 ## System architecture
 
 Ideally the system should only consist of frontend webpage that allows users to
-interact with stellar blockchain which would be "open decentralized backend" for
-our system. Unfortunatelly proposed system require central server for authorizing
-vote token issuance, thus becoming single point of failure. This flaw is
-addressed at the end of this survey.
+interact with stellar blockchain, getting rid of centralized backend.
+Unfortunatelly proposed system require central authorization server for vote
+token issuance, thus becoming single point of failure. This flaw is addressed at
+the end of this survey.
 
 ## Authorization
 
-Blockchain platform can ensure it's trust and determinism by leveraging it's
-other properties like immutability   world everything should be contained in
-blockchain, which is often impractical and/or expensive. For example one could
-encode all eligable user addresses in smart contract and then allow redeeming
-vote token only to address which is present is eligable addresses list. But this
-process would be very expensive But they are
+Blockchain platform can ensure trust and determinism by leveraging other
+properties like immutability.
+
+In blockchain world in order to ensure equal trust, everything should be
+contained in blockchain, which is often impractical and/or expensive. For
+example one could encode all eligable user addresses in smart contract and then
+allow redeeming vote token only to addresses which are present is eligable
+addresses list. But this process would be very expensive.
+
+But they are
 attentives that preserve most of the open Blockchains pillars, for example data
 storage, can be delegated to ipfs, when content is identified by it's hash.
-Other aspects like identity due to thier centralized nature sems to be nearly
+
+Other aspects like authorization due to thier centralized nature sems to be nearly
 impossible to fit this decentralized world, nevertheless there are some attempts
-to leverage Blockchain trust in identity domain. At the moment we need to create
-hybrid systems, that uses plain old web 2.0 or wrappers like oracle's.
+to leverage Blockchain trust model in identity domain. At the moment we need to
+create hybrid systems, that uses plain old web 2.0 or wrappers like oracle's.
 
 ## Implementation description
 
@@ -107,12 +113,37 @@ indivisible amount possible in
 [XDR](https://www.stellar.org/developers/guides/concepts/xdr.html) which is 1
 scaled down by a factor of 10,000,000 (It allows to represent decimal numbers
 in 7 diigts precision in human-friendly form).
+Parties are represented just as plain stellar accounts. One can vote on such
+party by sending vote token on thier account.
+
 
 ## Bootstrapping
 
-Create asset
-Set proper asset data to frontend and backend.
-publish frontend app with it's hash (ideally on IPFS)
+In order to create such election we need distribution account, new vote token,
+and accounts for all registered parties. Creating distribution account and new
+token is multi-step process; well described on official stellar
+documentation [Issuing
+Assets](https://www.stellar.org/developers/guides/issuing-assets.html) and
+[Custom
+Assets](https://www.stellar.org/developers/guides/walkthroughs/custom-assets.html)
+Each party account is created by generating keypair and issuing trustline to
+token distribution account.
+See `bootstrap.js` for for whole flow implementation.
+Variables that need to be propagated in backend and webpage code are:
+
+- asset name, asset issuer public key
+- distribution account public key
+- list of (party name, party account public key)
+
+In backend those environment variables are injected from `.env` file.
+In fronted we could do simillar using e.g. Webpack DefinePlugin, but for
+simplicity I decided to not use any bundler.
+
+Now we are ready to publish our application. Here, we have another decentralized
+solution called IPFS, where we can publish our webpage on P2P network, protecting
+our election system access point from many vector attacks, but this itself if
+topic for separate survey so we will end here. Here is link to proposed system
+on IPFS network.
 
 ## Token distribution
 
