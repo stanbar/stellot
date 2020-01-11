@@ -142,7 +142,7 @@ simplicity I decided to not use any bundler.
 Now we are ready to publish our application. Here, we have another decentralized
 solution called IPFS, where we can publish our webpage on P2P network, protecting
 our election system access point from many vector attacks, but this itself if
-topic for separate survey so we will end here. Here is link to proposed system
+topic for separate survey so we will end here. Here is [link]() to proposed system
 on IPFS network.
 
 ## Token distribution
