@@ -108,6 +108,30 @@ async function fetchDistributorTokensBalance() {
   $('#tokensRemaining').text(balance)
 }
 
+async function createAccount() {
+  const keypair = StellarSdk.Keypair.random()
+  $('secret').text(keypair.secret())
+  $('account-id').text(keypair.publicKey())
+  const pesel = $('#pesel').text()
+  const request = { keypair.publicKey(), pesel }
+  try {
+    const response = await fetch('/createAccount', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    })
+    if (response.ok) {
+      console.log('Successfully funded account')
+    } else {
+      console.error('Failed to fund account')
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 async function trustIssuer() {
   const secret = $('#secret').val()
   const keypair = StellarSdk.Keypair.fromSecret(secret)
@@ -168,9 +192,9 @@ async function issueToken() {
 }
 
 let selectedParty
-let results
-async function createPartiesList() {
-  const partiesWithVotes = await Promise.all(
+
+async function fetchResults() {
+  return Promise.all(
     parties.map(async party => {
       console.log(
         `fetching balance for party ${party.name} for accoundId ${party.accountId}`,
@@ -182,8 +206,10 @@ async function createPartiesList() {
       }
     }),
   )
-  results = partiesWithVotes
+}
 
+async function createPartiesList() {
+  const partiesWithVotes = await fetchResults()
   const list = $('#party-list')
   partiesWithVotes.forEach(party => {
     console.log({ party })
@@ -237,7 +263,8 @@ async function signAndSendVote() {
   $('#voteModal').modal('hide')
 }
 
-function createResultsPlot() {
+async function createResultsPlot() {
+  const partiesWithVotes = await fetchResults()
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 30, bottom: 70, left: 60 }
   const width = 460 - margin.left - margin.right
@@ -255,7 +282,7 @@ function createResultsPlot() {
   const x = d3
     .scaleBand()
     .range([0, width])
-    .domain(results.map(party => party.name))
+    .domain(partiesWithVotes.map(party => party.name))
     .padding(0.2)
   svg
     .append('g')
@@ -270,7 +297,10 @@ function createResultsPlot() {
     .scaleLinear()
     .domain([
       0,
-      results.reduce((prev, current) => prev + (current.votes || 0), 0),
+      partiesWithVotes.reduce(
+        (prev, current) => prev + (current.votes || 0),
+        0,
+      ),
     ])
     .range([height, 0])
   svg.append('g').call(d3.axisLeft(y))
@@ -278,7 +308,7 @@ function createResultsPlot() {
   // Bars
   svg
     .selectAll('mybar')
-    .data(results)
+    .data(partiesWithVotes)
     .enter()
     .append('rect')
     .attr('x', party => x(party.name))
