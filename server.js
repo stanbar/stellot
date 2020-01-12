@@ -86,9 +86,6 @@ async function createAccount(address, userId) {
     .build()
 
   transaction.sign(distributionKeypair)
-  log({
-    source: transaction.source,
-  })
   return stellar.submitTransaction(transaction)
 }
 
@@ -111,9 +108,6 @@ async function sendTokenFromDistributionToAddress(address, userId) {
     .build()
 
   transaction.sign(distributionKeypair)
-  log({
-    source: transaction.source,
-  })
   return stellar.submitTransaction(transaction)
 }
 
