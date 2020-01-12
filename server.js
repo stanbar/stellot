@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const StellarSdk = require('stellar-sdk')
 const log = require('debug')('server:app')
+const crypto = require('crypto')
 
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
 
@@ -18,32 +19,33 @@ app.use(express.static(path.join(__dirname, 'docs')))
 const distributionKeypair = StellarSdk.Keypair.fromSecret(
   process.env.DISTRIBUTION_SECRET_KEY,
 )
+
 const voteToken = new StellarSdk.Asset(
   'Vote01122019',
   process.env.ISSUE_PUBLIC_KEY,
 )
 
-async function isAlreadyIssuedToPesel(pesel) {
-  log(`checking against pesel: ${pesel}`)
+async function isAlreadyIssuedToUserId(userId) {
+  log(`checking against userId: ${userId}`)
   const transactions = await stellar
     .transactions()
+    .limit(200) // TODO error-prone should not be hardcoded
     .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
     .call()
+
   const relevantTransactions = transactions.records.filter(
     transaction => transaction.memo_type === 'text',
   )
-  relevantTransactions.forEach(transaction => {
-    log({ pesel: transaction.memo })
-  })
-  const isAlreadyIssued = relevantTransactions.some(txn => txn.memo === pesel)
-  log(`isAlreadyIssued to pesel: ${isAlreadyIssued}`)
+  const isAlreadyIssued = relevantTransactions.some(txn => txn.memo === userId)
+  log(`isAlreadyIssued to userId: ${isAlreadyIssued}`)
   return isAlreadyIssued
 }
 
-async function isAlreadyIssuedToAddress(address) {
-  log(`checking against address: ${address}`)
+async function isAlreadyIssuedToAccountId(address) {
+  log(`checking against accountId: ${address}`)
   const payments = await stellar
     .payments()
+    .limit(200) // TODO error-prone should not be hardcoded
     .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
     .call()
 
@@ -52,34 +54,27 @@ async function isAlreadyIssuedToAddress(address) {
       payment.type === 'payment' &&
       payment.asset_code === process.env.ASSET_NAME,
   )
-  relevantPayments.forEach(payment => {
-    // log({
-    //   id: payment.id,
-    //   to: payment.to,
-    //   from: payment.from,
-    //   amount: payment.amount,
-    // })
-  })
   const isAlreadyIssued = relevantPayments.some(
     payment => payment.to === address,
   )
-  log(`isAlreadyIssued to account: ${isAlreadyIssued}`)
+  log(`isAlreadyIssued to accountId: ${isAlreadyIssued}`)
   return isAlreadyIssued
 }
 
-async function isNotIssued(address, pesel) {
-  const issuedToAddress = await isAlreadyIssuedToAddress(address)
-  const issuedToPesel = await isAlreadyIssuedToPesel(pesel)
-  log(`DEBUG isNotIssued ${!issuedToAddress && !issuedToPesel}`)
-  return true //TODO For debug purposes only !!!
+async function isNotIssued(address, userId) {
+  const issuedToAddress = await isAlreadyIssuedToAccountId(address)
+  const issuedToUserId = await isAlreadyIssuedToUserId(userId)
+  log(`DEBUG isNotIssued ${!issuedToAddress && !issuedToUserId}`)
+  return !issuedToAddress && !issuedToUserId
 }
 
-async function createAccount(address, pesel) {
+async function createAccount(address, userId) {
+  log({ createAccount: { address, userId } })
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
-    memo: new StellarSdk.Memo(StellarSdk.MemoText, pesel),
+    memo: StellarSdk.Memo.text(userId),
   })
     .addOperation(
       StellarSdk.Operation.createAccount({
@@ -91,16 +86,19 @@ async function createAccount(address, pesel) {
     .build()
 
   transaction.sign(distributionKeypair)
+  log({
+    source: transaction.source,
+  })
   return stellar.submitTransaction(transaction)
 }
 
-async function sendTokenFromDistributionToAddress(address, pesel) {
-  log(`sending token to ${address} pesel: ${pesel}`)
+async function sendTokenFromDistributionToAddress(address, userId) {
+  log({ sendTokenFromDistributionToAddress: { address, userId } })
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
-    memo: new StellarSdk.Memo(StellarSdk.MemoText, pesel),
+    memo: StellarSdk.Memo.text(userId),
   })
     .addOperation(
       StellarSdk.Operation.payment({
@@ -113,69 +111,70 @@ async function sendTokenFromDistributionToAddress(address, pesel) {
     .build()
 
   transaction.sign(distributionKeypair)
+  log({
+    source: transaction.source,
+  })
   return stellar.submitTransaction(transaction)
 }
 
 app.post('/issueToken', async (req, res) => {
-  const { address, pesel } = req.body
-  log(`address: ${address} pesel: ${pesel}`)
-  if (!address || !pesel) {
+  const { address, userId } = req.body
+  log(`address: ${address} userId: ${userId}`)
+  if (!address || !userId) {
     return res.sendStatus(400).end()
   }
-  const isEligableForVote = await isNotIssued(address, pesel)
+  const isEligableForVote = await isNotIssued(address, userId)
+  // TODO Distinquish checking for issue token from create account
   if (!isEligableForVote) {
-    res.sendStatus(405)
-  } else {
-    try {
-      await sendTokenFromDistributionToAddress(address, pesel)
-      res.sendStatus(200).end()
-    } catch (e) {
-      log(e)
-      res.sendStatus(500).end()
-    }
+    return res.sendStatus(405)
+  }
+  try {
+    const result = await sendTokenFromDistributionToAddress(address, userId)
+    log({ hash: result.hash })
+    res.sendStatus(200).end()
+  } catch (e) {
+    log(e)
+    res.sendStatus(500).end()
   }
 })
 
 app.post('/createAccount', async (req, res) => {
-  const { address, pesel } = req.body
-  log(`address: ${address} pesel: ${pesel}`)
-  if (!address || !pesel) {
+  const { address, userId } = req.body
+  log(`address: ${address} userId: ${userId}`)
+  if (!address || !userId) {
     return res.sendStatus(400).end()
   }
-  const isEligableForVote = await isNotIssued(address, pesel)
+  const isEligableForVote = await isNotIssued(address, userId)
+  // TODO Distinquish checking for issue token from create account
   if (!isEligableForVote) {
-    res.sendStatus(405)
-  } else {
-    try {
-      await createAccount(address, pesel)
-      return res.sendStatus(200).end()
-    } catch (e) {
-      log(e)
-      log(e.response.data)
-      console.error({ result_codes: e.response.data.extras.result_codes })
-      return res.sendStatus(500).end()
-    }
+    return res.sendStatus(405)
+  }
+  try {
+    const result = await createAccount(address, userId)
+    log({ hash: result.hash })
+    return res.sendStatus(200).end()
+  } catch (e) {
+    log(e)
+    log(e.response.data)
+    console.error({ result_codes: e.response.data.extras.result_codes })
+    return res.sendStatus(500).end()
   }
 })
 
-const userDb = {
-  stasbar: { password: 'password', pesel: 95031801212 },
-  user: { password: 'password', pesel: 12345678989 },
-}
-
 app.post('/login', (req, res) => {
   const { login, password } = req.body
-  log(`login: ${login} password: ${password}`)
   if (!login || !password) {
     return res.sendStatus(400).end()
   }
-  const user = userDb[login]
-  if (user) {
-    if (user.password === password) {
-      return res.json({ pesel: user.pesel }).end()
-    }
-  }
-  return res.sendStatus(405)
+  return res
+    .json({
+      userId: crypto
+        .createHash('sha256')
+        .update(login + password)
+        .digest('hex')
+        .substring(0, 16),
+    })
+    .end()
 })
 
 module.exports = app
