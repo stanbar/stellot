@@ -1,6 +1,6 @@
 # Stellar Voting
 
-Election voting system backed by decentralized [stellar blockchain
+Election voting system backed by [stellar blockchain
 network](http://stellar.org/).
 
 Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
@@ -10,10 +10,10 @@ Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 Blockchain as a technology provide three major properties that are highly
 desirable in applications like election voting. Those properties are:
 _immutability_ which ensures that noone can modify the data once wrote into
-blockchain\*, there might be concerns if this property is trully desirable for
-everyone, but I assume this system is designed for healthly subjects, thus I'll
-not focus on this topic. Another property is _transparency_ that allow everyone
-validate the election correctness and calculate results by it's own.
+blockchain, there might be concerns if this property is trully desirable for
+everyone, but I assume this system is designed for healthly subjects. Another
+property is _transparency_ that allow everyone validate the election correctness
+and calculate results by it's own.
 In consequences one can __distrust authorities__, while __trust voting
 results__.
 
@@ -21,13 +21,13 @@ results__.
 
 Blockchain initialy introduced by Satoshi Nakamoto in [Bitcoin
 Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application,
-i.e. ledger for transfering Bitcoin. 5 years later Vitalik Buterin
+i.e. ledger for transfering Bitcoin cryptocurrency. 5 years later Vitalik Buterin
 [proposed](https://bitcointalk.org/index.php?topic=428589.0) generalization to
 this concept by allowing to process not only transactions, but also so called
 "smart contracts" which are in fact scripts run on ethereum platform. Those
 "scripts" are executed and validated by all ethereum node, and use blockchain as
 a persistant storage. This innovation allowed to create domain specific
-behaviour top of ethereum blockchain, levereging already existing
+behaviour on top of ethereum blockchain, levereging already existing
 infrastructure.
 
 ## Tokens
@@ -39,9 +39,9 @@ represent company shares. This pattern is called ICO (Initial Coin Offering) or
 STO (Security Token Offering), alluding to IPO (Initial Public Offering).
 Another one can issue tokens backed by physical asset like national currency;
 bypassing slow and expensive international transfers and taxes from
-exchanging cryptocurrencies with physical national currencies. This pattern is
+exchanging cryptocurrencies with national currencies. This pattern is
 called Stable Coin.
-There are many other applications to tokens particulary _vote as a token_ used
+There are many other token applications particulary _vote as a token_ used
 here in this survey.
 
 ## Stellar platform
@@ -57,7 +57,7 @@ vote tokenization, but it's enought for this simple election system.
 
 The goal of the system is to provide the highest level of transparency, while
 keeping sensitive data private. Additionaly it should be illegal to issue more
-than one vote token to one person. Thus it should be way of identyfying and
+than one vote token to one person. Thus there should be way of identyfying and
 authorizing voters. I decided to use government authorized polish system "Profil
 Zaufany" as an identification provider, with the assumption that every eligable
 voter is registered there.
@@ -68,54 +68,70 @@ Vote token exchanging is permited intentionally, and treated as a feature.
 It's no different from traditional election system where some people deleage thier
 vote decision to one family member who tell them what should they vote on. In
 this system it's possible to send the token and let the receiver to perform vote
-on thy behalf. This decition can possible allow unhealthly vote trading, but it
+on thy behalf. This decision can possible allow unhealthly vote trading, but it
 is possible in traditional system anyway. Stellar is capable of [limiting
 users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization)
-who are eligable to receive tokens, but I can not see any benefits from using
-it. Additionaly user authentication is done by external service (Profil
-Zaufany), and authorization is done via our backend which verify if user is
+who are eligable to receive tokens, but I can not see any benefits from using it
+in proposed system, where user authentication is done by external service (Profil
+Zaufany), and authorization is done by our backend, which verify if user is
 eligable for token issuance.
 
 ## System architecture
 
 Ideally the system should only consist of frontend webpage that allows users to
-interact with stellar blockchain, getting rid of centralized backend.
+interact with stellar network, getting rid of centralized backend.
 Unfortunatelly proposed system require central authorization server for vote
 token issuance, thus becoming single point of failure. This flaw is addressed at
 the end of this survey.
 
 ## Authorization
 
-Blockchain platform can ensure trust and determinism by leveraging other
-properties like immutability.
+In order to protect from double token issuance, proposed system link each token
+issuance transaction with user identifier e.g. national identification number.
+Link is achieved by attaching HMAC of user identifier in transaction MEMO field.
+Thus all informations required to perform authorization are contained in
+blockchain itself. In consequence, such system become more transparent. We use
+HMAC of user identifier to prevent private data exposure, while still allowing
+to perform authorization check on public blockchain. User is eligable to issue
+token only if his user identifier hash is not present in any issuance
+transaction made from distribution account.
 
-In blockchain world in order to ensure equal trust, everything should be
-contained in blockchain, which is often impractical and/or expensive. For
-example one could encode all eligable user addresses in smart contract and then
-allow redeeming vote token only to addresses which are present is eligable
-addresses list. But this process would be very expensive.
+## Vote Token
 
-But they are
-attentives that preserve most of the open Blockchains pillars, for example data
-storage, can be delegated to ipfs, when content is identified by it's hash.
-
-Other aspects like authorization due to thier centralized nature sems to be nearly
-impossible to fit this decentralized world, nevertheless there are some attempts
-to leverage Blockchain trust model in identity domain. At the moment we need to
-create hybrid systems, that uses plain old web 2.0 or wrappers like oracle's.
-
-## Implementation description
-
-I assume that the number of eligible voters is equal to 100 (it will be easier
-to demonstrate), thus we should create 100 tokens.
-In order to prevent spending only part of token we will issue the smallest
+We assume that the number of eligable voters is public information. Thus
+becoming value of maximum number of tokens in this election. During asset
+creation, issuing account lockout from creating new asset, so we can be sure
+that no more tokens are ever created.
+Assets in stellar blockchain, are divisible to 7 decimal points. This is
+unwanted feature since we don't want to allow users to vote by just one tenth of
+thier vote. To prevent from it, we will treat 1 vote token as the smallest
 indivisible amount possible in
 [XDR](https://www.stellar.org/developers/guides/concepts/xdr.html) which is 1
-scaled down by a factor of 10,000,000 (It allows to represent decimal numbers
-in 7 diigts precision in human-friendly form).
-Parties are represented just as plain stellar accounts. One can vote on such
-party by sending vote token on thier account.
+scaled down by a factor of 10,000,000 (this format allows to represent decimal
+numbers in 7 digts precision, without introduction floating-point arithmetics
+and it's innate errors).
 
+In example election we assume that the number of eligible voters is equal to
+100.
+
+## Token distribution
+
+Each user who authenticate itself by Profil Zaufany and authorize by our backend
+will be able to issue 1 voting token (seen by user as 0.0000001). One can do
+with this token whatever he want, ideally vote for one of eligible parties, but
+nothing prevent him for transfering this token to any other account, such as
+family member. Since it already happends in current traditional voting system,
+it should not be considered as system flaw, rather as a feature.
+
+## Voting paths
+
+Our system allow two paths of voting: simplified and manual. In _manual path_,
+user already posses stellar account and want to take control of whole process,
+which involve creating trustline to distribution account and issuing vote token.
+_Simplified path_ create new stellar account, create trustline to distribution
+account and issue token automatically on the user behalf, leaving it with just
+decision what party to vote on. User of such path is completely abstracted from
+technology used underneath, while still leverageing all blockchain benefits.  
 
 ## Bootstrapping
 
@@ -142,44 +158,39 @@ simplicity I decided to not use any bundler.
 Now we are ready to publish our application. Here, we have another decentralized
 solution called IPFS, where we can publish our webpage on P2P network, protecting
 our election system access point from many vector attacks, but this itself if
-topic for separate survey so we will end here. Here is [link]() to proposed system
-on IPFS network.
-
-## Token distribution
-
-Each user who authorize itself by Profil Zaufany will have created an account
-with trustline to distribution account and balance of 1 VOTE token. The user
-then can decide if he wants to send this token to one of listed parties or send
-it to someone else.
-// TODO On maybe don't allow to send tokens, just don't show
-secret to user, but then whats the point ?
-
-Votes can exchange thier ID for 1 (seen by user as 0.0000001) _VOTE_ token.
-User can do with this token whatever he want, ideally vote for one of eligible
-parties, but nothing prevent him for transfering this token to any other
-account, such as family member. Since it already happends in current "analog"
-voting model, it should not be considered as system flaw, rather as a feature.
-
-
-smallest value: 0.0000001
-max value: 922,337,203,685.4775807
+topic for separate survey so we will end here. Here is
+[link](https://ipfs.io/ipfs/QmY5ZcYuBXJ56ZUsNqYXKuLdk5j3i6zWDwuzfV9SBSZviv) to
+proposed system on IPFS network.
 
 ## Fully Decentralized Application
 
-This Flaw could be solved i.e. by using Ethereum smart contract with embeded
-list of eligable adresses (or better thier hashes for privacy); while this might
-work for small list of adresses, can become overkill for election when we take
-cost of such huge smart contract into account.  
+In blockchain world in order to ensure equal trust, everything should be
+blockchain contained, which is often impractical and/or expensive. For
+example one could encode all eligable user addresses (or better hash of
+addresses) in smart contract and then allow redeeming vote token only to
+addresses which are present in there. While this might work for small list of
+adresses, can become overkill for election when we take cost of such huge smart
+contract into account.  
+
+## Demo
+
+Visit
+
+`https://voting.stasbar.com`
 
 ## Installation
 
-Install:
-```npm install```
+Install
 
-Start:
-```npm run start```
+`npm install`
 
-Website will be available on `localhost:3000`
+Start
+
+`npm run start`
+
+Open
+
+`http://localhost:3000`
 
 
 ## Resources
