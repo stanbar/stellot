@@ -26,23 +26,6 @@ const voteToken = new StellarSdk.Asset(
 )
 
 async function isAlreadyIssuedToUserId(userId) {
-  log(`checking against userId: ${userId}`)
-  const transactions = await stellar
-    .transactions()
-    .limit(200) // TODO error-prone should not be hardcoded
-    .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
-    .call()
-
-  const relevantTransactions = transactions.records.filter(
-    transaction => transaction.memo_type === 'text',
-  )
-  const isAlreadyIssued = relevantTransactions.some(txn => txn.memo === userId)
-  log(`isAlreadyIssued to userId: ${isAlreadyIssued}`)
-  return isAlreadyIssued
-}
-
-async function isAlreadyIssuedToAccountId(address) {
-  log(`checking against accountId: ${address}`)
   const payments = await stellar
     .payments()
     .limit(200) // TODO error-prone should not be hardcoded
@@ -50,26 +33,43 @@ async function isAlreadyIssuedToAccountId(address) {
     .call()
 
   const relevantPayments = payments.records.filter(
-    payment =>
-      payment.type === 'payment' &&
-      payment.asset_code === process.env.ASSET_NAME,
+    payment => payment.type === 'payment',
   )
-  const isAlreadyIssued = relevantPayments.some(
-    payment => payment.to === address,
-  )
-  log(`isAlreadyIssued to accountId: ${isAlreadyIssued}`)
-  return isAlreadyIssued
+
+  for (let i = 0; i < relevantPayments.length; i += 1) {
+    const transaction = await relevantPayments[i].transaction()
+    if (transaction.memo === userId) {
+      return true
+    }
+  }
+
+  return false
 }
 
-async function isNotIssued(address, userId) {
-  const issuedToAddress = await isAlreadyIssuedToAccountId(address)
-  const issuedToUserId = await isAlreadyIssuedToUserId(userId)
-  log(`DEBUG isNotIssued ${!issuedToAddress && !issuedToUserId}`)
-  return !issuedToAddress && !issuedToUserId
+async function isAlreadyCreatedAccount(accountId, userId) {
+  log(`checking against accountId: ${accountId}`)
+  const payments = await stellar
+    .payments()
+    .limit(200) // TODO error-prone should not be hardcoded
+    .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
+    .call()
+
+  const relevantPayments = payments.records.filter(
+    payment => payment.type === 'create_account',
+  )
+
+  for (let i = 0; i < relevantPayments.length; i += 1) {
+    const transaction = await relevantPayments[i].transaction()
+    if (transaction.memo === userId) {
+      return true
+    }
+  }
+
+  return false
 }
 
-async function createAccount(address, userId) {
-  log({ createAccount: { address, userId } })
+async function createAccount(accountId, userId) {
+  log({ createAccount: { accountId, userId } })
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
@@ -78,7 +78,7 @@ async function createAccount(address, userId) {
   })
     .addOperation(
       StellarSdk.Operation.createAccount({
-        destination: address,
+        destination: accountId,
         startingBalance: '1.5000200', // 1 XML for minimum acocunt balance 0.5 for trustline and 200 for two transactions fee: changeTrust and token payment
       }),
     )
@@ -89,8 +89,8 @@ async function createAccount(address, userId) {
   return stellar.submitTransaction(transaction)
 }
 
-async function sendTokenFromDistributionToAddress(address, userId) {
-  log({ sendTokenFromDistributionToAddress: { address, userId } })
+async function sendTokenFromDistributionToAddress(accountId, userId) {
+  log({ sendTokenFromDistributionToAddress: { accountId, userId } })
   const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
@@ -99,7 +99,7 @@ async function sendTokenFromDistributionToAddress(address, userId) {
   })
     .addOperation(
       StellarSdk.Operation.payment({
-        destination: address,
+        destination: accountId,
         asset: voteToken,
         amount: `${1 / 10 ** 7}`,
       }),
@@ -112,18 +112,17 @@ async function sendTokenFromDistributionToAddress(address, userId) {
 }
 
 app.post('/issueToken', async (req, res) => {
-  const { address, userId } = req.body
-  log(`address: ${address} userId: ${userId}`)
-  if (!address || !userId) {
+  const { accountId, userId } = req.body
+  log(`accountId: ${accountId} userId: ${userId}`)
+  if (!accountId || !userId) {
     return res.sendStatus(400).end()
   }
-  const isEligableForVote = await isNotIssued(address, userId)
-  // TODO Distinquish checking for issue token from create account
-  if (!isEligableForVote) {
+  const isAlreadyIssued = await isAlreadyIssuedToUserId(userId)
+  if (isAlreadyIssued) {
     return res.sendStatus(405)
   }
   try {
-    const result = await sendTokenFromDistributionToAddress(address, userId)
+    const result = await sendTokenFromDistributionToAddress(accountId, userId)
     log({ hash: result.hash })
     res.sendStatus(200).end()
   } catch (e) {
@@ -133,18 +132,20 @@ app.post('/issueToken', async (req, res) => {
 })
 
 app.post('/createAccount', async (req, res) => {
-  const { address, userId } = req.body
-  log(`address: ${address} userId: ${userId}`)
-  if (!address || !userId) {
+  const { accountId, userId } = req.body
+  log(`accountId: ${accountId} userId: ${userId}`)
+  if (!accountId || !userId) {
     return res.sendStatus(400).end()
   }
-  const isEligableForVote = await isNotIssued(address, userId)
-  // TODO Distinquish checking for issue token from create account
-  if (!isEligableForVote) {
+  const isAlreadyCreatedAccountForUser = await isAlreadyCreatedAccount(
+    accountId,
+    userId,
+  )
+  if (isAlreadyCreatedAccountForUser) {
     return res.sendStatus(405)
   }
   try {
-    const result = await createAccount(address, userId)
+    const result = await createAccount(accountId, userId)
     log({ hash: result.hash })
     return res.sendStatus(200).end()
   } catch (e) {

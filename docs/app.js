@@ -82,7 +82,7 @@ async function fetchAccountTokenBalance(accountId) {
       aBalance.asset_issuer === voteToken.issuer,
   )
 
-  console.log(`found balance ${balance.balance} on address ${accountId}`)
+  console.log(`found balance ${balance.balance} on accountId ${accountId}`)
 
   if (balance) {
     return Math.round(balance.balance * 10 ** 7)
@@ -153,9 +153,11 @@ async function createAccount() {
   $('#vote-secret').val(keypair.secret())
   $('#account-id').val(keypair.publicKey())
 
-  const address = $('#account-id').val()
+  //TODO show to user, allow managing his account
+
+  const accountId = $('#account-id').val()
   const userId = $('#userId').text()
-  const request = { address, userId }
+  const request = { accountId, userId }
   const response = await fetch('/createAccount', {
     method: 'POST',
     headers: {
@@ -202,9 +204,9 @@ async function trustIssuer() {
 }
 
 async function issueToken() {
-  const address = $('#account-id').val()
+  const accountId = $('#account-id').val()
   const userId = $('#userId').text()
-  const request = { address, userId }
+  const request = { accountId, userId }
   try {
     $('#voteSpinnerSending').removeClass('d-none')
     $('#issueTokenButton').prop('disabled', true)
