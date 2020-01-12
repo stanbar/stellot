@@ -108,6 +108,44 @@ async function fetchDistributorTokensBalance() {
   $('#tokensRemaining').text(balance)
 }
 
+function showError(message) {
+  $('#alert-text').text(message)
+  $('.alert').addClass('show')
+  $('.alert').alert()
+}
+
+async function loginWithPz() {
+  console.log('login with pz')
+  const login = $('#login').val()
+  const password = $('#password').val()
+  const request = { login, password }
+  try {
+    $('#loginSpinner').removeClass('d-none')
+    $('#loginWithPz').prop('disabled', true)
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    })
+    const data = await response.json()
+    console.log({ userId: data.userId })
+    $('#userId').text(data.userId)
+    $('#btnManualMode').prop('disabled', false)
+    $('#btnSimpleVote').prop('disabled', false)
+    if (response.ok) {
+      console.log('Successfully logged in')
+    } else {
+      console.error('Failed to login')
+      throw new Error(response.message)
+    }
+    $('#loginWithPzModal').modal('hide')
+  } finally {
+    $('#loginSpinner').addClass('d-none')
+    $('#loginWithPz').prop('disabled', false)
+  }
+}
 async function createAccount() {
   console.log('createAccount')
   const keypair = StellarSdk.Keypair.random()
@@ -116,23 +154,20 @@ async function createAccount() {
   $('#account-id').val(keypair.publicKey())
 
   const address = $('#account-id').val()
-  const pesel = $('#pesel').text()
-  const request = { address, pesel }
-  try {
-    const response = await fetch('/createAccount', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    })
-    if (response.ok) {
-      console.log('Successfully funded account')
-    } else {
-      console.error('Failed to fund account')
-    }
-  } catch (e) {
-    console.error(e)
+  const userId = $('#userId').text()
+  const request = { address, userId }
+  const response = await fetch('/createAccount', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+  if (response.ok) {
+    console.log('Successfully funded account')
+  } else {
+    console.error('Failed to fund account')
+    throw new Error(response.message)
   }
 }
 
@@ -161,16 +196,15 @@ async function trustIssuer() {
     console.log('Successfully submited transaction to network')
   } else {
     console.error('Failed to submit transaction to network')
+    throw new Error(response.message)
   }
-  $('#trustlineModal').modal('hide')
-  $('#spinnerSending').addClass('d-none')
   fetchVoteTokensBalance()
 }
 
 async function issueToken() {
   const address = $('#account-id').val()
-  const pesel = $('#pesel').text()
-  const request = { address, pesel }
+  const userId = $('#userId').text()
+  const request = { address, userId }
   try {
     $('#voteSpinnerSending').removeClass('d-none')
     $('#issueTokenButton').prop('disabled', true)
@@ -186,13 +220,40 @@ async function issueToken() {
       console.log('Successfully assigned vote token')
     } else {
       console.error('Failed to assign vote token')
+      throw new Error(response.message)
     }
-  } catch (e) {
-    console.error(e)
   } finally {
     $('#voteSpinnerSending').addClass('d-none')
     $('#issueTokenButton').prop('disabled', false)
   }
+}
+
+async function signAndSendVote() {
+  console.log(`vote on party ${selectedParty.name}`)
+  const secret = $('#vote-secret').val()
+  const keypair = StellarSdk.Keypair.fromSecret(secret)
+  $('#signAndSendSpinner').removeClass('d-none')
+  $('#signVoteButton').prop('disabled', true)
+  const account = await stellar.loadAccount(keypair.publicKey())
+  const transaction = new StellarSdk.TransactionBuilder(account, {
+    fee: 100,
+    networkPassphrase: StellarSdk.Networks.TESTNET,
+  })
+    .addOperation(
+      StellarSdk.Operation.payment({
+        destination: selectedParty.accountId,
+        asset: voteToken,
+        amount: '0.0000001',
+      }),
+    )
+    .setTimeout(60) // seconds
+    .build()
+
+  transaction.sign(keypair)
+  const response = await stellar.submitTransaction(transaction)
+  $('#signAndSendSpinner').addClass('d-none')
+  $('#signVoteButton').prop('disabled', false)
+  $('#voteModal').modal('hide')
 }
 
 let selectedParty
@@ -236,34 +297,6 @@ async function createPartiesList() {
 
     return li
   })
-}
-
-async function signAndSendVote() {
-  console.log(`vote on party ${selectedParty.name}`)
-  const secret = $('#vote-secret').val()
-  const keypair = StellarSdk.Keypair.fromSecret(secret)
-  $('#signAndSendSpinner').removeClass('d-none')
-  $('#signVoteButton').prop('disabled', true)
-  const account = await stellar.loadAccount(keypair.publicKey())
-  const transaction = new StellarSdk.TransactionBuilder(account, {
-    fee: 100,
-    networkPassphrase: StellarSdk.Networks.TESTNET,
-  })
-    .addOperation(
-      StellarSdk.Operation.payment({
-        destination: selectedParty.accountId,
-        asset: voteToken,
-        amount: '0.0000001',
-      }),
-    )
-    .setTimeout(60) // seconds
-    .build()
-
-  transaction.sign(keypair)
-  const response = await stellar.submitTransaction(transaction)
-  $('#signAndSendSpinner').addClass('d-none')
-  $('#signVoteButton').prop('disabled', false)
-  $('#voteModal').modal('hide')
 }
 
 async function createResultsPlot() {
@@ -319,41 +352,6 @@ async function createResultsPlot() {
     .attr('width', x.bandwidth())
     .attr('height', party => height - y(party.votes || 0))
     .attr('fill', '#69b3a2')
-}
-
-async function loginWithPz() {
-  console.log('login with pz')
-  const login = $('#login').val()
-  const password = $('#password').val()
-  const request = { login, password }
-  try {
-    $('#loginSpinner').removeClass('d-none')
-    $('#loginWithPz').prop('disabled', true)
-    const response = await fetch('/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    })
-    const data = await response.json()
-    console.log({ pesel: data.pesel })
-    $('#pesel').text(data.pesel)
-    $('#btnManualMode').prop('disabled', false)
-    $('#btnSimpleVote').prop('disabled', false)
-    // setUserPesel(response.body.pesel)
-    if (response.ok) {
-      console.log('Successfully logged in')
-    } else {
-      console.error('Failed to login')
-    }
-    $('#loginWithPzModal').modal('hide')
-  } catch (e) {
-    console.error(e)
-  } finally {
-    $('#loginSpinner').addClass('d-none')
-    $('#loginWithPz').prop('disabled', false)
-  }
 }
 
 const onStart = {
@@ -434,22 +432,26 @@ $('#loginWithPz').click(() => {
 $('#btnSimpleVote').click(async () => {
   mode = 'simple'
   $('#simpleVoteProgressbar').attr('aria-valuenow', '0')
-  await createAccount()
-  $('#simpleVoteProgressbar')
-    .attr('aria-valuenow', '1')
-    .css('width', '33%')
-  await trustIssuer()
-  $('#simpleVoteProgressbar')
-    .attr('aria-valuenow', '2')
-    .css('width', '66%')
-  await issueToken()
-  $('#simpleVoteProgressbar')
-    .attr('aria-valuenow', '3')
-    .css('width', '100%')
-  showNextPage()
-  $('#simpleVoteProgressbar')
-    .attr('aria-valuenow', '0')
-    .css('width', '0%')
+  try {
+    await createAccount()
+    $('#simpleVoteProgressbar')
+      .attr('aria-valuenow', '1')
+      .css('width', '33%')
+    await trustIssuer()
+    $('#simpleVoteProgressbar')
+      .attr('aria-valuenow', '2')
+      .css('width', '66%')
+    await issueToken()
+    $('#simpleVoteProgressbar')
+      .attr('aria-valuenow', '3')
+      .css('width', '100%')
+    showNextPage()
+    $('#simpleVoteProgressbar')
+      .attr('aria-valuenow', '0')
+      .css('width', '0%')
+  } catch (e) {
+    showError(e.message)
+  }
 })
 
 $('#btnManualMode').click(() => {
