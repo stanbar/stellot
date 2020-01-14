@@ -111,6 +111,15 @@ async function sendTokenFromDistributionToAddress(accountId, userId) {
   return stellar.submitTransaction(transaction)
 }
 
+async function signTransaction(userId, txn) {
+  const transaction = new StellarSdk.Transaction(
+    txn,
+    StellarSdk.Networks.TESTNET,
+  )
+  transaction.sign(distributionKeypair)
+  return transaction
+}
+
 app.post('/issueToken', async (req, res) => {
   const { accountId, userId } = req.body
   log(`accountId: ${accountId} userId: ${userId}`)
@@ -170,6 +179,24 @@ app.post('/login', (req, res) => {
         .substring(0, 16),
     })
     .end()
+})
+
+app.post('/signTx', async (req, res) => {
+  const { userId, txn } = req.body
+  if (!userId || !txn) {
+    return res.sendStatus(400).end()
+  }
+  try {
+    const result = await signTransaction(userId, txn)
+    log({ hash: result.hash })
+    log({ XDR: result.toXDR() })
+    return res.status(200).send(result.toXDR())
+  } catch (e) {
+    log(e)
+    log(e.response.data)
+    console.error({ result_codes: e.response.data.extras.result_codes })
+    return res.sendStatus(500).end()
+  }
 })
 
 module.exports = app

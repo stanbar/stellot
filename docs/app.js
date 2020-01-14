@@ -22,6 +22,7 @@ const issuerAccountId =
   'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH'
 
 const voteToken = new StellarSdk.Asset('Vote01122019', issuerAccountId)
+let selectedParty
 
 const parties = [
   {
@@ -146,6 +147,7 @@ async function loginWithPz() {
     $('#loginWithPz').prop('disabled', false)
   }
 }
+
 async function createAccount() {
   console.log('createAccount')
   const keypair = StellarSdk.Keypair.random()
@@ -258,7 +260,96 @@ async function signAndSendVote() {
   $('#voteModal').modal('hide')
 }
 
-let selectedParty
+async function voteOnParty() {
+  console.log('simplifiedPath')
+  const keypair = StellarSdk.Keypair.random()
+  console.log('generated keypair')
+  $('#secret').val(keypair.secret())
+  $('#vote-secret').val(keypair.secret())
+  $('#account-id').val(keypair.publicKey())
+  const accountId = $('#account-id').val()
+  const userId = $('#userId').text()
+
+  //TODO show to user, allow managing his account
+
+  const account = await stellar.loadAccount(distributionAccountId)
+  console.log('loaded account')
+  const transaction = new StellarSdk.TransactionBuilder(account, {
+    fee: 100,
+    networkPassphrase: StellarSdk.Networks.TESTNET,
+    memo: StellarSdk.Memo.text(userId),
+  })
+    .addOperation(
+      StellarSdk.Operation.createAccount({
+        source: distributionAccountId,
+        destination: accountId,
+        startingBalance: '1.5000200',
+        // 1 XML for minimum acocunt balance
+        // 0.5 for trustline and
+        // 200 for two transactions fee
+      }),
+    )
+    .addOperation(
+      StellarSdk.Operation.changeTrust({
+        source: keypair.publicKey(),
+        asset: voteToken,
+        limit: '0.0000100',
+      }),
+    )
+    .addOperation(
+      StellarSdk.Operation.payment({
+        source: distributionAccountId,
+        destination: accountId,
+        asset: voteToken,
+        amount: `${1 / 10 ** 7}`,
+      }),
+    )
+    .addOperation(
+      StellarSdk.Operation.payment({
+        source: keypair.publicKey(),
+        destination: selectedParty.accountId,
+        asset: voteToken,
+        amount: '0.0000001',
+      }),
+    )
+    .setTimeout(60) // seconds
+    .build()
+  console.log('Build transaction')
+
+  transaction.sign(keypair)
+  console.log('signed transaction')
+  const txn = transaction.toXDR()
+  console.log('get XDR')
+  const request = { userId, txn }
+
+  const response = await fetch('/signTx', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (response.ok) {
+    console.log('Successfully funded account')
+  } else {
+    console.error('Failed to fund account')
+    throw new Error(response.message)
+  }
+
+  const signedTxn = await response.text()
+  console.log({ receivedTxn: signedTxn })
+  const signedTransaction = new StellarSdk.Transaction(
+    signedTxn,
+    StellarSdk.Networks.TESTNET,
+  )
+  try {
+    const res = await stellar.submitTransaction(signedTransaction)
+    console.log(res.hash)
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 async function fetchResults() {
   return Promise.all(
@@ -433,24 +524,24 @@ $('#loginWithPz').click(() => {
 
 $('#btnSimpleVote').click(async () => {
   mode = 'simple'
-  $('#simpleVoteProgressbar').attr('aria-valuenow', '0')
+  // $('#simpleVoteProgressbar').attr('aria-valuenow', '0')
   try {
-    await createAccount()
-    $('#simpleVoteProgressbar')
-      .attr('aria-valuenow', '1')
-      .css('width', '33%')
-    await trustIssuer()
-    $('#simpleVoteProgressbar')
-      .attr('aria-valuenow', '2')
-      .css('width', '66%')
-    await issueToken()
-    $('#simpleVoteProgressbar')
-      .attr('aria-valuenow', '3')
-      .css('width', '100%')
+    // await createAccount()
+    // $('#simpleVoteProgressbar')
+    //   .attr('aria-valuenow', '1')
+    //   .css('width', '33%')
+    // await trustIssuer()
+    // $('#simpleVoteProgressbar')
+    //   .attr('aria-valuenow', '2')
+    //   .css('width', '66%')
+    // await issueToken()
+    // $('#simpleVoteProgressbar')
+    //   .attr('aria-valuenow', '3')
+    //   .css('width', '100%')
     showNextPage()
-    $('#simpleVoteProgressbar')
-      .attr('aria-valuenow', '0')
-      .css('width', '0%')
+    // $('#simpleVoteProgressbar')
+    //   .attr('aria-valuenow', '0')
+    //   .css('width', '0%')
   } catch (e) {
     showError(e.message)
   }
@@ -464,7 +555,8 @@ $('#btnManualMode').click(() => {
 $('#btnVote').click(async e => {
   if (mode === 'simple') {
     e.preventDefault()
-    await signAndSendVote()
+    // await signAndSendVote()
+    await voteOnParty()
     showNextPage()
   }
 })
