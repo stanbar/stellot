@@ -495,27 +495,7 @@ $('#loginWithPz').click(() => {
 
 $('#btnSimpleVote').click(async () => {
   mode = 'simple'
-  // $('#simpleVoteProgressbar').attr('aria-valuenow', '0')
-  try {
-    // await createAccount()
-    // $('#simpleVoteProgressbar')
-    //   .attr('aria-valuenow', '1')
-    //   .css('width', '33%')
-    // await trustIssuer()
-    // $('#simpleVoteProgressbar')
-    //   .attr('aria-valuenow', '2')
-    //   .css('width', '66%')
-    // await issueToken()
-    // $('#simpleVoteProgressbar')
-    //   .attr('aria-valuenow', '3')
-    //   .css('width', '100%')
-    showNextPage()
-    // $('#simpleVoteProgressbar')
-    //   .attr('aria-valuenow', '0')
-    //   .css('width', '0%')
-  } catch (e) {
-    showError(e.message)
-  }
+  showNextPage()
 })
 
 $('#btnManualMode').click(() => {
