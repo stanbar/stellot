@@ -148,33 +148,6 @@ async function loginWithPz() {
   }
 }
 
-async function createAccount() {
-  console.log('createAccount')
-  const keypair = StellarSdk.Keypair.random()
-  $('#secret').val(keypair.secret())
-  $('#vote-secret').val(keypair.secret())
-  $('#account-id').val(keypair.publicKey())
-
-  //TODO show to user, allow managing his account
-
-  const accountId = $('#account-id').val()
-  const userId = $('#userId').text()
-  const request = { accountId, userId }
-  const response = await fetch('/createAccount', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  })
-  if (response.ok) {
-    console.log('Successfully funded account')
-  } else {
-    console.error('Failed to fund account')
-    throw new Error(response.message)
-  }
-}
-
 async function trustIssuer() {
   console.log('trustIssuer')
   const secret = $('#secret').val()
@@ -261,19 +234,14 @@ async function signAndSendVote() {
 }
 
 async function voteOnParty() {
-  console.log('simplifiedPath')
   const keypair = StellarSdk.Keypair.random()
-  console.log('generated keypair')
   $('#secret').val(keypair.secret())
   $('#vote-secret').val(keypair.secret())
   $('#account-id').val(keypair.publicKey())
   const accountId = $('#account-id').val()
   const userId = $('#userId').text()
 
-  //TODO show to user, allow managing his account
-
   const account = await stellar.loadAccount(distributionAccountId)
-  console.log('loaded account')
   const transaction = new StellarSdk.TransactionBuilder(account, {
     fee: 100,
     networkPassphrase: StellarSdk.Networks.TESTNET,
@@ -309,19 +277,18 @@ async function voteOnParty() {
         source: keypair.publicKey(),
         destination: selectedParty.accountId,
         asset: voteToken,
-        amount: '0.0000001',
+        amount: `${1 / 10 ** 7}`,
       }),
     )
     .setTimeout(60) // seconds
     .build()
-  console.log('Build transaction')
 
   transaction.sign(keypair)
-  console.log('signed transaction')
   const txn = transaction.toXDR()
-  console.log('get XDR')
-  const request = { userId, txn }
+  const request = { txn, userId }
 
+  $('#simpleVoteSpinner').removeClass('d-none')
+  $('#btnVote').prop('disabled', true)
   const response = await fetch('/signTx', {
     method: 'POST',
     headers: {
@@ -329,12 +296,14 @@ async function voteOnParty() {
     },
     body: JSON.stringify(request),
   })
+  $('#simpleVoteSpinner').addClass('d-none')
+  $('#btnVote').prop('disabled', false)
 
   if (response.ok) {
     console.log('Successfully funded account')
   } else {
     console.error('Failed to fund account')
-    throw new Error(response.message)
+    throw new Error(await response.text())
   }
 
   const signedTxn = await response.text()
@@ -343,11 +312,13 @@ async function voteOnParty() {
     signedTxn,
     StellarSdk.Networks.TESTNET,
   )
+
   try {
     const res = await stellar.submitTransaction(signedTransaction)
     console.log(res.hash)
   } catch (e) {
     console.error(e)
+    throw new Error(e.message)
   }
 }
 
@@ -554,10 +525,15 @@ $('#btnManualMode').click(() => {
 
 $('#btnVote').click(async e => {
   if (mode === 'simple') {
-    e.preventDefault()
+    e.stopPropagation()
     // await signAndSendVote()
-    await voteOnParty()
-    showNextPage()
+    try {
+      await voteOnParty()
+      showNextPage()
+    } catch (error) {
+      console.error(error)
+      showError(error.message)
+    }
   }
 })
 
