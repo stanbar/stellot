@@ -57,7 +57,7 @@ vote tokenization, but it's enought for this simple election system.
 
 The goal of the system is to provide the highest level of transparency, while
 keeping sensitive data private. Additionaly it should be illegal to issue more
-than one vote token to one person. Thus there should be way of identyfying and
+than one vote token to one person. Hence there should be way of identyfying and
 authorizing voters. I decided to use government authorized polish system "Profil
 Zaufany" as an identification provider, with the assumption that every eligable
 voter is registered there.
@@ -98,7 +98,7 @@ transaction made from distribution account.
 
 ## Vote Token
 
-We assume that the number of eligable voters is public information. Thus
+We assume that the number of eligable voters is public information. Hence
 becoming value of maximum number of tokens in this election. During asset
 creation, issuing account lockout from creating new asset, so we can be sure
 that no more tokens are ever created.
@@ -128,10 +128,16 @@ it should not be considered as system flaw, rather as a feature.
 Our system allow two paths of voting: simplified and manual. In _manual path_,
 user already posses stellar account and want to take control of whole process,
 which involve creating trustline to distribution account and issuing vote token.
-_Simplified path_ create new stellar account, create trustline to distribution
-account and issue token automatically on the user behalf, leaving it with just
-decision what party to vote on. User of such path is completely abstracted from
-technology used underneath, while still leverageing all blockchain benefits.  
+_Simplified path_ create new keypair on frontend side, not releaving private key
+to backend. Backend funds the account with minimum required amount of lumens
+required to process next steps. Next, trustline to distribution account is
+created and vote token issued, everything is done automatically on the user
+behalf, leaving it with just decision what party to vote on. User of such path
+is completely abstracted from technology used underneath, while still
+leverageing all blockchain benefits.
+Simplified path could be enhanced by allowing user to releave his keypair, hence
+allowing him to send his vote token to other user instead of voting by thier
+own.
 
 ## Bootstrapping
 
@@ -155,7 +161,7 @@ In backend those environment variables are injected from `.env` file.
 In fronted we could do simillar using e.g. Webpack DefinePlugin, but for
 simplicity I decided to not use any bundler.
 
-Now we are ready to publish our application. Here, we have another decentralized
+Now the application is ready to be published. Here, we have another decentralized
 solution called IPFS, where we can publish our webpage on P2P network, protecting
 our election system access point from many vector attacks, but this itself if
 topic for separate survey so we will end here. Here is
@@ -169,16 +175,18 @@ blockchain contained, which is often impractical and/or expensive. For
 example one could encode all eligable user addresses (or better hash of
 addresses) in smart contract and then allow redeeming vote token only to
 addresses which are present in there. While this might work for small list of
-adresses, can become overkill for election when we take cost of such huge smart
-contract into account.  
+adresses, can become overkill for election when cost of such huge smart contract
+are taken into account.
 
 ## Demo
 
-Visit
+Demo represent parlament election of 2019. Number of eligable voters equals
+1000. Created token is called VotePLPE2020 (Vote of Polish Parlament Election of
+      2020).
 
-`https://voting.stasbar.com`
+Demo can be accessed on `https://voting.stasbar.com` or locally
 
-## Installation
+## Demo locally
 
 Install
 
