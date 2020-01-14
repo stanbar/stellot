@@ -136,8 +136,9 @@ behalf, leaving it with just decision what party to vote on. User of such path
 is completely abstracted from technology used underneath, while still
 leverageing all blockchain benefits.
 Simplified path could be enhanced by allowing user to releave his keypair, hence
-allowing him to send his vote token to other user instead of voting by thier
-own.
+allowing him to send his vote token to other user, instead of voting by thier
+own, same as on manual path. But just for sake of proposed system, two separate
+paths are available.
 
 ## Bootstrapping
 
