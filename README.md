@@ -201,6 +201,10 @@ Open
 
 `http://localhost:3000`
 
+## Results
+
+Blockchain assumed as disruptive technology, seems 
+
 
 ## Resources
 
