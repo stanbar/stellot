@@ -244,8 +244,8 @@ app.post('/login', (req, res) => {
   return res
     .json({
       userId: crypto
-        .createHash('sha256')
-        .update(login + password)
+        .createHmac('sha256', process.env.ISSUE_SECRET_KEY)
+        .update(login)
         .digest('hex')
         .substring(0, 16),
     })
