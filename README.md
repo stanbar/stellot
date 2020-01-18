@@ -118,7 +118,7 @@ In blockchain world in order to ensure absolute trust, everything should be bloc
 
 ## Demo
 
-Demo represent parlament election of 2019. Number of eligable voters equals 1000. Created token is called VotePLPE2020 (Vote of Polish Parlament Election of 2020).
+Demo represent parlament election of 2019. Number of eligable voters equals 100. Created token is called Vote01122019.
 Demo can be accessed on `https://voting.stasbar.com` or locally
 
 ## Demo locally
