@@ -78,8 +78,6 @@ it should not be considered as system flaw, rather as a feature.
 
 ## Voting paths
 
-// TODO MERGING
-// TODO DOUBLE PUBLISH BECAUSE DISTRUST
 Our system allow two paths of voting: simplified and manual. In _manual path_, user already posses stellar account and want to take control of whole process, which involve [creating trustline](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines) to distribution account and issuing vote token.
 _Simplified path_ create new keypair on frontend side, not releaving private key to backend. Client prepare one [ACID](https://en.wikipedia.org/wiki/ACID) transaction that include five operations: 
 
