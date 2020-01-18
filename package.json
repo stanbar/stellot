@@ -4,9 +4,8 @@
   "description": "Stellar election smart contract ",
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config .",
-    "start-server": "DEBUG=server:* node -r dotenv/config ./bin/www",
-    "issueVoteToken": "node -r dotenv/config issueVoteToken.js"
+    "start": "DEBUG=server:* node -r dotenv/config ./bin/www",
+    "bootstrap": "node -r dotenv/config bootstrap.js"
   },
   "repository": {
     "type": "git",
