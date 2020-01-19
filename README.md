@@ -1,9 +1,7 @@
 # Stellar Voting
 
-Election voting system backed by [stellar blockchain
-network](http://stellar.org/).
+Election voting system backed by [stellar blockchain network](http://stellar.org/).
 
-Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 
 ## Overview
 
@@ -86,6 +84,18 @@ _Simplified path_ create a new keypair on the frontend side, not revealing the p
 The prepared transaction is then signed by a newly created account, send to the issuance/authorization server, which performs validation, sign and send it back to the client webapp. Now both issuance/authorization server and the voter can publish the transaction to the stellar network.
 The user of such path is completely abstracted from technology used underneath, while still leveraging all blockchain benefits. The simplified path could be enhanced by allowing the user to reveal his keypair, hence allowing him to send his vote token to another user, instead of voting on their own, same as on manual path. But just for sake of the proposed system, two separate paths are available.
 
+## Transaction Fees
+
+//TODO
+We assumed that the Stellar network is cheap, and indeed, for date of wirting (19.01.2020) 1XLM costs $0.060508.
+When we combine it with _manual path_, issuer needs to pay 0.00001XLM * 0.229626 zł = 0.00000229626 zł for each vote.
+Due to more complex transaction involved in _simplified path_, issuer needs to pay 0.00006XLM * 0.229626 zł = 0.00001377756 zł for each vote.
+We can state this costs with election frequency in 2019 which was 18 470 710 voters.
+We can estimate that if the [Polish Parlament Election in 2019](https://pl.wikipedia.org/wiki/Wybory_parlamentarne_w_Polsce_w_2019_roku), was handled by
+proposed system, transaction fees only would be equal to   where 18 470 710 = 254,48zł
+would costs $67,06 ~ 256.37zł
+people participated in election
+
 ## Bootstrapping
 
 In order to create such an election, we need an issuer and distribution account, a new vote token, and accounts for all registered parties. Creating issuer and distribution account and creating new token is a multi-step process; well described on official stellar documentation [Issuing
@@ -124,20 +134,27 @@ Install
 
 Start
 
-`npm run start`
-
 Open
 
 `http://localhost:3000`
 
 ## Results
 
-The proposed system prototype satisfies core expectations. Authorities can not falsify election results. There is a limit on how much votes can be issued. Each vote is recorded on Blockchain, and everyone can calculate election results without trusting authorities. What we get is a system where Blockchain is the only subject who needs to be trusted. Both government and electoral can distrust each other, while still perform valid elections (assuming that they trust Blockchain).
-We confirmed that Blockchain can be used not only for cryptocurrencies, but also in assets tokenization, and building dapps (decentralized applications). 
+The proposed system prototype satisfies core expectations. Authorities can not falsify election results.
+There is a limit on how much votes can be issued.
+Each vote is recorded on Blockchain, and everyone can calculate election results without trusting authorities.
+What we get is a system where Blockchain is the only subject who needs to be trusted.
+Both government and electoral can distrust each other, while still perform valid elections (assuming that they trust Blockchain).
+We confirmed that Blockchain can be used not only for cryptocurrencies, but also in assets tokenization and building dapps (decentralized applications).
 Stellar is just one of many platforms that could be used in such cases, but it turns out that it handles it very well.
-It would be advisable to test this system under heavy overload.
+What makes Stellar one of the best option in in this category is transaction fees, were estimated pesimistic (100% simplified path) costs of Polish Parlament Election of 2019 to 254.48zł.
+In order to estimate transaction speed we would need to host local instance of
+Stellar Horizon API server to isolate from network latency and possible queueing overhead on public Horizon instance.
+Doing it would also allow to accuratly measure how proposed system behaves on
+heavy overload.
 
 
 ## Resources
 
-- [Source Code](https://github.com/stasbar/stellar-voting)
+- live demo [voting.stasbar.com](https://voting.stasbar.com/)
+- [source code](https://github.com/stasbar/stellar-voting)
