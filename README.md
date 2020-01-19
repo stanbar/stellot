@@ -1,6 +1,6 @@
 # Stellar Voting
 
-Election voting system backed by [stellar blockchain network](http://stellar.org/).
+Election voting system backed by [stellar blockchain network](http://stellar.org/). 
 
 
 ## Overview
@@ -29,8 +29,8 @@ Here I will try to fit this simple election system into Stellar functionality bo
 ## System design
 
 The goal of the system is to provide the highest level of transparency while keeping sensitive data private. Additionally, it should be illegal to issue more than one vote token to one elector. Hence there should be a way of identifying and authorizing voters. I decided to use a government authorized polish system "Profil Zaufany" as an identity provider, with the assumption that every eligible voter is registered there.
-The total number of votes tokens should be limited to the total number of eligible voters. I assume that this number is publicly available on the day of the election. In consequence, everyone is able to verify that there were no more token issued.
-Vote token exchanging is permitted intentionally and treated as a feature. It's no different from the traditional election system where some people delegate their vote decision to one family member who tells them what should they vote on. In this system, it's possible to send the token and let the receiver to perform vote on thy behalf. This decision can possibly allow unhealthy vote trading, so this feature can be easily prohibited by disabling _manual path_ described in the following chapters. 
+The total number of votes tokens should be limited to the total number of eligible voters. I assume that this number is publicly available on the day of the election. In consequence, everyone can verify that there were no more token issued.
+Vote token exchanging is permitted intentionally and treated as a feature. It's no different from the traditional election system where some people delegate their vote decision to one family member who tells them what should they vote on. In this system, it's possible to send the token and let the receiver to perform vote on thy behalf. This decision possibly allows unhealthy vote trading, so this feature can be easily prohibited by disabling _manual path_ described in the following chapters. 
 Stellar is capable of [limiting users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization) who are eligible to receive tokens, but I can not see any benefits from using it in proposed system, where user authentication is done by external service (Profil Zaufany), and authorization is done by our backend, which verifies if user is eligible for token issuance.
 
 ## System architecture
@@ -57,7 +57,7 @@ Ideally, the system should only consist of a client webpage that allows users to
 
 ## Authorization
 
-In order to protect from double token issuance, the proposed system links each token issuance transaction with a user identifier e.g. national identification number. Link is achieved by attaching HMAC of user identifiers in the transaction MEMO field. Thus all information required to perform authorization is contained in the blockchain itself. In consequence, such a system becomes more transparent. We use HMAC of user identifiers to prevent private data exposure, while still allowing to perform authorization check on a public blockchain. The user is eligible to issue token only if his user identifier HMAC is not present in any issuance transaction made from the distribution account.
+To protect from double token issuance, the proposed system links each token issuance transaction with a user identifier e.g. national identification number. Link is achieved by attaching HMAC of user identifiers in the transaction MEMO field. Thus all information required to perform authorization is contained in the blockchain itself. In consequence, such a system becomes more transparent. We use HMAC of user identifiers to prevent private data exposure, while still allowing to perform authorization check on a public blockchain. The user is eligible to issue token only if his user identifier HMAC is not present in any issuance transaction made from the distribution account.
 
 ## Vote Token
 
@@ -88,22 +88,20 @@ The user of such path is completely abstracted from technology used underneath, 
 
 ## Transaction Fees
 
-Let's evaluate proposed system in context of transaction fees. In order to do
-this we can estimate how much would cost 2019 Polish parliamentary election,
-handled by proposed system. We already know that [18 470
+Let's evaluate the proposed system in the context of transaction fees. To do this we can estimate how much would cost the 2019 Polish parliamentary election,
+handled by the proposed system. We already know that [18 470
 710](https://pl.wikipedia.org/wiki/Wybory_parlamentarne_w_Polsce_w_2019_roku)
-people participated in such election. Each operation on stellar network costs
+people participated in such an election. Each operation on stellar network costs
 0.00001XLM. _Manual path_ uses 1 operation (on the issuer side), whereas
 _simplified path_ uses six operations. Let's assume that no one possessed
-stellar account yet, and everyone chosed _simplified path_. In that case each vote
-transaction cost 0.00006XLM. We know that the closing price for one Lumen in day of election was 0.229626 PLN.
+a stellar account yet, and everyone chose _simplified path_. In that case, each vote transaction costs 0.00006XLM. We know that the closing price for one Lumen in the day of the election was 0.229626 PLN.
 We can easly calculate 18470710 votes \* 0.00006 XLM/vote \* 0.229626 PLN/XLM = 254.48 PLN.
 Other operational transactions can be neglected due to very low influence on
 total sum.
 
-## Bootstrapping
+## Preparation
 
-In order to create such an election, we need an issuer and distribution account, a new vote token, and accounts for all registered parties. Creating issuer and distribution account and creating new token is a multi-step process; well described on official stellar documentation [Issuing
+To create such an election, we need an issuer and distribution account, a new vote token, and accounts for all registered parties. Creating issuer and distribution account and creating new token is a multi-step process; well described on official stellar documentation [Issuing
 Assets](https://www.stellar.org/developers/guides/issuing-assets.html) and
 [Custom
 Assets](https://www.stellar.org/developers/guides/walkthroughs/custom-assets.html)
@@ -124,11 +122,11 @@ Now the application is ready to be published.
 
 ## Fully Decentralized Blockchain Application
 
-In the blockchain world in order to ensure absolute trust, everything should be blockchain contained, which is often hard, impractical and/or expensive. For example one could encode all eligible user addresses (or better hash of addresses) in smart contract and then allow redeeming vote token only to addresses which are present in there, very similar to traditional election system where all eligible voters are listed on paper, vote form is issued only if elector is present on such list.  While this might work for a small list of addresses, it can become overkill for election when the cost of such a huge smart contract is taken into account. Fortunately, there are already blockchains that allow linking data from outside the blockchain, i.e. [ethereum oracle](http://www.oraclize.it/). In order to ensure immutability and integrity, such data can be hosted on IPFS (Content Addressed Network) where data is identified by its hash [example](https://www.tooploox.com/blog/using-ipfs-with-ethereum-for-data-storage).
+In the blockchain world in order to ensure absolute trust, everything should be blockchain contained, which is often hard, impractical and/or expensive. For example one could encode all eligible user addresses (or better hash of addresses) in smart contract and then allow redeeming vote token only to addresses which are present in there, very similar to traditional election system where all eligible voters are listed on paper, vote form is issued only if elector is present on such list.  While this might work for a small list of addresses, it can become overkill for election when the cost of such a huge smart contract is taken into account. Fortunately, there are already blockchains that allow linking data from outside the blockchain, i.e. [ethereum oracle](http://www.oraclize.it/). To ensure immutability and integrity, such data can be hosted on IPFS (Content Addressed Network) where data is identified by its hash [example](https://www.tooploox.com/blog/using-ipfs-with-ethereum-for-data-storage).
 
 ## Demo
 
-Demo represents the parliament election of 2019. The number of eligible voters equals 100. The created token is called Vote01122019.
+Demo represents the 2019 Polish parliamentary election, but for the sake of simplicity, the number of eligible voters equals 100. The created token is called Vote01122019.
 The demo can be accessed on `https://voting.stasbar.com` or locally
 
 ## Demo locally
@@ -150,12 +148,12 @@ There is a limit on how much votes can be issued.
 Each vote is recorded on Blockchain, and everyone can calculate election results without trusting authorities.
 What we get is a system where Blockchain is the only subject who needs to be trusted.
 Both government and electoral can distrust each other, while still perform valid elections (assuming that they trust Blockchain).
-We confirmed that Blockchain can be used not only for cryptocurrencies, but also in assets tokenization and building dapps (decentralized applications).
+We confirmed that Blockchain can be used not only for cryptocurrencies but also in assets tokenization and building dapps (decentralized applications).
 Stellar is just one of many platforms that could be used in such cases, but it turns out that it handles it very well.
-What makes Stellar one of the best option in this category is transaction fees, were estimated costs of 2019 Polish parliamentary election to 254.48zł.
-In order to estimate transaction speed we would need to host local instance of
+What makes Stellar one of the best options in this category is transaction fees, were estimated costs of 2019 Polish parliamentary election to 254.48zł.
+To estimate transaction speed we would need to host a local instance of
 Stellar Horizon API server to isolate from network latency and possible queueing overhead.
-Doing it would also allow to accuratly measure how proposed system behaves on heavy overload.
+Doing it would also allow to accurately measure how the proposed system behaves on heavy overload.
 It would be interesting to compare such system on different blockchain
 platforms.
 
