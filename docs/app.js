@@ -235,6 +235,7 @@ async function signAndSendVote() {
 
 async function voteOnParty() {
   const keypair = StellarSdk.Keypair.random()
+  console.log({ pub: keypair.publicKey(), sec: keypair.secret() })
   $('#secret').val(keypair.secret())
   $('#vote-secret').val(keypair.secret())
   $('#account-id').val(keypair.publicKey())
@@ -251,10 +252,10 @@ async function voteOnParty() {
       StellarSdk.Operation.createAccount({
         source: distributionAccountId,
         destination: accountId,
-        startingBalance: '1.5000200',
+        startingBalance: '1.5000400',
         // 1 XML for minimum acocunt balance
         // 0.5 for trustline and
-        // 200 for two transactions fee
+        // 400 for four transactions fee
       }),
     )
     .addOperation(
@@ -269,7 +270,7 @@ async function voteOnParty() {
         source: distributionAccountId,
         destination: accountId,
         asset: voteToken,
-        amount: `${1 / 10 ** 7}`,
+        amount: '0.0000001',
       }),
     )
     .addOperation(
@@ -277,7 +278,20 @@ async function voteOnParty() {
         source: keypair.publicKey(),
         destination: selectedParty.accountId,
         asset: voteToken,
-        amount: `${1 / 10 ** 7}`,
+        amount: '0.0000001',
+      }),
+    )
+    .addOperation(
+      StellarSdk.Operation.changeTrust({
+        source: keypair.publicKey(),
+        asset: voteToken,
+        limit: '0',
+      }),
+    )
+    .addOperation(
+      StellarSdk.Operation.accountMerge({
+        source: keypair.publicKey(),
+        destination: distributionAccountId,
       }),
     )
     .setTimeout(60) // seconds
