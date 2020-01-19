@@ -7,34 +7,32 @@ Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 
 ## Overview
 
-Blockchain as a technology provides two major properties that are highly desirable in applications like election voting. Those properties are: _immutability_ which ensures that noone can modify the data once wrote into blockchain, there might be concerns if this property is trully desirable for everyone, but I assume this system is designed for healthly subjects. Another property is _transparency_ that allow everyone validate the election correctness and calculate results by it's own.
-In consequences one can distrust authorities, while trust voting
-results.
+Blockchain as a technology provides two major benefits that are highly useful in applications like election voting. These are: _immutability_ which ensures that no one can modify the data once written into the blockchain. There might be concerns if this property is truly useful for everyone but I assume that this system is designed for **what** subjects. Another property is _transparency_ that allows everyone to validate the election validity and calculate the results by their own. As a consequence, one does not need to rely on the authorities and validate the results. 
 
 ## Introduction
 
-Blockchain initialy introduced by Satoshi Nakamoto in [Bitcoin
-Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application, i.e. ledger for transfering Bitcoin cryptocurrency. 5 years later Vitalik Buterin [proposed](https://bitcointalk.org/index.php?topic=428589.0) generalization to this concept by allowing to process not only transactions, but also so called _smart contracts_ which are in fact scripts run on ethereum platform. Those "scripts" are executed and validated by all ethereum node, and use blockchain as a persistant storage. This innovation allowed to create domain specific behaviour on top of ethereum blockchain, levereging already existing infrastructure.
+Blockchain initially introduced by Satoshi Nakamoto in [Bitcoin
+Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application, i.e. a ledger for transferring Bitcoin cryptocurrency. 5 years later Vitalik Buterin [proposed](https://bitcointalk.org/index.php?topic=428589.0) a generalization to this concept by allowing to process not only transactions, but also so called _smart contracts_ which are in fact scripts that are run on the Ethereum platform. Those "scripts" are executed and validated by all the ethereum nodes, and use blockchain as a persistent storage. This innovation allowed to create domain specific behaviour on top of the ethereum blockchain, utilizing already existing infrastructure.
 
 ## Tokens
 
 Currently the most popular application of smart contract is token
-issuance. Those tokens can represent any arbitrary asset either in virtual or physical world. One can create tokens for funding his startup; hence token represent company shares. This pattern is called ICO (Initial Coin Offering) or STO (Security Token Offering), alluding to IPO (Initial Public Offering).
-Another one can issue tokens backed by physical asset like national currency; bypassing slow and expensive international transfers and taxes from exchanging cryptocurrencies with national currencies. This pattern is called Stable Coin.
-There are many other token applications particulary _vote as a token_ used here in this survey.
+issuance. Those tokens can represent any arbitrary asset either in virtual or physical world. One can create tokens to fund their startup; hence the tokens can represent company shares. This pattern is called ICO (Initial Coin Offering) or STO (Security Token Offering), alluding to IPO (Initial Public Offering).
+Another one can issue tokens backed by physical assets like national currency; bypassing slow and expensive international transfers and taxes from exchanging cryptocurrencies with national currencies. This pattern is called Stable Coin.
+There are many other token applications, particulary _vote as a token_ used in this project.
 
 ## Stellar platform
 
-Ethereum provide high flexibility, mainly because it's fully fledged smart contracts ecosystem, particulary it's turing-complete Solidity language.
-[Stellar](https://www.stellar.org/) on the other hand is blockchain platform specializing just in one application that is asset tokenization. Thus becoming easier, cheaper and faster than general purpose ethereum smart contracts.
-Here I will try to fit this simple election system into Stellar functionality boundaries.
+Ethereum provides high flexibility, mainly because it is fully fledged smart contracts ecosystem and uses turing-complete Solidity language.
+[Stellar](https://www.stellar.org/) on the other hand is a blockchain platform specializing in just one application that is asset tokenization. Thus becoming easier, cheaper and faster than general purpose ethereum smart contracts.
+Here I will try to fit this simple election system into the Stellar functionality boundaries.
 
 ## System design
 
-The goal of the system is to provide the highest level of transparency, while keeping sensitive data private. Additionaly it should be illegal to issue more than one vote token to one elector. Hence there should be way of identyfying and authorizing voters. I decided to use government authorized polish system "Profil Zaufany" as an identification provider, with the assumption that every eligable voter is registered there.
-The total number of vote tokens should be limited to total number of eligable voters. I assume that this number is publictly available in the day of election. In consequences everyone is able to verify that there were no more token issued.
-Vote token exchanging is permited intentionally, and treated as a feature. It's no different from traditional election system where some people deleage thier vote decision to one family member who tell them what should they vote on. In this system it's possible to send the token and let the receiver to perform vote on thy behalf. This decision can possible allow unhealthly vote trading, so this feature can be easly prohibited by disabling _manual path_ described in following chapters. 
-Stellar is capable of [limiting users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization) who are eligable to receive tokens, but I can not see any benefits from using it in proposed system, where user authentication is done by external service (Profil Zaufany), and authorization is done by our backend, which verify if user is eligable for token issuance.
+The goal of the system is to provide the highest level of transparency, while keeping sensitive data private. Additionaly it should be illegal to issue more than one vote token by one elector. Hence there should be way of identyfying and authorizing voters. I decided to use government authorized Polish system "Profil Zaufany" (Trusted Profile) as an identification provider, with the assumption that every eligible voter is registered there.
+The total number of vote tokens should be limited to total number of eligible voters. I assume that this number is publicly available during the day of the election. In consequence everyone is able to verify that there were no more tokens issued.
+Vote token exchanging is permitted intentionally and treated as a feature. It is no different from the traditional election system where some people delegate thier voting process to one family member. In this system it is possible to send the token and let the receiver to perform voting on their behalf. This decision allows potential undesired vote trading, so this feature can be easly prohibited by disabling _manual path_ described in the following chapters. 
+Stellar is capable of [limiting users](https://www.stellar.org/developers/guides/issuing-assets.html#requiring-or-revoking-authorization) who are eligible to receive tokens, but I can not see any benefits from using it in the proposed system, where user authentication is done by an external service (Profil Zaufany) and authorization is done by our backend, which verifies if user is eligible for token issuance.
 
 ## System architecture
 
