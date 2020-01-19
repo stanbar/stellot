@@ -7,7 +7,7 @@ Live demo: [voting.stasbar.com](https://voting.stasbar.com/)
 
 ## Overview
 
-Blockchain as a technology provide two major properties that are highly desirable in applications like election voting. Those properties are: _immutability_ which ensures that noone can modify the data once wrote into blockchain, there might be concerns if this property is trully desirable for everyone, but I assume this system is designed for healthly subjects. Another property is _transparency_ that allow everyone validate the election correctness and calculate results by it's own.
+Blockchain as a technology provides two major properties that are highly desirable in applications like election voting. Those properties are: _immutability_ which ensures that noone can modify the data once wrote into blockchain, there might be concerns if this property is trully desirable for everyone, but I assume this system is designed for healthly subjects. Another property is _transparency_ that allow everyone validate the election correctness and calculate results by it's own.
 In consequences one can distrust authorities, while trust voting
 results.
 
@@ -59,7 +59,7 @@ Ideally the system should only consist of client webpage that allows users to in
 
 ## Authorization
 
-In order to protect from double token issuance, proposed system link each token issuance transaction with user identifier e.g. national identification number. Link is achieved by attaching HMAC of user identifier in transaction MEMO field. Thus all informations required to perform authorization are contained in blockchain itself. In consequence, such system become more transparent. We use HMAC of user identifier to prevent private data exposure, while still allowing to perform authorization check on public blockchain. User is eligable to issue token only if his user identifier hmac is not present in any issuance transaction made from distribution account.
+In order to protect from double token issuance, proposed system link each token issuance transaction with user identifier e.g. national identification number. Link is achieved by attaching HMAC of user identifier in transaction MEMO field. Thus all informations required to perform authorization are contained in blockchain itself. In consequence, such system become more transparent. We use HMAC of user identifier to prevent private data exposure, while still allowing to perform authorization check on public blockchain. User is eligable to issue token only if his user identifier HMAC is not present in any issuance transaction made from distribution account.
 
 ## Vote Token
 
@@ -71,10 +71,7 @@ Assets in stellar blockchain, are divisible to 7 decimal points. This is unwante
 
 ## Token distribution
 
-Each user who authenticate itself by Profil Zaufany and authorize by our issuance/authorization server will be able to issue 1 _voting token_ (seen by user as 0.0000001). One can do with this token whatever he want, ideally vote for one of eligible parties, but
-nothing prevent him for transfering this token to any other account, such as
-family member. Since it already happends in current traditional voting system,
-it should not be considered as system flaw, rather as a feature.
+Each user who authenticate itself by Profil Zaufany and authorize by our issuance/authorization server will be able to issue 1 _voting token_ (seen by user as 0.0000001). One can do with this token whatever he want, ideally vote for one of eligible parties, but nothing prevent him for transfering this token to any other account, such as family member. Since it already happends in current traditional voting system, it should not be considered as system flaw, rather as a feature.
 
 ## Voting paths
 
@@ -87,6 +84,7 @@ _Simplified path_ create new keypair on frontend side, not releaving private key
 4. [Send](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#payment) 1 _vote token_ from newly created account to one of chosen parties.
 5. [Merge](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#account-merge) newly created account to distribution account, bringing back remained XLM.
 
+Prepared trasaction is then signed by newly created account, send to issuance/authorization server, which perform validation, sign and send it back to client webapp. Now both issuance/authorization server and voter can publish the transaction to stellar network.
 User of such path is completely abstracted from technology used underneath, while still leverageing all blockchain benefits. Simplified path could be enhanced by allowing user to releave his keypair, hence allowing him to send his vote token to other user, instead of voting by thier own, same as on manual path. But just for sake of proposed system, two separate paths are available.
 
 ## Bootstrapping

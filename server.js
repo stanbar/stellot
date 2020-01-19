@@ -25,6 +25,16 @@ const voteToken = new StellarSdk.Asset(
   process.env.ISSUE_PUBLIC_KEY,
 )
 
+function validateMergeOp(transaction) {
+  const expectedMergeAccount = transaction.operations[4]
+  if (expectedMergeAccount.type !== 'account_merge') {
+    throw new Error(
+      `operation[4] type is ${expectedMergeAccount.type} but should be account_merge`,
+    )
+  }
+  // TODO check source address
+  // TODO check destination address
+}
 function validateVoteOp(transaction) {
   const expectedVote = transaction.operations[3]
   if (expectedVote.type !== 'payment') {
@@ -97,15 +107,16 @@ function validateCreateAccountOp(transaction) {
       `operation[0] type is ${expectedCreateAccount.type} but should be createAccount`,
     )
   }
-  if (expectedCreateAccount.startingBalance !== '1.5000200') {
+  if (expectedCreateAccount.startingBalance !== '1.5000400') {
     // 1 XML for minimum acocunt balance
     // 0.5 for trustline and
-    // 200 for two transactions fee
+    // 400 for four transactions fee
     throw new Error(
-      `operation[0] startingBalance is ${expectedCreateAccount.startingBalance} but should be  1.5000200`,
+      `operation[0] startingBalance is ${expectedCreateAccount.startingBalance} but should be  1.5000400`,
     )
   }
 }
+
 function validateTransaction(txn, userId) {
   const transaction = new StellarSdk.Transaction(
     txn,
@@ -124,15 +135,16 @@ function validateTransaction(txn, userId) {
       )} doesn't equal userId: ${userId}`,
     )
   }
-  if (transaction.operations.length !== 4) {
-    throw new Error(
-      `transaction.operations.length: ${transaction.operations.length} doesnt equal 4`,
-    )
-  }
+  // if (transaction.operations.length !== 5) {
+  //   throw new Error(
+  //     `transaction.operations.length: ${transaction.operations.length} doesnt equal 5`,
+  //   )
+  // }
   validateCreateAccountOp(transaction)
   validateChangeTrustOp(transaction)
   validateIssueTokenOp(transaction)
   validateVoteOp(transaction)
+  // validateMergeOp(transaction)
 }
 
 function signTransaction(txn) {
