@@ -80,22 +80,26 @@ _Simplified path_ create a new keypair on the frontend side, not revealing the p
 2. [Create trustline](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#change-trust) to _vote token_ asset issuer.
 3. [Send](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#payment) 1 _vote token_ from distribution account to newly created account.
 4. [Send](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#payment) 1 _vote token_ from newly created account to one of the chosen parties.
-5. [Merge](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#account-merge) newly created account to distribution account, bringing back remained XLM.
+5. [Distrust](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#change-trust) from _vote token_ asset issuer in order to merge account.
+6. [Merge](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#account-merge) newly created account to distribution account, bringing back remained XLM.
 
 The prepared transaction is then signed by a newly created account, send to the issuance/authorization server, which performs validation, sign and send it back to the client webapp. Now both issuance/authorization server and the voter can publish the transaction to the stellar network.
 The user of such path is completely abstracted from technology used underneath, while still leveraging all blockchain benefits. The simplified path could be enhanced by allowing the user to reveal his keypair, hence allowing him to send his vote token to another user, instead of voting on their own, same as on manual path. But just for sake of the proposed system, two separate paths are available.
 
 ## Transaction Fees
 
-//TODO
-We assumed that the Stellar network is cheap, and indeed, for date of wirting (19.01.2020) 1XLM costs $0.060508.
-When we combine it with _manual path_, issuer needs to pay 0.00001XLM * 0.229626 zł = 0.00000229626 zł for each vote.
-Due to more complex transaction involved in _simplified path_, issuer needs to pay 0.00006XLM * 0.229626 zł = 0.00001377756 zł for each vote.
-We can state this costs with election frequency in 2019 which was 18 470 710 voters.
-We can estimate that if the [Polish Parlament Election in 2019](https://pl.wikipedia.org/wiki/Wybory_parlamentarne_w_Polsce_w_2019_roku), was handled by
-proposed system, transaction fees only would be equal to   where 18 470 710 = 254,48zł
-would costs $67,06 ~ 256.37zł
-people participated in election
+Let's evaluate proposed system in context of transaction fees. In order to do
+this we can estimate how much would cost 2019 Polish parliamentary election,
+handled by proposed system. We already know that [18 470
+710](https://pl.wikipedia.org/wiki/Wybory_parlamentarne_w_Polsce_w_2019_roku)
+people participated in such election. Each operation on stellar network costs
+0.00001XLM. _Manual path_ uses 1 operation (on the issuer side), whereas
+_simplified path_ uses six operations. Let's assume that no one possessed
+stellar account yet, and everyone chosed _simplified path_. In that case each vote
+transaction cost 0.00006XLM. We know that the closing price for one Lumen in day of election was 0.229626 PLN.
+We can easly calculate 18470710 votes \* 0.00006 XLM/vote \* 0.229626 PLN/XLM = 254.48 PLN.
+Other operational transactions can be neglected due to very low influence on
+total sum.
 
 ## Bootstrapping
 
@@ -148,11 +152,12 @@ What we get is a system where Blockchain is the only subject who needs to be tru
 Both government and electoral can distrust each other, while still perform valid elections (assuming that they trust Blockchain).
 We confirmed that Blockchain can be used not only for cryptocurrencies, but also in assets tokenization and building dapps (decentralized applications).
 Stellar is just one of many platforms that could be used in such cases, but it turns out that it handles it very well.
-What makes Stellar one of the best option in in this category is transaction fees, were estimated pesimistic (100% simplified path) costs of Polish Parlament Election of 2019 to 254.48zł.
+What makes Stellar one of the best option in this category is transaction fees, were estimated costs of 2019 Polish parliamentary election to 254.48zł.
 In order to estimate transaction speed we would need to host local instance of
-Stellar Horizon API server to isolate from network latency and possible queueing overhead on public Horizon instance.
-Doing it would also allow to accuratly measure how proposed system behaves on
-heavy overload.
+Stellar Horizon API server to isolate from network latency and possible queueing overhead.
+Doing it would also allow to accuratly measure how proposed system behaves on heavy overload.
+It would be interesting to compare such system on different blockchain
+platforms.
 
 
 ## Resources
