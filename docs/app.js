@@ -252,9 +252,9 @@ async function voteOnParty() {
       StellarSdk.Operation.createAccount({
         source: distributionAccountId,
         destination: accountId,
-        startingBalance: '1.5000400',
+        startingBalance: '1.5000000',
         // 1 XML for minimum acocunt balance
-        // 0.5 for trustline and
+        // 0.5 for trustline
         // 400 for four transactions fee
       }),
     )
@@ -285,13 +285,15 @@ async function voteOnParty() {
       StellarSdk.Operation.changeTrust({
         source: keypair.publicKey(),
         asset: voteToken,
-        limit: '0',
+        limit: '0.0000000',
       }),
     )
     .addOperation(
-      StellarSdk.Operation.accountMerge({
+      StellarSdk.Operation.payment({
         source: keypair.publicKey(),
         destination: distributionAccountId,
+        asset: StellarSdk.Asset.native(),
+        amount: '0.5000000',
       }),
     )
     .setTimeout(60) // seconds

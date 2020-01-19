@@ -107,12 +107,11 @@ function validateCreateAccountOp(transaction) {
       `operation[0] type is ${expectedCreateAccount.type} but should be createAccount`,
     )
   }
-  if (expectedCreateAccount.startingBalance !== '1.5000400') {
+  if (expectedCreateAccount.startingBalance !== '1.5000000') {
     // 1 XML for minimum acocunt balance
     // 0.5 for trustline and
-    // 400 for four transactions fee
     throw new Error(
-      `operation[0] startingBalance is ${expectedCreateAccount.startingBalance} but should be  1.5000400`,
+      `operation[0] startingBalance is ${expectedCreateAccount.startingBalance} but should be  1.5000000`,
     )
   }
 }
