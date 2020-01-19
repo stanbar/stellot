@@ -78,7 +78,7 @@ Each user who authenticate itself by Profil Zaufany and authorize by our issuanc
 Our system allow two paths of voting: simplified and manual. In _manual path_, user already posses stellar account and want to take control of whole process, which involve [creating trustline](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines) to distribution account and issuing vote token.
 _Simplified path_ create new keypair on frontend side, not releaving private key to backend. Client prepare one [ACID](https://en.wikipedia.org/wiki/ACID) transaction that include five operations: 
 
-1. [Fund newly created account](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#create-account) with minimum required amount of lumens to process next operations. 1 XLM (cryptocurrency used in stellar blockchain) for minimum acocunt balance, 0.5 XLM for creating trustline and 0.0000200XLM for transactions fee.
+1. [Fund newly created account](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#create-account) with minimum required amount of lumens to process next operations. 1 XLM (cryptocurrency used in stellar blockchain) for minimum acocunt balance, 0.5 XLM for creating trustline.
 2. [Create trustline](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#change-trust) to _vote token_ asset issuer.
 3. [Send](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#payment) 1 _vote token_ from distribution account to newly created account.
 4. [Send](https://www.stellar.org/developers/learn/concepts/list-of-operations.html#payment) 1 _vote token_ from newly created account to one of chosen parties.
