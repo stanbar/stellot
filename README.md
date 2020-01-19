@@ -5,7 +5,7 @@ Election voting system backed by [stellar blockchain network](http://stellar.org
 
 ## Overview
 
-Blockchain as technology provides two major properties that are highly desirable in applications like election voting. Those properties are _immutability_ which ensures that no one can modify the data once wrote into a blockchain, there might be concerns if this property is truly desirable for everyone, but I assume this system is designed for healthy subjects. Another property is _transparency_ that allows everyone to validates the election correctness and calculate results on its own.
+Blockchain as a technology provides two major properties that are highly desirable in applications like election voting. Those properties are _immutability_ which ensures that no one can modify the data once wrote into a blockchain, there might be concerns if this property is truly desirable for everyone, but I assume this system is designed for healthy subjects. Another property is _transparency_ that allows everyone to validates the election correctness and calculate results on its own.
 In consequences, one can distrust authorities, while trust voting
 results.
 
@@ -41,15 +41,16 @@ Stellar is capable of [limiting users](https://www.stellar.org/developers/guides
        |                +--------+------+        |
        |                         |               |
 +------v----------+              |               |
-| Identity        |              |             +-v-------+
-| Provider        |              |             | Stellar |
-| (Profil Zaufany)|              |             | Network |
-+------+----------+              |             +-^-------+
+| Identity        |              |            +--+---------+   +-v-------+
+| Provider        |              |            | Stellar    +---> Stellar |
+| (Profil Zaufany)|              |            | Horizon API|   | Network |
++------+----------+              |            +--+---------+   +-^-------+
        |            +------------v-----------+   |
        |            | Issuance/Authorization |   |
        +------------+        Server          +---+
                     |                        |
                     +------------------------+
+
 ```
 
 Ideally, the system should only consist of a client webpage that allows users to interact with the Stellar network, getting rid of the centralized identity provider and issuance/authorization server. Unfortunately proposed system requires a central authorization server for _vote token_ issuance, thus becoming a single point of failure. This flaw has been addressed at the end of this survey. There are also many proposals on how to achieve identification in the blockchain ecosystem, but I won't use it in this survey.
