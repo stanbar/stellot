@@ -285,7 +285,7 @@ async function voteOnParty() {
       StellarSdk.Operation.changeTrust({
         source: keypair.publicKey(),
         asset: voteToken,
-        limit: '0.0000000',
+        limit: '0',
       }),
     )
     .addOperation(
@@ -293,7 +293,7 @@ async function voteOnParty() {
         source: keypair.publicKey(),
         destination: distributionAccountId,
         asset: StellarSdk.Asset.native(),
-        amount: '0.5000000',
+        amount: '0.5',
       }),
     )
     .setTimeout(60) // seconds

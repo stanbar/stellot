@@ -26,15 +26,47 @@ const voteToken = new StellarSdk.Asset(
 )
 
 function validateMergeOp(transaction) {
-  const expectedMergeAccount = transaction.operations[4]
-  if (expectedMergeAccount.type !== 'account_merge') {
+  const expectedSendBack = transaction.operations[5]
+  if (expectedSendBack.type !== 'payment') {
     throw new Error(
-      `operation[4] type is ${expectedMergeAccount.type} but should be account_merge`,
+      `operation[5] type is ${expectedSendBack.type} but should be payment`,
     )
   }
-  // TODO check source address
-  // TODO check destination address
+  if (expectedSendBack.asset.code !== StellarSdk.Asset.native().code) {
+    throw new Error(
+      `operation[5] code is ${expectedSendBack.asset.code} but should be ${
+        StellarSdk.Asset.native().code
+      }`,
+    )
+  }
+  if (expectedSendBack.destination !== distributionKeypair.publicKey()) {
+    throw new Error(
+      `operation[5] destination is ${
+        expectedSendBack.destination
+      } but should be ${distributionKeypair.publicKey()}`,
+    )
+  }
 }
+
+function validateDistrustOp(transaction) {
+  const expectedChangeTrust = transaction.operations[4]
+  if (expectedChangeTrust.type !== 'changeTrust') {
+    throw new Error(
+      `operation[1] type is ${expectedChangeTrust.type} but should be changeTrust`,
+    )
+  }
+  if (expectedChangeTrust.line.issuer !== voteToken.issuer) {
+    throw new Error(
+      `operation[1] issuer is ${expectedChangeTrust.line.issuer} but should be ${voteToken.issuer}`,
+    )
+  }
+  if (expectedChangeTrust.line.code !== voteToken.code) {
+    throw new Error(
+      `operation[1] line code is ${expectedChangeTrust.line.code} but should be ${voteToken.code}`,
+    )
+  }
+}
+
 function validateVoteOp(transaction) {
   const expectedVote = transaction.operations[3]
   if (expectedVote.type !== 'payment') {
@@ -134,16 +166,17 @@ function validateTransaction(txn, userId) {
       )} doesn't equal userId: ${userId}`,
     )
   }
-  // if (transaction.operations.length !== 5) {
-  //   throw new Error(
-  //     `transaction.operations.length: ${transaction.operations.length} doesnt equal 5`,
-  //   )
-  // }
+  if (transaction.operations.length !== 6) {
+    throw new Error(
+      `transaction.operations.length: ${transaction.operations.length} doesnt equal 6`,
+    )
+  }
   validateCreateAccountOp(transaction)
   validateChangeTrustOp(transaction)
   validateIssueTokenOp(transaction)
   validateVoteOp(transaction)
-  // validateMergeOp(transaction)
+  validateDistrustOp(transaction)
+  validateMergeOp(transaction)
 }
 
 function signTransaction(txn) {
