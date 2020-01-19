@@ -1,0 +1,9 @@
+version: '2'
+services:
+  web:
+    container_name: "stellar-voting-authorization-server"
+    build: .
+    env_file: ".env"
+    ports:
+      - "${PORT}:${PORT}"
+    restart: 'unless-stopped'
