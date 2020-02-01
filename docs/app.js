@@ -79,11 +79,11 @@ async function fetchAccountTokenBalance(accountId) {
       aBalance.asset_issuer === voteToken.issuer,
   )
 
-  console.log(`found balance ${balance.balance} on accountId ${accountId}`)
-
   if (balance) {
+    console.log(`found balance ${balance.balance} on accountId ${accountId}`)
     return Math.round(balance.balance * 10 ** 7)
   }
+  console.log(`not found balance on accountId: ${accountId}`)
   return undefined
 }
 
