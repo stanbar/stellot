@@ -32,6 +32,7 @@
     "express": "~4.16.1",
     "morgan": "~1.9.1",
     "prettier": "^1.19.1",
+    "request": "^2.88.0",
     "stellar-sdk": "^3.3.0"
   },
   "devDependencies": {
