@@ -12,7 +12,7 @@ results.
 
 ## Introduction
 
-Blockchain initially introduced by Satoshi Nakamoto in [Bitcoin Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application, i.e. ledger for transferring Bitcoin cryptocurrency. 5 years later Vitalik Buterin [proposed](https://bitcointalk.org/index.php?topic=428589.0) generalization to this concept by allowing to process not only transactions but also so-called _smart contracts_ which are in fact scripts run on Ethereum platform. Those "scripts" are executed and validated by all Ethereum nodes and use blockchain as persistent storage. This innovation allowed to create domain-specific behavior on top of Ethereum blockchain, leveraging already existing infrastructure.
+Blockchain initially introduced by Satoshi Nakamoto in [Bitcoin Whitepaper](https://bitcoin.org/bitcoin.pdf) offered one simple application, i.e. ledger for transferring Bitcoin cryptocurrency. 4 years later Vitalik Buterin [proposed](https://bitcointalk.org/index.php?topic=428589.0) generalization to this concept by allowing to process not only transactions but also so-called _smart contracts_ which are in fact scripts run on Ethereum platform. Those "scripts" are executed and validated by all Ethereum nodes and use blockchain as persistent storage. This innovation allowed to create domain-specific behavior on top of Ethereum blockchain, leveraging already existing infrastructure.
 
 ## Tokens
 
