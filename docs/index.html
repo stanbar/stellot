@@ -7,10 +7,11 @@
     <meta name="description" content="Voting system build on stellar network" />
     <meta name="author" content="Stanislaw Baranski" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" media="screen" href="css/style.css"/>
   </head>
 
   <body>
-    <div id="app" class="container-lg col-md-6">
+    <div id="app" class="container-lg col-md-6" style="display: block; position: absolute;">
       <div id="identify">
         <h1 class="my-5">Voting system build on stellar network</h1>
         <div class="card mx-auto border-secondary bg-light mb-3" style="max-width: 18rem;">
@@ -167,6 +168,7 @@
         </button>
       </div>
     </div>
+    <div id="particles-js"></div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/3.0.1/stellar-sdk.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
@@ -175,5 +177,12 @@
 
 				<script src="https://d3js.org/d3.v4.js"></script>
 				<script src="./app.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+        <script>
+					/* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
+					particlesJS.load('particles-js', 'particles.json', function() {
+						console.log('callback - particles.js config loaded');
+					});
+        </script>
 	</body>
 </html>
