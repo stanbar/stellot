@@ -5,6 +5,7 @@ const logger = require('morgan')
 const StellarSdk = require('stellar-sdk')
 const log = require('debug')('server:app')
 const crypto = require('crypto')
+const elliptic = require('elliptic')
 
 const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
 
@@ -25,125 +26,26 @@ const voteToken = new StellarSdk.Asset(
   process.env.ISSUE_PUBLIC_KEY,
 )
 
-function validateMergeOp(transaction) {
-  const expectedSendBack = transaction.operations[5]
-  if (expectedSendBack.type !== 'payment') {
-    throw new Error(
-      `operation[5] type is ${expectedSendBack.type} but should be payment`,
-    )
-  }
-  if (expectedSendBack.asset.code !== StellarSdk.Asset.native().code) {
-    throw new Error(
-      `operation[5] code is ${expectedSendBack.asset.code} but should be ${
-        StellarSdk.Asset.native().code
-      }`,
-    )
-  }
-  if (expectedSendBack.destination !== distributionKeypair.publicKey()) {
-    throw new Error(
-      `operation[5] destination is ${
-        expectedSendBack.destination
-      } but should be ${distributionKeypair.publicKey()}`,
-    )
-  }
-}
-
-function validateDistrustOp(transaction) {
-  const expectedChangeTrust = transaction.operations[4]
-  if (expectedChangeTrust.type !== 'changeTrust') {
-    throw new Error(
-      `operation[1] type is ${expectedChangeTrust.type} but should be changeTrust`,
-    )
-  }
-  if (expectedChangeTrust.line.issuer !== voteToken.issuer) {
-    throw new Error(
-      `operation[1] issuer is ${expectedChangeTrust.line.issuer} but should be ${voteToken.issuer}`,
-    )
-  }
-  if (expectedChangeTrust.line.code !== voteToken.code) {
-    throw new Error(
-      `operation[1] line code is ${expectedChangeTrust.line.code} but should be ${voteToken.code}`,
-    )
-  }
-}
-
-function validateVoteOp(transaction) {
-  const expectedVote = transaction.operations[3]
-  if (expectedVote.type !== 'payment') {
-    throw new Error(
-      `operation[3] type is ${expectedVote.type} but should be payment`,
-    )
-  }
-  if (expectedVote.asset.code !== voteToken.code) {
-    throw new Error(
-      `operation[3] code is ${expectedVote.asset.code} but should be ${voteToken.code}`,
-    )
-  }
-  if (expectedVote.asset.issuer !== voteToken.issuer) {
-    throw new Error(
-      `operation[3] issuer is ${expectedVote.asset.issuer} but should be ${voteToken.code}`,
-    )
-  }
-  if (expectedVote.amount !== '0.0000001') {
-    throw new Error(
-      `operation[3] amount is ${expectedVote.amount} but should be 0.0000001`,
-    )
-  }
-}
-
-function validateIssueTokenOp(transaction) {
-  const expectedIssueToken = transaction.operations[2]
+function validateVoteTokenTransferOp(transaction) {
+  const expectedIssueToken = transaction.operations[0]
   if (expectedIssueToken.type !== 'payment') {
     throw new Error(
-      `operation[2] type is ${expectedIssueToken.type} but should be payment`,
+      `operation[0] type is ${expectedIssueToken.type} but should be payment`,
     )
   }
   if (expectedIssueToken.asset.issuer !== voteToken.issuer) {
     throw new Error(
-      `operation[1] issuer is ${expectedIssueToken.asset.issuer} but should be ${voteToken.issuer}`,
+      `operation[0] issuer is ${expectedIssueToken.asset.issuer} but should be ${voteToken.issuer}`,
     )
   }
   if (expectedIssueToken.asset.code !== voteToken.code) {
     throw new Error(
-      `operation[1] code is ${expectedIssueToken.asset.code} but should be ${voteToken.code}`,
+      `operation[0] code is ${expectedIssueToken.asset.code} but should be ${voteToken.code}`,
     )
   }
   if (expectedIssueToken.amount !== '0.0000001') {
     throw new Error(
-      `operation[2] amount is ${expectedIssueToken.amount} but should be 0.0000001`,
-    )
-  }
-}
-function validateChangeTrustOp(transaction) {
-  const expectedChangeTrust = transaction.operations[1]
-  if (expectedChangeTrust.type !== 'changeTrust') {
-    throw new Error(
-      `operation[1] type is ${expectedChangeTrust.type} but should be changeTrust`,
-    )
-  }
-  if (expectedChangeTrust.line.issuer !== voteToken.issuer) {
-    throw new Error(
-      `operation[1] issuer is ${expectedChangeTrust.line.issuer} but should be ${voteToken.issuer}`,
-    )
-  }
-  if (expectedChangeTrust.line.code !== voteToken.code) {
-    throw new Error(
-      `operation[1] line code is ${expectedChangeTrust.line.code} but should be ${voteToken.code}`,
-    )
-  }
-}
-function validateCreateAccountOp(transaction) {
-  const expectedCreateAccount = transaction.operations[0]
-  if (expectedCreateAccount.type !== 'createAccount') {
-    throw new Error(
-      `operation[0] type is ${expectedCreateAccount.type} but should be createAccount`,
-    )
-  }
-  if (expectedCreateAccount.startingBalance !== '1.5000000') {
-    // 1 XML for minimum acocunt balance
-    // 0.5 for trustline and
-    throw new Error(
-      `operation[0] startingBalance is ${expectedCreateAccount.startingBalance} but should be  1.5000000`,
+      `operation[0] amount is ${expectedIssueToken.amount} but should be 0.0000001`,
     )
   }
 }
@@ -166,17 +68,12 @@ function validateTransaction(txn, userId) {
       )} doesn't equal userId: ${userId}`,
     )
   }
-  if (transaction.operations.length !== 6) {
+  if (transaction.operations.length !== 1) {
     throw new Error(
-      `transaction.operations.length: ${transaction.operations.length} doesnt equal 6`,
+      `transaction.operations.length: ${transaction.operations.length} doesnt equal 1`,
     )
   }
-  validateCreateAccountOp(transaction)
-  validateChangeTrustOp(transaction)
-  validateIssueTokenOp(transaction)
-  validateVoteOp(transaction)
-  validateDistrustOp(transaction)
-  validateMergeOp(transaction)
+  validateVoteTokenTransferOp(transaction)
 }
 
 function signTransaction(txn) {
