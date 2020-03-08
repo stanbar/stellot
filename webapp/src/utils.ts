@@ -1,7 +1,7 @@
 import { rand } from 'elliptic'
 import BN from 'bn.js'
 
-export function getRandomInt(max) {
+export function getRandomInt(max: number) {
   return Math.floor(Math.random() * Math.floor(max))
 }
 
@@ -13,17 +13,23 @@ export function randomBytes(bytes: number) {
   return rand(bytes)
 }
 
-export function createMemo(candidateCode: number) {
-  const randomMemo = rand(32)
+export function encodeMemo(candidateCode: number): Buffer {
+  const randomMemo: Buffer = rand(32);
   // Write question 0
-  randomMemo.writeUInt8(0, 0)
+  randomMemo.writeUInt8(0, 0);
   // Write answer 0
-  randomMemo.writeUInt8(candidateCode, 1)
+  randomMemo.writeUInt8(candidateCode, 1);
   return randomMemo
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function encryptMemo(memo: Buffer, publicKey: Buffer): Buffer {
+  // TODO implement later
+  return memo
+}
+
 export function decodeCandidateCodeFromMemo(memo: Buffer): number {
-  const question = randomMemo.readUInt8(0)
-  const candidateCode = randomMemo.readUInt8(1)
+  const questionCode = memo.readUInt8(0);
+  const candidateCode = memo.readUInt8(1);
   return candidateCode
 }

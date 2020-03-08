@@ -108,7 +108,7 @@ function storeAndPickLuckyTransaction(tokenId, blindedTransactions) {
 app.post('/getChallenge', async (req, res) => {
   const { tokenId, blindedTransactions } = req.body;
   const luckyTransaction = storeAndPickLuckyTransaction(tokenId, blindedTransactions);
-  return res.status(200).send({luckyTransaction});
+  return res.status(200).send({ luckyTransaction });
 });
 
 function calculateBlindTransaction(session, R, a, b, transaction) {

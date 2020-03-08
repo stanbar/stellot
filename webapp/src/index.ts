@@ -2,19 +2,20 @@
 import 'particles.js';
 import particlesJson from './assets/particles.json';
 import { VoterSession } from './blindsig';
-import { voteOnCandidate } from './stellar';
+import $ from "jquery";
+import { voteOnCandidate, Candidate } from './stellar';
 
+// @ts-ignore
 particlesJS('particles-js', particlesJson);
 
 const sections = ['identify', 'vote', 'results'];
 let currentSectionIndex = 0;
-let selectedParty;
+let selectedCandidate: Candidate;
 let tokenId: string;
 
 function showError(message) {
   $('#alert-text').text(message);
-  $('.alert').addClass('show');
-  $('.alert').alert();
+  $('.alert').addClass('show').alert();
 }
 
 async function loginWithPz() {
@@ -51,9 +52,8 @@ async function loginWithPz() {
   }
 }
 
-
 async function performVote() {
-  await voteOnCandidate(tokenId)
+  await voteOnCandidate(tokenId, selectedCandidate);
 }
 
 async function createPartiesList() {
@@ -192,7 +192,7 @@ $('#btnVote').click(async e => {
   e.stopPropagation();
   // await signAndSendVote()
   try {
-    await voteOnParty();
+    await performVote()
     showNextPage();
   } catch (error) {
     console.error(error);
