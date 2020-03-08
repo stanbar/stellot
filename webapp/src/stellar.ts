@@ -1,20 +1,45 @@
-import StellarSdk from 'stellar-sdk';
-import { randomBytes, getRandomInt, createMemo, decodeCandidateCodeFromMemo } from './utils';
+import {
+  Transaction,
+  Memo,
+  Keypair,
+  Network,
+  Server,
+  Asset,
+  Account,
+  TransactionBuilder,
+  BASE_FEE,
+  Networks,
+  Operation,
+} from 'stellar-sdk';
+import BN from 'bn.js';
+import { encodeMemo, encryptMemo } from './utils';
+import { VoterSession } from './blindsig';
 
-StellarSdk.Network.useTestNetwork();
+Network.useTestNetwork();
 
-const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+const server = new Server('https://horizon-testnet.stellar.org');
 const distributionAccountId = 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU';
 
+if (!process.env.BALLOT_PUBLIC_KEY) {
+  throw new Error('process.env.BALLOT_PUBLIC_KEY can not be undefined');
+}
 const ballotAccountId = process.env.BALLOT_PUBLIC_KEY;
 
-export const distributionKeypair = StellarSdk.Keypair.fromPublicKey(distributionAccountId);
+export const distributionKeypair = Keypair.fromPublicKey(distributionAccountId);
 
-export const voteToken = new StellarSdk.Asset(process.env.ASSET_NAME, process.env.ISSUE_PUBLIC_KEY);
+if (!process.env.ASSET_NAME) {
+  throw new Error('process.env.ASSET_NAME can not be undefined');
+}
+if (!process.env.ISSUE_PUBLIC_KEY) {
+  throw new Error('process.env.ISSUE_PUBLIC_KEY can not be undefined');
+}
 
-interface Candidate {
+export const voteToken =
+  new Asset(process.env.ASSET_NAME!, process.env.ISSUE_PUBLIC_KEY);
+
+export interface Candidate {
   name: string;
-  code: int;
+  code: number;
 }
 
 const candidates: Candidate[] = [
@@ -38,57 +63,20 @@ const candidates: Candidate[] = [
 
 interface Session {
   id: number;
-  sesson: VoterSession;
-  transactionXdr: string[]; // TO MUST BE IN RANDOM ORDER
-  candidateCode: number[]; // TO MUST BE IN RANDOM ORDER
-  memo: Buffer[]; // TO MUST BE IN RANDOM ORDER
+  voterSession: VoterSession;
+  transactionsBatch: TransactionsBatch,
+  blindedTransactionsBatch: Array<BN>
 }
 
-let sessions: Array<{ id: number; transactionXdr: string; sesson: VoterSession }>;
+let sessions: Array<Session>;
 
 interface ResSession {
   id: number;
   R: Buffer;
 }
 
-async function voteOnCandidate(tokenId: string, candidate: Candidate) {
-  const keyPair = ed25519.keyFromPublic(distributionKeypair.rawPublicKey());
-  const resSessions = await initSessions(tokenId);
 
-  sessions = resSessions.map(
-    (resSession: ResSession) => {
-      const {candidateCode, memo, transactions[]} = createRandomBatchOfTransaction()
-      const session: Session = {
-        id: resSession.id,
-        candidateCode,
-        memo,
-        session: new VoterSessions(keyPair.public(), resSession.R),
-        transactionXdr: transaction.toXDR(),
-      }
-    }
-    ),
-  );
-
-  const { sessionId, luckyBatchTransactionSignatures, luckyTransactionIndex } = await getChallenges(tokenId);
-    const session = sessions[sessionId][luckyTransactionIndex]
-  const myLuckyTransaction = luckyBatchTransactionSignatures.find(sig => {
-    return session.transactionXdr.find(txXdr => {
-      const tx = new StellarSdk.Transaction(txXdr)
-      return decodeCandidateCodeFromMemo(tx.memo) === decodeCandidateCodeFromMemo(transaction.memo)
-
-    })
-  }
-
-  )
-  sessions[sessionId].session.singature(myLuckyTransaction)
-  if(sessions[luckyTransaction].candidateCode === candidate.code){
-    // TODO proceed
-  } else {
-    // TODO redo, so maybe just //initSessions(tokenId) again until it success
-  }
-}
-
-async function initSessions(tokenId: string): Array<ResSession> {
+async function initSessions(tokenId: string): Promise<Array<ResSession>> {
   const response = await fetch('/init', {
     method: 'POST',
     headers: {
@@ -103,48 +91,110 @@ async function initSessions(tokenId: string): Array<ResSession> {
     console.error('Failed to init session');
     throw new Error(await response.text());
   }
-  return await response.json();
+  return response.json(); // TODO not sure if should not use await response.json()
 }
 
-export async function createRandomBatchOfTransaction(candidate: Candidate): string[] {
-  const account = await server.loadAccount(distributionAccountId);
-  const fee = await server.fetchBaseFee();
+export async function voteOnCandidate(tokenId: string, candidate: Candidate): Promise<Transaction> {
+  // 1. Initialize interactive session
+  const resSessions = await initSessions(tokenId);
+  // 2. Signer has generated X number of sessions (associated id with R),
+  // will use them now to blind transaction
 
-   const shuffledCandidates = candidates.shuffle()
-   const batchOfTransactions = shuffledCandidates.map((candidate => {
-
-     const candidateCode = getRandomInt(candidates.length - 1)
-     const memo = Memo.hash(createMemo(candidateCode));
-     const transaction = new StellarSdk.TransactionBuilder(account, { fee, memo })
-     .addOperation(
-       StellarSdk.Operation.payment({
-         destination: ballotAccountId,
-         asset: voteToken,
-         amount: `${1 / 10 ** 7}`,
-       }),
-     )
-     .setTimeout(30)
-     .build();
-
-    return { candidateCode, memo, transaction, isMyOption: candidateCode === candidate.code}
-   }))
-
-   return batchOfTransactions;
-}
-
-
-async function getChallenges(tokenId: string): number {
-  const blindedTransactions = sessions.map((session: Session) => ({
-    id: session.id,
-    challenge: session.session.challenge(session.transactionXdr)
-
+  // 3. Let's fill all session with batch of transactions on each candidate
+  sessions = await Promise.all(resSessions.map(async ({ id, R }) => {
+    // 2.1 Generate batch of
+    const transactionsBatch = await createRandomBatchOfTransaction(candidate);
+    const voterSession = new VoterSession(distributionKeypair.rawPublicKey(), R);
+    const session: Session = {
+      id,
+      voterSession,
+      transactionsBatch,
+      blindedTransactionsBatch: transactionsBatch.map(tx => {
+        const txBuffer = Buffer.from(tx.transaction.toXDR());
+        return voterSession.challenge(txBuffer)
+      }),
+    };
+    return session;
   }));
+
+  const luckyBatchIndex = await getChallenges(
+    tokenId, sessions.map(session =>
+      ({ id: session.id, blindedTransactionBatch: session.blindedTransactionsBatch })),
+  );
+
+  const proofs = sessions.filter((_, index) => index !== luckyBatchIndex);
+  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await respondChallenge(tokenId, proofs);
+  const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
+  if (!luckySession) {
+    throw new Error('Could not find corresponding id session')
+  }
+  const { voterSession, transactionsBatch, id } = luckySession;
+  const myCandidateTxIndex = transactionsBatch.findIndex(tx => tx.isMyOption);
+  if (!myCandidateTxIndex) {
+    throw new Error(`Could not find my option transaction in session id: ${id}`)
+  }
+  const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
+  const tx = transactionsBatch[myCandidateTxIndex].transaction;
+  tx.addSignature(distributionKeypair.publicKey(), signature.toHex());
+  return tx
+}
+
+interface TransactionInBatch {
+  candidateCode: number,
+  memo: Memo,
+  transaction: Transaction,
+  isMyOption: boolean
+}
+
+type TransactionsBatch = Array<TransactionInBatch>;
+
+async function createRandomBatchOfTransaction(myCandidate: Candidate): Promise<TransactionsBatch> {
+  const seqNumber = (await server.loadAccount(distributionAccountId)).sequenceNumber();
+  const account = new Account(distributionAccountId, seqNumber);
+  const shuffledCandidates: Candidate[] = candidates
+    .map(candidate => ({ sort: Math.random(), value: candidate }))
+    .sort((a: any, b: any) => a.sort - b.sort)
+    .map(a => a.value);
+
+  return shuffledCandidates.map(candidate => {
+    const memo = Memo.hash(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('utf-8'));
+    return {
+      transaction: createTransaction(account, memo),
+      memo,
+      candidateCode: candidate.code,
+      isMyOption: myCandidate.code === candidate.code,
+    } as TransactionInBatch;
+  });
+}
+
+function createTransaction(account: Account, memo: Memo)
+  : Transaction {
+  return new TransactionBuilder(account, {
+    fee: BASE_FEE,
+    networkPassphrase: Networks.TESTNET,
+    memo,
+  })
+    .addOperation(
+      Operation.payment({
+        destination: ballotAccountId,
+        asset: voteToken,
+        amount: `${1 / (10 ** 7)}`,
+      }),
+    )
+    .setTimeout(30)
+    .build();
+}
+
+async function getChallenges(
+  tokenId: string,
+  blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>)
+  : Promise<number> {
   const response = await fetch('/getChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ tokenId, blindedTransactions }),
+    body: JSON.stringify({ tokenId, blindedTransactionBatches }),
   });
 
   if (response.ok) {
@@ -154,22 +204,24 @@ async function getChallenges(tokenId: string): number {
     throw new Error(await response.text());
   }
   const resText: string = await response.text();
-  return number(resText)
+  return Number(resText);
 }
 
-export async function fetchAccountTokenBalance(accountId) {
-  const account = await server
-    .accounts()
-    .accountId(accountId)
-    .call();
+async function respondChallenge(tokenId: string, proofs: Session[])
+  : Promise<{ id: number, sigs: Array<BN> }> {
+  const response = await fetch('/proofChallenge', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ tokenId, proofs }),
+  });
 
-  const balance = userAccount.balances.find(
-    aBalance =>
-      aBalance.asset_code === voteToken.code && aBalance.asset_issuer === voteToken.issuer,
-  );
-
-  if (balance) {
-    return Math.round(balance.balance * 10 ** 7);
+  if (response.ok) {
+    console.log('Successfully inited session');
+  } else {
+    console.error('Failed to init session');
+    throw new Error(await response.text());
   }
-  return undefined;
+  return response.json();
 }
