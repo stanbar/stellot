@@ -55,68 +55,9 @@
           </div>
         </div>
         <p class="d-none">UserID: <span id="userId"></span></p>
-        <button id="btnSimpleVote" class="btn mx-auto btn-primary btn-block" style="max-width: 18rem;">Simple Vote</button>
-        <button id="btnManualMode" class="btn mx-auto btn-outline-primary btn-block" style="max-width: 18rem;">Manual Vote</button>
+        <button id="btnSimpleVote" class="btn mx-auto btn-primary btn-block next" style="max-width: 18rem;">Simple Vote</button>
       </div>
 
-      <div id="enterStellarAddress">
-        <h2 class="my-4">Please enter your stellar account id</h2>
-        <input type="text" class="form-control" id="account-id" placeholder="GAM7ZPJQOM345NBLEZY23UN2ORHLJ6XMFZOTENGLGCBF6JNNWUXBU6QN" value="GAM7ZPJQOM345NBLEZY23UN2ORHLJ6XMFZOTENGLGCBF6JNNWUXBU6QN"></input>
-
-        <button class="btn btn-light back">Back</button>
-        <button class="btn btn-primary next">Next</button>
-      </div>
-      <div id="trustline">
-        <h2>In order to get vote token you need to create trustline to vote token issuer</h2>
-        <h4 id="issuerAccountId"></h4>
-        <div>
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#trustlineModal"> Create trustline </button>
-          <div class="modal fade" id="trustlineModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <div class="form-group">
-                    <label for="secret">Secret:</label>
-                    <input id="secret" type="text" value="SBOMRZ4BFPU2PZTAFSQIMRLUMX5RQDXYVJRACPEG5D4PIANYJ7MUBSH2" required class="form-control"/>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="button" id="trustIssuerButton" class="btn btn-primary">Sign and send trust</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        Tokens remaining: <span id="tokensRemaining"></span>
-        <div id="trust-status-trusted" class="alert alert-success d-none" role="alert">
-          You already trust this issuer
-        </div>
-        <div id="trust-status-not-trusted" class="alert alert-danger  d-none" role="alert">
-          You have not created trustline with this issuer
-        </div>
-        <br/>
-        <button class="btn btn-light back">Back</button>
-        <button class="btn btn-primary next">Next</button>
-      </div>
-
-      <div id="issue">
-        <h2>Issue a vote token</h2>
-        <h4>Your balance: <span id="vote-tokens-balance"></span></h4>
-        <button id="issueTokenButton" type="button" class="btn btn-primary">
-          <span class="spinner-border spinner-border-sm d-none" id="voteSpinnerSending" role="status" aria-hidden="true"></span>
-          Request token
-        </button>
-        <br/>
-        <button class="btn btn-light back">Back</button>
-        <button class="btn btn-primary next">Next</button>
-      </div>
 
       <div id="vote">
         <h2>Vote on party</h2>
@@ -176,13 +117,6 @@
 				<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 				<script src="https://d3js.org/d3.v4.js"></script>
-				<script src="./app.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-        <script>
-					/* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
-					particlesJS.load('particles-js', 'assets/particles.json', function() {
-						console.log('callback - particles.js config loaded');
-					});
-        </script>
+				<script src="./index.ts"></script>
 	</body>
 </html>

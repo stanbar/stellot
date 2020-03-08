@@ -13,15 +13,9 @@ const sections = {
   ],
   simple: ['identify', 'vote', 'results'],
 }
-let mode
-let currentSectionIndex = 0
-const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
-const distributionAccountId =
-  'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU'
-const issuerAccountId =
-  'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH'
 
-const voteToken = new StellarSdk.Asset('Vote01122019', issuerAccountId)
+let currentSectionIndex = 0
+
 let selectedParty
 
 const parties = [
@@ -43,62 +37,6 @@ const parties = [
   },
 ]
 
-async function fetchTrustlineInformation() {
-  const accountId = $('#account-id').val()
-  const userAccount = await stellar
-    .accounts()
-    .accountId(accountId)
-    .call()
-
-  const alreadyTrust =
-    userAccount.balances.filter(
-      balance =>
-        balance.asset_code === voteToken.code &&
-        balance.asset_issuer === voteToken.issuer,
-    ).length > 0
-
-  if (alreadyTrust) {
-    $('#trust-status-trusted').removeClass('d-none')
-    $('#trust-status-not-trusted').addClass('d-none')
-  } else {
-    $('#trust-status-trusted').addClass('d-none')
-    $('#trust-status-not-trusted').removeClass('d-none')
-  }
-}
-
-async function fetchAccountTokenBalance(accountId) {
-  console.log(`fetching balance for ${accountId}`)
-  const userAccount = await stellar
-    .accounts()
-    .accountId(accountId)
-    .call()
-
-  const balance = userAccount.balances.find(
-    aBalance =>
-      aBalance.asset_code === voteToken.code &&
-      aBalance.asset_issuer === voteToken.issuer,
-  )
-
-  if (balance) {
-    console.log(`found balance ${balance.balance} on accountId ${accountId}`)
-    return Math.round(balance.balance * 10 ** 7)
-  }
-  console.log(`not found balance on accountId: ${accountId}`)
-  return undefined
-}
-
-async function fetchVoteTokensBalance() {
-  const accountId = $('#account-id').val()
-  const balance = await fetchAccountTokenBalance(accountId)
-
-  if (balance) {
-    $('#vote-tokens-balance').text(balance)
-  } else {
-    $('#vote-tokens-balance').text(
-      "Cou don't have any votes left or you didn't create trustline to token issuer",
-    )
-  }
-}
 
 async function fetchDistributorTokensBalance() {
   const balance = await fetchAccountTokenBalance(distributionAccountId)
