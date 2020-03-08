@@ -2,7 +2,6 @@ import {
   Transaction,
   Memo,
   Keypair,
-  Network,
   Server,
   Asset,
   Account,
@@ -10,20 +9,19 @@ import {
   BASE_FEE,
   Networks,
   Operation,
+  MemoHash,
 } from 'stellar-sdk';
 import BN from 'bn.js';
-import { encodeMemo, encryptMemo } from './utils';
+import { encodeMemo, encryptMemo, decodeCandidateCodeFromMemo } from './utils';
 import { VoterSession } from './blindsig';
-
-Network.useTestNetwork();
 
 const server = new Server('https://horizon-testnet.stellar.org');
 const distributionAccountId = 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU';
 
-if (!process.env.BALLOT_PUBLIC_KEY) {
+if (!process.env.BALLOT_BOX_PUBLIC_KEY) {
   throw new Error('process.env.BALLOT_PUBLIC_KEY can not be undefined');
 }
-const ballotAccountId = process.env.BALLOT_PUBLIC_KEY;
+const ballotAccountId = process.env.BALLOT_BOX_PUBLIC_KEY;
 
 export const distributionKeypair = Keypair.fromPublicKey(distributionAccountId);
 
@@ -94,7 +92,7 @@ async function initSessions(tokenId: string): Promise<Array<ResSession>> {
   return response.json(); // TODO not sure if should not use await response.json()
 }
 
-export async function voteOnCandidate(tokenId: string, candidate: Candidate): Promise<Transaction> {
+export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   // 1. Initialize interactive session
   const resSessions = await initSessions(tokenId);
   // 2. Signer has generated X number of sessions (associated id with R),
@@ -102,7 +100,7 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate): Pr
 
   // 3. Let's fill all session with batch of transactions on each candidate
   sessions = await Promise.all(resSessions.map(async ({ id, R }) => {
-    // 2.1 Generate batch of
+    // 3.1 Generate batch of
     const transactionsBatch = await createRandomBatchOfTransaction(candidate);
     const voterSession = new VoterSession(distributionKeypair.rawPublicKey(), R);
     const session: Session = {
@@ -117,12 +115,14 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate): Pr
     return session;
   }));
 
+  // 4. Request challenges given blindedTransactions
   const luckyBatchIndex = await getChallenges(
     tokenId, sessions.map(session =>
       ({ id: session.id, blindedTransactionBatch: session.blindedTransactionsBatch })),
   );
 
   const proofs = sessions.filter((_, index) => index !== luckyBatchIndex);
+  // 5. Proof my honesty, and receive signed blind transacion in result
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await respondChallenge(tokenId, proofs);
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
@@ -136,7 +136,11 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate): Pr
   const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
   const tx = transactionsBatch[myCandidateTxIndex].transaction;
   tx.addSignature(distributionKeypair.publicKey(), signature.toHex());
-  return tx
+
+  console.log('Submiting transaction');
+  // 6. Send transaction to stellar network
+  await server.submitTransaction(tx);
+  console.log('Successfully submitted transaction to stellar network');
 }
 
 interface TransactionInBatch {
@@ -224,4 +228,37 @@ async function respondChallenge(tokenId: string, proofs: Session[])
     throw new Error(await response.text());
   }
   return response.json();
+}
+
+export interface Result {
+  candidate: Candidate;
+  votes: number
+}
+
+export async function fetchResults(): Promise<Result[]> {
+  const payments = await server
+    .payments()
+    .limit(200) // TODO Must not be hardcoded
+    .join('transactions')
+    .forAccount(ballotAccountId)
+    .call();
+
+  const transactions = await Promise.all(payments.records.filter(
+    tx =>
+      tx.asset_code === voteToken.code &&
+      tx.asset_issuer === voteToken.issuer,
+  ).map(payment => payment.transaction()));
+
+  const results = candidates.map(candidate => ({
+    candidate,
+    votes: 0,
+  }));
+
+  transactions
+    .filter(tx => tx.memo_type === MemoHash && tx.memo)
+    .forEach(tx => {
+      const candidateCode = decodeCandidateCodeFromMemo(tx.memo!);
+      results[candidateCode].votes += 1;
+    });
+  return results;
 }

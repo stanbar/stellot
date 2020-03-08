@@ -1,15 +1,17 @@
 import { eddsa } from 'elliptic';
 import BN from 'bn.js';
-import { ed25519 } from "./index";
-
-
-const { randomScalar } = require('../utils');
+import { ed25519 } from './index';
+import { randomScalar } from '../utils'
 
 export default class SignerSession {
   private readonly k: BN;
+
   private readonly P: eddsa.Point;
+
   private readonly x: BN;
+
   private readonly R: eddsa.Point;
+
   constructor(keypair: eddsa.KeyPair) {
     this.x = ed25519.decodeInt(keypair.getSecret());
     this.P = ed25519.decodePoint(keypair.getPublic());

@@ -1,9 +1,7 @@
 import { eddsa } from 'elliptic';
 import BN from 'bn.js';
 import { ed25519 } from './index';
-
-const { randomScalar } = require('../utils');
-
+import { randomScalar } from '../utils'
 
 export default class VoterSession {
   private readonly a: BN;

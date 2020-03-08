@@ -1,19 +1,25 @@
-/* global fetch */
+import $ from 'jquery';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css'
+import * as d3 from 'd3';
 import 'particles.js';
+
 import particlesJson from './assets/particles.json';
-import { VoterSession } from './blindsig';
-import $ from "jquery";
-import { voteOnCandidate, Candidate } from './stellar';
+import { voteOnCandidate, Candidate, fetchResults, Result } from './stellar';
 
 // @ts-ignore
+// eslint-disable-next-line no-undef
 particlesJS('particles-js', particlesJson);
 
-const sections = ['identify', 'vote', 'results'];
+const IDENTIFY = 'identify';
+const VOTE = 'vote';
+const RESULTS = 'results';
+const sections = [IDENTIFY, VOTE, RESULTS];
 let currentSectionIndex = 0;
-let selectedCandidate: Candidate;
+let selectedCandidate: Candidate | null = null;
 let tokenId: string;
 
-function showError(message) {
+function showError(message: string) {
   $('#alert-text').text(message);
   $('.alert').addClass('show').alert();
 }
@@ -43,7 +49,7 @@ async function loginWithPz() {
       console.log('Successfully logged in');
     } else {
       console.error('Failed to login');
-      throw new Error(response.message);
+      throw new Error(response.statusText);
     }
     $('#loginWithPzModal').modal('hide');
   } finally {
@@ -53,21 +59,26 @@ async function loginWithPz() {
 }
 
 async function performVote() {
+  if (!selectedCandidate) {
+    showError('Please select candidate first');
+    return;
+  }
   await voteOnCandidate(tokenId, selectedCandidate);
 }
+
 
 async function createPartiesList() {
   const partiesWithVotes = await fetchResults();
   const list = $('#party-list');
-  partiesWithVotes.forEach(party => {
-    console.log({ party });
+  partiesWithVotes.forEach(candidate => {
+    console.log({ candidate });
     const li = $('<li/>')
       .addClass(
         'list-group-item list-group-item-action d-flex justify-content-between align-items-center',
       )
-      .text(party.name)
+      .text(candidate.candidate.name)
       .click(() => {
-        selectedParty = party;
+        selectedCandidate = candidate.candidate;
         $('#party-list > li').removeClass('active');
         li.addClass('active');
       })
@@ -75,7 +86,7 @@ async function createPartiesList() {
 
     $('<span/>')
       .addClass('badge badge-primary badge-pill')
-      .text(party.votes || 0)
+      .text(candidate.votes || 0)
       .appendTo(li);
 
     return li;
@@ -83,7 +94,7 @@ async function createPartiesList() {
 }
 
 async function createResultsPlot() {
-  const partiesWithVotes = await fetchResults();
+  const partiesWithVotes: Result[] = await fetchResults();
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 30, bottom: 70, left: 60 };
   const width = 460 - margin.left - margin.right;
@@ -101,7 +112,7 @@ async function createResultsPlot() {
   const x = d3
     .scaleBand()
     .range([0, width])
-    .domain(partiesWithVotes.map(party => party.name))
+    .domain(partiesWithVotes.map(candidate => candidate.candidate.name))
     .padding(0.2);
   svg
     .append('g')
@@ -124,23 +135,24 @@ async function createResultsPlot() {
     .data(partiesWithVotes)
     .enter()
     .append('rect')
-    .attr('x', party => x(party.name))
-    .attr('y', party => y(party.votes || 0))
+    .attr('x', (result: Result) => x(result.candidate.name))
+    .attr('y', (result: Result) => y(result.votes || 0))
     .attr('width', x.bandwidth())
-    .attr('height', party => height - y(party.votes || 0))
+    .attr('height', (result: Result) => height - y(result.votes || 0))
     .attr('fill', '#69b3a2');
 }
 
-const onStart = {
-  identify: () => {
+const onStart: { [key: string]: any } = {
+  [IDENTIFY]: () => {
     const login = $('#login').val();
     if (!login) {
       $('#btnManualMode').prop('disabled', true);
       $('#btnSimpleVote').prop('disabled', true);
     }
   },
-  vote: () => {},
-  results: () => {
+  [VOTE]: () => {
+  },
+  [RESULTS]: () => {
     createResultsPlot();
   },
 };
@@ -149,18 +161,13 @@ function render() {
   sections
     .filter((_value, index) => index !== currentSectionIndex)
     .forEach(value => $(`#${value}`).hide());
-
-  if (!mode) {
-    $(`#identify`).show();
-    onStart.identify();
-  } else {
-    $(`#${sections[currentSectionIndex]}`).show();
-    onStart[sections[currentSectionIndex]]();
-  }
+  const currentSection = sections[currentSectionIndex];
+  $(`#${currentSection}`).show();
+  onStart[currentSection]();
 }
 
 function showNextPage() {
-  currentSectionIndex = (currentSectionIndex + 1) % sections[mode].length;
+  currentSectionIndex = (currentSectionIndex + 1) % sections.length;
   render();
 }
 
@@ -184,20 +191,14 @@ $('#loginWithPz').click(() => {
   loginWithPz();
 });
 
-$('#signVoteButton').click(() => {
-  signAndSendVote();
-});
-
 $('#btnVote').click(async e => {
   e.stopPropagation();
   // await signAndSendVote()
   try {
-    await performVote()
+    await performVote();
     showNextPage();
   } catch (error) {
     console.error(error);
     showError(error.message);
   }
 });
-
-$('#issuerAccountId').text(issuerAccountId);
