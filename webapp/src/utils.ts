@@ -25,11 +25,17 @@ export function encodeMemo(candidateCode: number): Buffer {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function encryptMemo(memo: Buffer, publicKey: Buffer): Buffer {
   // TODO implement later
+  console.log(publicKey);
   return memo
 }
 
-export function decodeCandidateCodeFromMemo(memo: Buffer): number {
-  const questionCode = memo.readUInt8(0);
+export function decodeCandidateCodeFromMemo(memo: Buffer | string): number {
+  if (typeof memo === 'string') {
+    // eslint-disable-next-line no-param-reassign
+    memo = Buffer.from(memo)
+  }
+  // TODO allow multiple Q&A
+  // const questionCode = memo.readUInt8(0);
   const candidateCode = memo.readUInt8(1);
   return candidateCode
 }
