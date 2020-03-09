@@ -5,8 +5,11 @@
   "main": "src/index.html",
   "scripts": {
     "start": "parcel src/index.html --open",
-    "build": "parcel build src/index.html"
+    "build": "parcel build src/index.html --out-dir ../docs"
   },
+  "browserslist": [
+    "last 3 Chrome versions"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stasbar/stellar-voting.git"
@@ -39,6 +42,7 @@
     "fetch": "^1.1.0",
     "jquery": "^3.4.1",
     "morgan": "~1.9.1",
+    "parcel-proxy-server": "^1.1.0",
     "particles.js": "^2.0.0",
     "popper.js": "^1.16.1",
     "prettier": "^1.19.1",

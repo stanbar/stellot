@@ -73,25 +73,6 @@ interface ResSession {
   R: Buffer;
 }
 
-
-async function initSessions(tokenId: string): Promise<Array<ResSession>> {
-  const response = await fetch('/init', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ tokenId }),
-  });
-
-  if (response.ok) {
-    console.log('Successfully inited session');
-  } else {
-    console.error('Failed to init session');
-    throw new Error(await response.text());
-  }
-  return response.json(); // TODO not sure if should not use await response.json()
-}
-
 export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   // 1. Initialize interactive session
   const resSessions = await initSessions(tokenId);
@@ -123,7 +104,7 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
 
   const proofs = sessions.filter((_, index) => index !== luckyBatchIndex);
   // 5. Proof my honesty, and receive signed blind transacion in result
-  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await respondChallenge(tokenId, proofs);
+  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, proofs);
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
     throw new Error('Could not find corresponding id session')
@@ -141,6 +122,24 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   // 6. Send transaction to stellar network
   await server.submitTransaction(tx);
   console.log('Successfully submitted transaction to stellar network');
+}
+
+async function initSessions(tokenId: string): Promise<Array<ResSession>> {
+  const response = await fetch('/api/init', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ tokenId }),
+  });
+
+  if (response.ok) {
+    console.log('Successfully inited session');
+  } else {
+    console.error('Failed to init session');
+    throw new Error(await response.text());
+  }
+  return response.json(); // TODO not sure if should not use await response.json()
 }
 
 interface TransactionInBatch {
@@ -193,7 +192,7 @@ async function getChallenges(
   tokenId: string,
   blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>)
   : Promise<number> {
-  const response = await fetch('/getChallenges', {
+  const response = await fetch('/api/getChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -211,9 +210,9 @@ async function getChallenges(
   return Number(resText);
 }
 
-async function respondChallenge(tokenId: string, proofs: Session[])
+async function proofChallenge(tokenId: string, proofs: Session[])
   : Promise<{ id: number, sigs: Array<BN> }> {
-  const response = await fetch('/proofChallenge', {
+  const response = await fetch('/api/proofChallenge', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

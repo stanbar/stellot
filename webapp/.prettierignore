@@ -1,1 +1,3 @@
-nacl.js
+dist
+.cache
+node_modules

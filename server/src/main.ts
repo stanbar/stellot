@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { config } from 'dotenv';
 
 const result = config();
@@ -10,8 +8,10 @@ if (result.error) {
 /**
  * Module dependencies.
  */
+
 import http from 'http';
 import app from './app';
+
 
 const debug = require('debug')('stellar-voting:server');
 
