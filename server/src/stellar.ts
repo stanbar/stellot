@@ -1,60 +1,137 @@
-import StellarSdk from 'stellar-sdk'
+import { Keypair, Asset, Memo, Transaction } from 'stellar-sdk'
+import BN from 'bn.js';
+import { ed25519, SignerSession, VoterSession } from './blindsig';
+import { getRandomInt } from './utils';
+import { validateProof } from './validators';
 
-const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org')
+export const distributionKeypair = Keypair.fromSecret(process.env.DISTRIBUTION_SECRET_KEY!);
 
-export const distributionKeypair = StellarSdk.Keypair.fromSecret(
-  process.env.DISTRIBUTION_SECRET_KEY,
-)
-
-export const voteToken = new StellarSdk.Asset(
-  process.env.ASSET_NAME,
-  process.env.ISSUE_PUBLIC_KEY,
-)
-
-export function signTransaction(txn) {
-  const transaction = new StellarSdk.Transaction(
-    txn,
-    StellarSdk.Networks.TESTNET,
-  )
-  transaction.sign(distributionKeypair)
-  return transaction
+if (!process.env.ASSET_NAME) {
+  throw new Error('process.env.ASSET_NAME can not be undefined');
+}
+if (!process.env.ISSUE_PUBLIC_KEY) {
+  throw new Error('process.env.ISSUE_PUBLIC_KEY can not be undefined');
 }
 
-export async function isAlreadyIssuedToUserId(userId) {
-  const transactions = await stellar
-    .transactions()
-    .limit(200) // TODO should not be hardcoded
-    .forAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
-    .call()
+export const voteToken =
+  new Asset(process.env.ASSET_NAME!, process.env.ISSUE_PUBLIC_KEY);
 
-  const relevantTransactions = transactions.records.filter(
-    txn =>
-      txn.memo_type === 'text' &&
-      txn.source_account === process.env.DISTRIBUTION_PUBLIC_KEY,
-  )
-  return relevantTransactions.some(txn => txn.memo === userId)
+export interface Candidate {
+  name: string;
+  code: number;
 }
 
-export async function sendTokenFromDistributionToAddress(accountId, userId) {
-  log({ sendTokenFromDistributionToAddress: { accountId, userId } })
-  const account = await stellar.loadAccount(process.env.DISTRIBUTION_PUBLIC_KEY)
-  const transaction = new StellarSdk.TransactionBuilder(account, {
-    fee: 100,
-    networkPassphrase: StellarSdk.Networks.TESTNET,
-    memo: StellarSdk.Memo.text(userId),
-  })
-    .addOperation(
-      StellarSdk.Operation.payment({
-        destination: accountId,
-        asset: voteToken,
-        amount: `${1 / 10 ** 7}`,
-      }),
-    )
-    .setTimeout(60) // seconds
-    .build()
-
-  transaction.sign(distributionKeypair)
-  return stellar.submitTransaction(transaction)
+interface InitSession {
+  id: number;
+  signerSession: SignerSession;
 }
 
+const initSessions: Map<string, Array<InitSession>> = new Map();
 
+export function isAlreadyInitedSession(tokenId: string) {
+  return initSessions.get(tokenId) !== undefined;
+}
+
+export interface ChallengeSession extends InitSession {
+  id: number;
+  blindedTransactionsBatch: Array<BN>;
+  lucky: boolean;
+}
+
+const challengeSessions: Map<string, Array<ChallengeSession>> = new Map();
+
+
+const cutAndChooseCount = 100;
+
+export interface InitResponse {
+  id: number;
+  R: Buffer;
+}
+
+export function createSession(tokenId: string): Array<InitResponse> {
+  const userSessions = new Array<InitSession>(cutAndChooseCount);
+  const response = new Array<InitResponse>(cutAndChooseCount);
+  for (let i = 0; i < cutAndChooseCount; i += 1) {
+    const signerSession = new SignerSession(
+      distributionKeypair.rawSecretKey(),
+      distributionKeypair.rawPublicKey());
+    response[i] = { id: i, R: ed25519.encodePoint(signerSession.publicNonce()) };
+    userSessions[i] = { id: i, signerSession };
+  }
+  initSessions.set(tokenId, userSessions);
+  return response;
+}
+
+export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>
+
+export function storeAndPickLuckyBatch(
+  tokenId: string,
+  blindedTransactionBatches: ChallengeRequest): number {
+  const userSessions = initSessions.get(tokenId);
+  if (!userSessions) {
+    throw new Error('Could not find corresponding user session')
+  }
+
+  const luckyBatchId = getRandomInt(cutAndChooseCount);
+  const session = new Array<ChallengeSession>();
+  for (let i = 0; i < cutAndChooseCount; i += 1) {
+    session[i] = {
+      id: i,
+      signerSession: userSessions[i].signerSession,
+      blindedTransactionsBatch: blindedTransactionBatches[i].blindedTransactionBatch,
+      lucky: i === luckyBatchId,
+    };
+  }
+  challengeSessions.set(tokenId, session);
+  // TODO save number of attempts preventing DoS
+  return luckyBatchId;
+}
+
+export interface TransactionInBatch {
+  candidateCode: number,
+  memo: Memo,
+  transaction: Transaction,
+  isMyOption: boolean // TODO remove in clientApp
+}
+
+type TransactionsBatch = Array<TransactionInBatch>;
+
+interface ProofSession extends InitSession, ChallengeSession {
+  voterSession: VoterSession;
+  transactionsBatch: TransactionsBatch;
+}
+
+const proofSessions: Map<string, Array<ProofSession>> = new Map();
+
+export function isAlreadyProofedSession(tokenId: string) {
+  return proofSessions.get(tokenId) !== undefined;
+}
+
+export interface Proof {
+  id: number;
+  voterSession: VoterSession;
+  transactionsBatch: TransactionsBatch,
+  blindedTransactionsBatch: Array<BN>
+}
+
+export function proofChallenge(tokenId: string, proofs: Proof[]) {
+  const challengeSession = challengeSessions.get(tokenId);
+  if (!challengeSession) {
+    throw new Error('Could not find corresponding challenge session')
+  }
+  const valid = challengeSession.every((session, id) => {
+    if (session.lucky) return true;
+    return validateProof(session, proofs[id]);
+  });
+
+  if (!valid) {
+    throw new Error('Failed to pass verification')
+  }
+
+  const luckySession = challengeSession.find(session => session.lucky)!;
+  return signTransactionBatch(luckySession);
+}
+
+function signTransactionBatch(session: ChallengeSession): Array<BN> {
+  return session.blindedTransactionsBatch.map(btx => session.signerSession.sign(btx))
+}

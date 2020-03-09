@@ -32,7 +32,7 @@ async function loginWithPz() {
   try {
     $('#loginSpinner').removeClass('d-none');
     $('#loginWithPz').prop('disabled', true);
-    const response = await fetch('/login', {
+    const response = await fetch('/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,6 @@ async function loginWithPz() {
     console.log({ userId: data.userId });
     tokenId = data.userId;
     $('#userId').text(data.userId);
-    $('#btnManualMode').prop('disabled', false);
     $('#btnSimpleVote').prop('disabled', false);
     if (response.ok) {
       console.log('Successfully logged in');
@@ -146,8 +145,7 @@ const onStart: { [key: string]: any } = {
   [IDENTIFY]: () => {
     const login = $('#login').val();
     if (!login) {
-      $('#btnManualMode').prop('disabled', true);
-      $('#btnSimpleVote').prop('disabled', true);
+      // $('#btnSimpleVote').prop('disabled', true);
     }
   },
   [VOTE]: () => {
@@ -187,9 +185,13 @@ $('.back').click(() => {
   showPreviousPage();
 });
 
-$('#loginWithPz').click(() => {
+$('#btnLoginWithPz').on('click', () => {
+  console.log('clicked loginWithPz');
   loginWithPz();
-});
+})
+$('#btnSimpleVote').on('click', () => {
+  console.log('btnSimpleVote clicked');
+})
 
 $('#btnVote').click(async e => {
   e.stopPropagation();
