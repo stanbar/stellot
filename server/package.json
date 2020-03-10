@@ -9,7 +9,7 @@
     "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
     "lint:prettier": "check-prettier lint",
     "start": "tsc && DEBUG=* node -r dotenv/config .",
-    "start-ts": "ts-node-dev -r dotenv/config src/main.ts",
+    "start-ts": "DEBUG=* ts-node-dev -r dotenv/config src/main.ts",
     "start:dev": "npm run lint && ts-node-dev -r dotenv/config src/main.ts",
     "test": "jest --watchAll",
     "prettier": "prettier -c --write \"**/*\"",

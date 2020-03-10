@@ -1,22 +1,25 @@
 import {
-  Transaction,
-  Memo,
-  Keypair,
-  Server,
-  Asset,
   Account,
-  TransactionBuilder,
+  Asset,
   BASE_FEE,
+  Keypair,
+  Memo,
   Networks,
   Operation,
-  MemoHash,
+  Server,
+  Transaction,
+  TransactionBuilder,
+  MemoText,
 } from 'stellar-sdk';
-import BN from 'bn.js';
-import { encodeMemo, encryptMemo, decodeCandidateCodeFromMemo } from './utils';
+import BN from 'bn.js'
+import { decodeAnswersFromMemo, encodeMemo, encryptMemo } from '~/utils';
 import { VoterSession } from './blindsig';
 
 const server = new Server('https://horizon-testnet.stellar.org');
-const distributionAccountId = 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU';
+if (!process.env.DISTRIBUTION_PUBLIC_KEY) {
+  throw new Error('process.env.DISTRIBUTION_PUBLIC_KEY can not be undefined');
+}
+const distributionAccountId = process.env.DISTRIBUTION_PUBLIC_KEY;
 
 if (!process.env.BALLOT_BOX_PUBLIC_KEY) {
   throw new Error('process.env.BALLOT_PUBLIC_KEY can not be undefined');
@@ -40,22 +43,23 @@ export interface Candidate {
   code: number;
 }
 
-const candidates: Candidate[] = [
+const ANSWERS = 1;
+const CANDIDATES: Candidate[] = [
   {
     name: 'PiS',
-    code: 0,
-  },
-  {
-    name: 'PO',
     code: 1,
   },
   {
-    name: 'SLD',
+    name: 'PO',
     code: 2,
   },
   {
-    name: 'Konfederacja',
+    name: 'SLD',
     code: 3,
+  },
+  {
+    name: 'Konfederacja',
+    code: 4,
   },
 ];
 
@@ -70,28 +74,29 @@ let sessions: Array<Session>;
 
 interface ResSession {
   id: number;
-  R: Buffer;
+  R: string; // hex
+  P: string; // hex
 }
 
 export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   // 1. Initialize interactive session
   const resSessions = await initSessions(tokenId);
+  console.log({ resSessions });
   // 2. Signer has generated X number of sessions (associated id with R),
   // will use them now to blind transaction
 
   // 3. Let's fill all session with batch of transactions on each candidate
-  sessions = await Promise.all(resSessions.map(async ({ id, R }) => {
+  const seqNumber = (await server.loadAccount(distributionAccountId)).sequenceNumber();
+  sessions = await Promise.all(resSessions.map(async ({ id, R, P }) => {
     // 3.1 Generate batch of
-    const transactionsBatch = await createRandomBatchOfTransaction(candidate);
-    const voterSession = new VoterSession(distributionKeypair.rawPublicKey(), R);
+    const transactionsBatch = await createRandomBatchOfTransaction(seqNumber, candidate);
+    const voterSession = new VoterSession(P, R);
     const session: Session = {
       id,
       voterSession,
       transactionsBatch,
-      blindedTransactionsBatch: transactionsBatch.map(tx => {
-        const txBuffer = Buffer.from(tx.transaction.toXDR());
-        return voterSession.challenge(txBuffer)
-      }),
+      blindedTransactionsBatch: transactionsBatch.map(tx =>
+        voterSession.challenge(tx.transaction.hash())),
     };
     return session;
   }));
@@ -107,16 +112,18 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, proofs);
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
+    console.error({ sessions });
     throw new Error('Could not find corresponding id session')
   }
   const { voterSession, transactionsBatch, id } = luckySession;
   const myCandidateTxIndex = transactionsBatch.findIndex(tx => tx.isMyOption);
-  if (!myCandidateTxIndex) {
+  if (myCandidateTxIndex === -1) {
+    console.error(transactionsBatch);
     throw new Error(`Could not find my option transaction in session id: ${id}`)
   }
   const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
   const tx = transactionsBatch[myCandidateTxIndex].transaction;
-  tx.addSignature(distributionKeypair.publicKey(), signature.toHex());
+  tx.addSignature(distributionKeypair.publicKey(), signature);
 
   console.log('Submiting transaction');
   // 6. Send transaction to stellar network
@@ -139,34 +146,65 @@ async function initSessions(tokenId: string): Promise<Array<ResSession>> {
     console.error('Failed to init session');
     throw new Error(await response.text());
   }
-  return response.json(); // TODO not sure if should not use await response.json()
+  const responseJson: Array<{
+    id: number,
+    R: Array<number>,
+    P: Array<number>
+  }> = await response.json();
+
+  const mapped = responseJson.map(res => ({
+    id: res.id,
+    R: Buffer.from(res.R).toString('hex'),
+    P: Buffer.from(res.P).toString('hex'),
+  }));
+  console.log({ mapped });
+  return mapped
 }
 
-interface TransactionInBatch {
-  candidateCode: number,
-  memo: Memo,
-  transaction: Transaction,
-  isMyOption: boolean
+class TransactionInBatch {
+  candidateCode: number;
+
+  memo: Memo;
+
+  transaction: Transaction;
+
+  isMyOption: boolean;
+
+  constructor(candidateCode: number, memo: Memo, transaction: Transaction, isMyOption: boolean) {
+    this.candidateCode = candidateCode;
+    this.memo = memo;
+    this.transaction = transaction;
+    this.isMyOption = isMyOption;
+  }
+
+  toJSON() {
+    return {
+      transaction: this.transaction.toXDR(),
+    }
+  }
 }
 
 type TransactionsBatch = Array<TransactionInBatch>;
 
-async function createRandomBatchOfTransaction(myCandidate: Candidate): Promise<TransactionsBatch> {
-  const seqNumber = (await server.loadAccount(distributionAccountId)).sequenceNumber();
-  const account = new Account(distributionAccountId, seqNumber);
-  const shuffledCandidates: Candidate[] = candidates
+async function createRandomBatchOfTransaction(
+  seqNumber: string,
+  myCandidate: Candidate)
+  : Promise<TransactionsBatch> {
+  const shuffledCandidates: Candidate[] = CANDIDATES
     .map(candidate => ({ sort: Math.random(), value: candidate }))
     .sort((a: any, b: any) => a.sort - b.sort)
     .map(a => a.value);
 
   return shuffledCandidates.map(candidate => {
-    const memo = Memo.hash(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('utf-8'));
-    return {
-      transaction: createTransaction(account, memo),
+    const memo = Memo.text(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('ascii'));
+    console.log({ memo });
+    const account = new Account(distributionAccountId, seqNumber);
+    return new TransactionInBatch(
+      candidate.code,
       memo,
-      candidateCode: candidate.code,
-      isMyOption: myCandidate.code === candidate.code,
-    } as TransactionInBatch;
+      createTransaction(account, memo),
+      myCandidate.code === candidate.code,
+    )
   });
 }
 
@@ -176,6 +214,7 @@ function createTransaction(account: Account, memo: Memo)
     fee: BASE_FEE,
     networkPassphrase: Networks.TESTNET,
     memo,
+    // TODO timebounds: endoftheelections
   })
     .addOperation(
       Operation.payment({
@@ -206,13 +245,13 @@ async function getChallenges(
     console.error('Failed to init session');
     throw new Error(await response.text());
   }
-  const resText: string = await response.text();
-  return Number(resText);
+  const res: { luckyBatchTransaction: number } = await response.json();
+  return res.luckyBatchTransaction;
 }
 
 async function proofChallenge(tokenId: string, proofs: Session[])
   : Promise<{ id: number, sigs: Array<BN> }> {
-  const response = await fetch('/api/proofChallenge', {
+  const response = await fetch('/api/proofChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -226,7 +265,9 @@ async function proofChallenge(tokenId: string, proofs: Session[])
     console.error('Failed to init session');
     throw new Error(await response.text());
   }
-  return response.json();
+  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await response.json();
+  signedLuckyBatch.sigs = signedLuckyBatch.sigs.map(sig => new BN(sig, 16));
+  return signedLuckyBatch
 }
 
 export interface Result {
@@ -248,16 +289,22 @@ export async function fetchResults(): Promise<Result[]> {
       tx.asset_issuer === voteToken.issuer,
   ).map(payment => payment.transaction()));
 
-  const results = candidates.map(candidate => ({
+  const results = CANDIDATES.map(candidate => ({
     candidate,
     votes: 0,
   }));
 
   transactions
-    .filter(tx => tx.memo_type === MemoHash && tx.memo)
+    .filter(tx => tx.memo_type === MemoText && tx.memo)
     .forEach(tx => {
-      const candidateCode = decodeCandidateCodeFromMemo(tx.memo!);
-      results[candidateCode].votes += 1;
+      const candidateCode: Array<number> = decodeAnswersFromMemo(tx.memo!, ANSWERS);
+      const result = results.find(it => it.candidate.code === candidateCode[0]);
+      if (result === undefined) {
+        console.log(`Detected invalid vote on candidateCode: ${candidateCode}`)
+      } else {
+        result.votes += 1;
+        console.log(`Detected valid vote on candidateCode: ${candidateCode}`)
+      }
     });
   return results;
 }

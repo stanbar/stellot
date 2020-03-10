@@ -4,7 +4,7 @@
   "description": "Stellar election smart contract ",
   "main": "src/index.html",
   "scripts": {
-    "start": "parcel src/index.html --open",
+    "start": "node server.js",
     "build": "parcel build src/index.html --out-dir ../docs"
   },
   "browserslist": [
@@ -41,6 +41,7 @@
     "express": "~4.16.1",
     "fetch": "^1.1.0",
     "jquery": "^3.4.1",
+    "minimalistic-crypto-utils": "^1.0.1",
     "morgan": "~1.9.1",
     "parcel-proxy-server": "^1.1.0",
     "particles.js": "^2.0.0",

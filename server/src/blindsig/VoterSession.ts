@@ -38,4 +38,13 @@ export default class VoterSession {
     // @ts-ignore
     return ed25519.makeSignature({ R: this.R, S })
   }
+
+  toJSON() {
+    return {
+      a: this.a,
+      b: this.b,
+      P: ed25519.encodePoint(this.P),
+      R: ed25519.encodePoint(this.R),
+    }
+  }
 }

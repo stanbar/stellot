@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.css'
 import * as d3 from 'd3';
 import 'particles.js';
 
-import particlesJson from './assets/particles.json';
 import { voteOnCandidate, Candidate, fetchResults, Result } from './stellar';
+import particlesJson from './assets/particles.json';
 
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -21,6 +21,7 @@ let tokenId: string;
 
 function showError(message: string) {
   $('#alert-text').text(message);
+  // @ts-ignore
   $('.alert').addClass('show').alert();
 }
 
@@ -50,6 +51,7 @@ async function loginWithPz() {
       console.error('Failed to login');
       throw new Error(response.statusText);
     }
+    // @ts-ignore
     $('#loginWithPzModal').modal('hide');
   } finally {
     $('#loginSpinner').addClass('d-none');
@@ -145,7 +147,7 @@ const onStart: { [key: string]: any } = {
   [IDENTIFY]: () => {
     const login = $('#login').val();
     if (!login) {
-      // $('#btnSimpleVote').prop('disabled', true);
+      $('#btnSimpleVote').prop('disabled', true);
     }
   },
   [VOTE]: () => {
@@ -188,12 +190,13 @@ $('.back').click(() => {
 $('#btnLoginWithPz').on('click', () => {
   console.log('clicked loginWithPz');
   loginWithPz();
-})
+});
+
 $('#btnSimpleVote').on('click', () => {
   console.log('btnSimpleVote clicked');
-})
+});
 
-$('#btnVote').click(async e => {
+$('#btnVote').on('click', async e => {
   e.stopPropagation();
   // await signAndSendVote()
   try {
