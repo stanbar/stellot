@@ -3,18 +3,18 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import crypto from 'crypto';
-// import debug from 'debug';
 
 import {
   isAlreadyInitedSession,
   createSession,
   ChallengeRequest,
   storeAndPickLuckyBatch,
-  proofChallenge,
+  proofChallenges,
   Proof,
 } from './stellar';
 
-// const log = debug('server:app');
+const debug = require('debug')('stellar-voting:app');
+
 const app = express();
 export default app;
 
@@ -26,6 +26,7 @@ app.use(express.static(path.join(__dirname, '../docs')));
 
 app.post('/api/init', async (req, res) => {
   const { tokenId } = req.body;
+  debug(`tokenId: ${tokenId}`);
   const isAlreadyInited = isAlreadyInitedSession(tokenId);
   if (isAlreadyInited) {
     return res.status(405).send('Session already inited');
@@ -34,19 +35,22 @@ app.post('/api/init', async (req, res) => {
   return res.status(200).send(session);
 });
 
-app.post('/api/getChallenge', async (req, res) => {
+app.post('/api/getChallenges', async (req, res) => {
   const { tokenId, blindedTransactionBatches }
     : { tokenId: string, blindedTransactionBatches: ChallengeRequest } = req.body;
+  debug(`tokenId: ${tokenId}`);
   const luckyBatchIndex = storeAndPickLuckyBatch(tokenId, blindedTransactionBatches);
   return res.status(200).send({ luckyBatchIndex });
 });
 
-app.post('/api/proofChallenge', async (req, res) => {
+app.post('/api/proofChallenges', async (req, res) => {
   const { tokenId, proofs }: { tokenId: string, proofs: Proof[] } = req.body;
+  debug(`tokenId: ${tokenId}`);
   try {
-    const signedBatch = proofChallenge(tokenId, proofs);
+    const signedBatch = proofChallenges(tokenId, proofs);
     return res.status(200).send(signedBatch);
   } catch (e) {
+    console.error(e);
     return res.status(405).send(e.message);
   }
 });
@@ -73,6 +77,6 @@ if (!process.env.WEBAPP_DIR) {
   throw new Error('Could not find webapp dir');
 }
 
-// app.use('/*', (req, res) => {
-//   res.sendFile(path.join(process.env.WEBAPP_DIR!, 'index.html'));
-// });
+app.use('/*', (req, res) => {
+  res.sendFile(path.join(process.env.WEBAPP_DIR!, 'index.html'));
+});

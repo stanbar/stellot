@@ -95,6 +95,5 @@ export function validateTransaction(txn: string) {
  */
 
 export function validateProof(challenge: ChallengeSession, proof: Proof): boolean {
-  console.log(challenge, proof);
   return true
 }

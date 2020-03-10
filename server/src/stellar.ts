@@ -41,21 +41,26 @@ export interface ChallengeSession extends InitSession {
 const challengeSessions: Map<string, Array<ChallengeSession>> = new Map();
 
 
-const cutAndChooseCount = 100;
+const cutAndChooseCount = 2;
 
 export interface InitResponse {
   id: number;
   R: Buffer;
+  P: Buffer;
 }
 
 export function createSession(tokenId: string): Array<InitResponse> {
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
   for (let i = 0; i < cutAndChooseCount; i += 1) {
-    const signerSession = new SignerSession(
-      distributionKeypair.rawSecretKey(),
-      distributionKeypair.rawPublicKey());
-    response[i] = { id: i, R: ed25519.encodePoint(signerSession.publicNonce()) };
+    const signerSession = new SignerSession(distributionKeypair.rawSecretKey());
+    const R = signerSession.publicNonce();
+    const P = signerSession.publicKey();
+    response[i] = {
+      id: i,
+      R: ed25519.encodePoint(R),
+      P: ed25519.encodePoint(P),
+    };
     userSessions[i] = { id: i, signerSession };
   }
   initSessions.set(tokenId, userSessions);
@@ -109,12 +114,12 @@ export function isAlreadyProofedSession(tokenId: string) {
 
 export interface Proof {
   id: number;
-  voterSession: VoterSession;
+  voterSession: { a: BN, b: BN, P: Buffer, R: Buffer };
   transactionsBatch: TransactionsBatch,
   blindedTransactionsBatch: Array<BN>
 }
 
-export function proofChallenge(tokenId: string, proofs: Proof[]) {
+export function proofChallenges(tokenId: string, proofs: Proof[]) {
   const challengeSession = challengeSessions.get(tokenId);
   if (!challengeSession) {
     throw new Error('Could not find corresponding challenge session')
@@ -132,6 +137,9 @@ export function proofChallenge(tokenId: string, proofs: Proof[]) {
   return signTransactionBatch(luckySession);
 }
 
-function signTransactionBatch(session: ChallengeSession): Array<BN> {
-  return session.blindedTransactionsBatch.map(btx => session.signerSession.sign(btx))
+function signTransactionBatch(session: ChallengeSession): { id: number, sigs: Array<BN> } {
+  return ({
+    id: session.id,
+    sigs: session.blindedTransactionsBatch.map(btx => session.signerSession.sign(new BN(btx, 16))),
+  })
 }

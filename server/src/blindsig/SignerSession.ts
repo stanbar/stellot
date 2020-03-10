@@ -12,18 +12,21 @@ export default class SignerSession {
 
   private readonly R: eddsa.Point;
 
-  constructor(secretKey: Buffer, publicKey: Buffer) {
-    this.x = ed25519.decodeInt(secretKey);
-    this.P = ed25519.decodePoint(publicKey);
+  constructor(secretKey: Buffer) {
+    const keypair = ed25519.keyFromSecret(secretKey);
+    // @ts-ignore
+    this.x = keypair.priv();
+    // @ts-ignore
+    this.P = keypair.pub();
     this.k = randomScalar();
     this.R = ed25519.curve.g.mul(this.k)
   }
 
-  publicKey() {
+  publicKey(): eddsa.Point {
     return this.P
   }
 
-  publicNonce() {
+  publicNonce(): eddsa.Point {
     return this.R
   }
 

@@ -22,7 +22,7 @@ const server = new ParcelProxyServer({
   proxies: {
     // add proxies here
     '/api': {
-      target: 'http://localhost:8082/api',
+      target: 'http://localhost:8082/',
     },
   },
 });
