@@ -1,14 +1,11 @@
-dist
-node_modules
-.cache
-.idea
+server.cert
+server.key
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
 # Runtime data
 pids
 *.pid
@@ -60,5 +57,5 @@ typings/
 
 # next.js build output
 .next
-node_modules
-.idea/
+.cache/
+dist/
