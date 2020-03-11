@@ -12,9 +12,9 @@ import {
   MemoText,
 } from 'stellar-sdk';
 import BN from 'bn.js'
-import { decodeAnswersFromMemo, encodeMemo, encryptMemo } from '~/utils';
-import { VoterSession } from '~/blindsig';
 import $ from 'jquery';
+import { decodeAnswersFromMemo, encodeMemo, encryptMemo } from './utils';
+import { VoterSession } from './blindsig';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 if (!process.env.DISTRIBUTION_PUBLIC_KEY) {
