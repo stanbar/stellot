@@ -64,7 +64,15 @@ async function performVote() {
     showError('Please select candidate first');
     return;
   }
-  await voteOnCandidate(tokenId, selectedCandidate);
+  $('#btnVote').prop('disabled', true);
+  $('#voteStatusSpinner').removeClass('d-none');
+  try {
+    await voteOnCandidate(tokenId, selectedCandidate);
+    $('#btnVote').prop('disabled', true);
+  } catch (e) {
+    $('#btnVote').prop('disabled', false);
+    $('#voteStatusSpinner').addClass('d-none');
+  }
 }
 
 
@@ -196,9 +204,13 @@ $('#btnSimpleVote').on('click', () => {
   console.log('btnSimpleVote clicked');
 });
 
+$('#btnShowResults').on('click', () => {
+  currentSectionIndex = sections.findIndex(section => section === RESULTS);
+  render();
+});
+
 $('#btnVote').on('click', async e => {
   e.stopPropagation();
-  // await signAndSendVote()
   try {
     await performVote();
     showNextPage();
