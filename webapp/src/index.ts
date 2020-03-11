@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.css'
 import * as d3 from 'd3';
 import 'particles.js';
 
-import { voteOnCandidate, Candidate, fetchResults, Result } from './stellar';
-import particlesJson from './assets/particles.json';
+import { voteOnCandidate, Candidate, fetchResults, Result } from '~/stellar';
+import particlesJson from '~/assets/particles.json';
 
 // @ts-ignore
 // eslint-disable-next-line no-undef
