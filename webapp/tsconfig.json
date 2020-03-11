@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "jsx": "preserve",
+    "target": "esnext",
+    "module": "esnext",
     "esModuleInterop": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es6", "dom", "esnext.asynciterable"],
     "rootDir": "src",
     "moduleResolution": "node"
   },

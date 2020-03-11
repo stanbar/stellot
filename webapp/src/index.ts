@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import * as d3 from 'd3';
 import 'particles.js';
 
-import { voteOnCandidate, Candidate, fetchResults, Result } from './stellar';
+import { voteOnCandidate, Candidate, fetchResults, Result, CANDIDATES } from './stellar';
 import particlesJson from './assets/particles.json';
 
 // @ts-ignore
@@ -67,7 +67,9 @@ async function performVote() {
   $('#btnVote').prop('disabled', true);
   $('#voteStatusSpinner').removeClass('d-none');
   try {
-    await voteOnCandidate(tokenId, selectedCandidate);
+    for await (const message of voteOnCandidate(tokenId, selectedCandidate)) {
+      $('#btnVote').html(message);
+    }
     $('#btnVote').prop('disabled', true);
   } catch (e) {
     $('#btnVote').prop('disabled', false);
@@ -76,27 +78,21 @@ async function performVote() {
 }
 
 
-async function createPartiesList() {
-  const partiesWithVotes = await fetchResults();
+function createPartiesList() {
   const list = $('#party-list');
-  partiesWithVotes.forEach(candidate => {
+  CANDIDATES.forEach(candidate => {
     console.log({ candidate });
     const li = $('<li/>')
       .addClass(
         'list-group-item list-group-item-action d-flex justify-content-between align-items-center',
       )
-      .text(candidate.candidate.name)
+      .text(candidate.name)
       .click(() => {
-        selectedCandidate = candidate.candidate;
+        selectedCandidate = candidate;
         $('#party-list > li').removeClass('active');
         li.addClass('active');
       })
       .appendTo(list);
-
-    $('<span/>')
-      .addClass('badge badge-primary badge-pill')
-      .text(candidate.votes || 0)
-      .appendTo(li);
 
     return li;
   });
@@ -204,7 +200,7 @@ $('#btnSimpleVote').on('click', () => {
   console.log('btnSimpleVote clicked');
 });
 
-$('#btnShowResults').on('click', () => {
+$('.btnShowResults').on('click', () => {
   currentSectionIndex = sections.findIndex(section => section === RESULTS);
   render();
 });
