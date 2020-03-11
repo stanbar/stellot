@@ -6,4 +6,6 @@ services:
     env_file: ".env"
     ports:
       - "${PORT}:${PORT}"
+    volumes:
+      - "${WEBAPP_DIR}:${WEBAPP_DIR}"
     restart: 'unless-stopped'
