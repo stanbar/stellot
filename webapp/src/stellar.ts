@@ -14,6 +14,7 @@ import {
 import BN from 'bn.js'
 import { decodeAnswersFromMemo, encodeMemo, encryptMemo } from '~/utils';
 import { VoterSession } from './blindsig';
+import $ from 'jquery';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 if (!process.env.DISTRIBUTION_PUBLIC_KEY) {
@@ -80,13 +81,16 @@ interface ResSession {
 
 export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   // 1. Initialize interactive session
+  $('#btnVote').html('Initializing');
   const resSessions = await initSessions(tokenId);
   console.log({ resSessions });
   // 2. Signer has generated X number of sessions (associated id with R),
   // will use them now to blind transaction
 
   // 3. Let's fill all session with batch of transactions on each candidate
+  $('#btnVote').html('Fetching sequence number from stellar network');
   const seqNumber = (await server.loadAccount(distributionAccountId)).sequenceNumber();
+  $('#btnVote').html('Creating blind transactions');
   sessions = await Promise.all(resSessions.map(async ({ id, R, P }) => {
     // 3.1 Generate batch of
     const transactionsBatch = await createRandomBatchOfTransaction(seqNumber, candidate);
@@ -102,6 +106,7 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
   }));
 
   // 4. Request challenges given blindedTransactions
+  $('#btnVote').html('Requested challenge');
   const luckyBatchIndex = await getChallenges(
     tokenId, sessions.map(session =>
       ({ id: session.id, blindedTransactionBatch: session.blindedTransactionsBatch })),
@@ -109,6 +114,7 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
 
   const proofs = sessions.filter((_, index) => index !== luckyBatchIndex);
   // 5. Proof my honesty, and receive signed blind transacion in result
+  $('#btnVote').html('Proofing challenge');
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, proofs);
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
@@ -121,13 +127,16 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
     console.error(transactionsBatch);
     throw new Error(`Could not find my option transaction in session id: ${id}`)
   }
+  $('#btnVote').html('Calculating signature');
   const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
   const tx = transactionsBatch[myCandidateTxIndex].transaction;
   tx.addSignature(distributionKeypair.publicKey(), signature);
 
   console.log('Submiting transaction');
   // 6. Send transaction to stellar network
+  $('#btnVote').html('Casting vote');
   await server.submitTransaction(tx);
+  $('#btnVote').html('Done!');
   console.log('Successfully submitted transaction to stellar network');
 }
 
