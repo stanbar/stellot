@@ -1,8 +1,0 @@
-[[CURRENCIES]]
-code="Vote01122019"
-issuer="GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH"
-display_decimals=7
-name="Voting token for election in 01/12/2019"
-desc="1 token allows you to vote for one of eligible party"
-conditions="There is only 100 eligible voters, in order to issue token, one have to provide ID to the system"
-# image="https://pbs.twimg.com/profile_images/666921221410439168/iriHah4f.jpg"
