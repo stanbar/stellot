@@ -18,6 +18,7 @@
     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     /* Redirect output structure to the directory. */
+    "outDir":"./dist",
     "rootDir": "./src",
     /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                     /* Enable project compilation */
