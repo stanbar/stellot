@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import crypto from 'crypto';
@@ -22,7 +21,10 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../docs')));
+if (!process.env.WEBAPP_DIR) {
+  throw new Error('Could not find webapp dir');
+}
+app.use(express.static(process.env.WEBAPP_DIR!));
 
 app.post('/api/init', async (req, res) => {
   const { tokenId } = req.body;
@@ -71,12 +73,4 @@ app.post('/api/login', (req, res) => {
         .substring(0, 16),
     })
     .end();
-});
-
-if (!process.env.WEBAPP_DIR) {
-  throw new Error('Could not find webapp dir');
-}
-
-app.use('/*', (req, res) => {
-  res.sendFile(path.join(process.env.WEBAPP_DIR!, 'index.html'));
 });

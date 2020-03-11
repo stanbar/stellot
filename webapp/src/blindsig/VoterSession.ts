@@ -1,7 +1,7 @@
 import { eddsa } from 'elliptic';
 import BN from 'bn.js'
-import { ed25519 } from '~/blindsig';
-import { randomScalar, bytesToBase64 } from '~/utils'
+import { ed25519 } from './index';
+import { randomScalar, bytesToBase64 } from '../utils'
 
 export default class VoterSession {
   private readonly a: BN;
@@ -35,6 +35,7 @@ export default class VoterSession {
 
   signature(s: BN) {
     const S = s.add(this.a).umod(ed25519.curve.n);
+    // @ts-ignore
     const signature = ed25519.encodePoint(this.R).concat(ed25519.encodeInt(S));
     console.log({ signature: bytesToBase64(signature) });
     return bytesToBase64(signature);
