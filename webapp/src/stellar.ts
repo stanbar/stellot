@@ -4,15 +4,14 @@ import {
   BASE_FEE,
   Keypair,
   Memo,
+  MemoText,
   Networks,
   Operation,
   Server,
   Transaction,
   TransactionBuilder,
-  MemoText,
 } from 'stellar-sdk';
 import BN from 'bn.js'
-import $ from 'jquery';
 import { decodeAnswersFromMemo, encodeMemo, encryptMemo } from './utils';
 import { VoterSession } from './blindsig';
 
@@ -45,7 +44,7 @@ export interface Candidate {
 }
 
 const ANSWERS = 1;
-const CANDIDATES: Candidate[] = [
+export const CANDIDATES: Candidate[] = [
   {
     name: 'PiS',
     code: 1,
@@ -79,18 +78,14 @@ interface ResSession {
   P: string; // hex
 }
 
-export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
-  // 1. Initialize interactive session
-  $('#btnVote').html('Initializing');
-  const resSessions = await initSessions(tokenId);
-  console.log({ resSessions });
-  // 2. Signer has generated X number of sessions (associated id with R),
-  // will use them now to blind transaction
+interface Proof {
+  id: number;
+  voterSession: { a: BN, b: BN };
+  transactionsBatch: TransactionsBatch;
+}
 
-  // 3. Let's fill all session with batch of transactions on each candidate
-  $('#btnVote').html('Fetching sequence number from stellar network');
+async function createTransactions(resSessions: Array<ResSession>, candidate: Candidate) {
   const seqNumber = (await server.loadAccount(distributionAccountId)).sequenceNumber();
-  $('#btnVote').html('Creating blind transactions');
   sessions = await Promise.all(resSessions.map(async ({ id, R, P }) => {
     // 3.1 Generate batch of
     const transactionsBatch = await createRandomBatchOfTransaction(seqNumber, candidate);
@@ -104,17 +99,42 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
     };
     return session;
   }));
+}
+
+function createProofs(luckyBatchIndex: number) {
+  return sessions
+    .filter((_, index) => index !== luckyBatchIndex)
+    .map(session => ({
+      id: session.id,
+      voterSession: session.voterSession.proof(),
+      transactionsBatch: session.transactionsBatch,
+    }));
+}
+
+function createBlindTransactions() {
+  return sessions.map(session =>
+    ({ id: session.id, blindedTransactionBatch: session.blindedTransactionsBatch }));
+}
+
+export async function* voteOnCandidate(tokenId: string, candidate: Candidate) {
+  // 1. Initialize interactive session
+  yield 'Initializing';
+  const resSessions = await initSessions(tokenId);
+  console.log({ resSessions });
+  // 2. Signer has generated X number of sessions (associated id with R),
+  // will use them now to blind transaction
+
+  // 3. Let's fill all session with batch of transactions on each candidate
+  yield 'Creating blind transactions';
+  await createTransactions(resSessions, candidate);
 
   // 4. Request challenges given blindedTransactions
-  $('#btnVote').html('Requested challenge');
-  const luckyBatchIndex = await getChallenges(
-    tokenId, sessions.map(session =>
-      ({ id: session.id, blindedTransactionBatch: session.blindedTransactionsBatch })),
-  );
-
-  const proofs = sessions.filter((_, index) => index !== luckyBatchIndex);
+  yield 'Requested challenge';
+  const blindTransactions = createBlindTransactions();
+  const luckyBatchIndex = await getChallenges(tokenId, blindTransactions);
   // 5. Proof my honesty, and receive signed blind transacion in result
-  $('#btnVote').html('Proofing challenge');
+  yield 'Proofing challenge';
+  const proofs = createProofs(luckyBatchIndex);
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, proofs);
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
@@ -127,16 +147,16 @@ export async function voteOnCandidate(tokenId: string, candidate: Candidate) {
     console.error(transactionsBatch);
     throw new Error(`Could not find my option transaction in session id: ${id}`)
   }
-  $('#btnVote').html('Calculating signature');
+  yield 'Calculating signature';
   const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
   const tx = transactionsBatch[myCandidateTxIndex].transaction;
   tx.addSignature(distributionKeypair.publicKey(), signature);
 
   console.log('Submiting transaction');
   // 6. Send transaction to stellar network
-  $('#btnVote').html('Casting vote');
+  yield 'Casting vote';
   await server.submitTransaction(tx);
-  $('#btnVote').html('Done!');
+  yield 'Done';
   console.log('Successfully submitted transaction to stellar network');
 }
 
@@ -206,7 +226,6 @@ async function createRandomBatchOfTransaction(
 
   return shuffledCandidates.map(candidate => {
     const memo = Memo.text(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('ascii'));
-    console.log({ memo });
     const account = new Account(distributionAccountId, seqNumber);
     return new TransactionInBatch(
       candidate.code,
@@ -249,17 +268,18 @@ async function getChallenges(
   });
 
   if (response.ok) {
-    console.log('Successfully inited session');
+    console.log('Successfully received challenges');
   } else {
-    console.error('Failed to init session');
+    console.error('Failed to receive challenges');
     throw new Error(await response.text());
   }
   const res: { luckyBatchTransaction: number } = await response.json();
   return res.luckyBatchTransaction;
 }
 
-async function proofChallenge(tokenId: string, proofs: Session[])
+async function proofChallenge(tokenId: string, proofs: Proof[])
   : Promise<{ id: number, sigs: Array<BN> }> {
+  console.log({ proofs: JSON.stringify({ tokenId, proofs }) });
   const response = await fetch('/api/proofChallenges', {
     method: 'POST',
     headers: {
@@ -269,12 +289,13 @@ async function proofChallenge(tokenId: string, proofs: Session[])
   });
 
   if (response.ok) {
-    console.log('Successfully inited session');
+    console.log('Successfully proofed challenges');
   } else {
-    console.error('Failed to init session');
+    console.error('Failed to proof challenges');
     throw new Error(await response.text());
   }
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await response.json();
+  // TODO is it really needed ?
   signedLuckyBatch.sigs = signedLuckyBatch.sigs.map(sig => new BN(sig, 16));
   return signedLuckyBatch
 }

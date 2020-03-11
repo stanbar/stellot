@@ -33,6 +33,10 @@ export default class VoterSession {
       .umod(ed25519.curve.n)
   }
 
+  proof(): { a: BN, b: BN } {
+    return { a: this.a, b: this.b }
+  }
+
   signature(s: BN) {
     const S = s.add(this.a).umod(ed25519.curve.n);
     // @ts-ignore

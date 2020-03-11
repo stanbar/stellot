@@ -41,7 +41,7 @@ export interface ChallengeSession extends InitSession {
 const challengeSessions: Map<string, Array<ChallengeSession>> = new Map();
 
 
-const cutAndChooseCount = 2;
+const cutAndChooseCount = 100;
 
 export interface InitResponse {
   id: number;
@@ -114,9 +114,8 @@ export function isAlreadyProofedSession(tokenId: string) {
 
 export interface Proof {
   id: number;
-  voterSession: { a: BN, b: BN, P: Buffer, R: Buffer };
-  transactionsBatch: TransactionsBatch,
-  blindedTransactionsBatch: Array<BN>
+  voterSession: { a: BN, b: BN };
+  transactionsBatch: TransactionsBatch;
 }
 
 export function proofChallenges(tokenId: string, proofs: Proof[]) {
