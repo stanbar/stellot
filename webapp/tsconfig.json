@@ -21,7 +21,7 @@
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./dist",
     /* Redirect output structure to the directory. */
-    "rootDir": "./src",
+    // "rootDir": "./src",
     /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                     /* Enable project compilation */
     // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
@@ -59,6 +59,7 @@
     "paths": {
       "~*": ["./*"]
     },
+    "typeRoots": ["node_modules/@types"],
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
     // "types": [],                           /* Type declaration files to be included in compilation. */
@@ -77,14 +78,13 @@
     /* Experimental Options */
     // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMoetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+//    "emitDecoratorMetadata": true,
+//    "experimentalDecorators": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "node_modules",
     "node_modules",
     "build",
     "dist",

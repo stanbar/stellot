@@ -12,8 +12,8 @@ const server = new ParcelProxyServer({
     //
     // More info on supported options are documented at
     // https://parceljs.org/api
-    https: false,
-    publicUrl: '/',
+    // https: false,
+    // publicUrl: '.',
     outDir: '../docs',
     outFile: 'index.html',
     watch: true,

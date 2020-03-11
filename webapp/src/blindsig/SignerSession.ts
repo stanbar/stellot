@@ -1,7 +1,7 @@
 import { eddsa } from 'elliptic';
 import BN from 'bn.js';
-import { ed25519 } from './index';
-import { randomScalar } from '../utils'
+import { ed25519 } from '~/blindsig';
+import { randomScalar } from '~utils'
 
 export default class SignerSession {
   private readonly k: BN;
