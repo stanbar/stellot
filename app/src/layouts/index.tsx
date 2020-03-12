@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './index.css';
-import { Layout, Typography } from 'antd';
+import { Layout } from 'antd';
 import logo from '@/assets/stellotLogo.png';
 
 const { Header, Footer, Content } = Layout;

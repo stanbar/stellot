@@ -2,6 +2,10 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "moduleResolution": "node",
     "importHelpers": true,
     "jsx": "react",
@@ -9,9 +13,30 @@
     "sourceMap": true,
     "baseUrl": ".",
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "allowSyntheticDefaultImports": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "jest",
+    "src/setupTests.ts",
+    "tslint:latest",
+    "tslint-config-prettier"
+  ]
 }
