@@ -1,20 +1,10 @@
-import { Keypair, Asset, Memo, Transaction } from 'stellar-sdk'
+import { Keypair, Memo, Transaction } from 'stellar-sdk'
 import BN from 'bn.js';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
-
-export const distributionKeypair = Keypair.fromSecret(process.env.DISTRIBUTION_SECRET_KEY!);
-
-if (!process.env.ASSET_NAME) {
-  throw new Error('process.env.ASSET_NAME can not be undefined');
-}
-if (!process.env.ISSUE_PUBLIC_KEY) {
-  throw new Error('process.env.ISSUE_PUBLIC_KEY can not be undefined');
-}
-
-export const voteToken =
-  new Asset(process.env.ASSET_NAME!, process.env.ISSUE_PUBLIC_KEY);
+import Voting from './types/voting';
+import { getKeychain } from './database';
 
 export interface Candidate {
   name: string;
@@ -28,7 +18,7 @@ interface InitSession {
 
 const initSessions: Map<string, Array<InitSession>> = new Map();
 
-export function isAlreadyInitedSession(tokenId: string) {
+export function isAlreadyInitedSession(tokenId: string, votingId: string) {
   return initSessions.get(tokenId) !== undefined;
 }
 
@@ -39,8 +29,6 @@ export interface ChallengeSession extends InitSession {
 }
 
 const challengeSessions: Map<string, Array<ChallengeSession>> = new Map();
-
-
 const cutAndChooseCount = 100;
 
 export interface InitResponse {
@@ -49,7 +37,9 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(tokenId: string): Array<InitResponse> {
+export function createSession(tokenId: string, voting: Voting): Array<InitResponse> {
+  const keyChain = getKeychain(voting.id);
+  const distributionKeypair = Keypair.fromSecret(keyChain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
   for (let i = 0; i < cutAndChooseCount; i += 1) {

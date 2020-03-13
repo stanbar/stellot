@@ -11,6 +11,8 @@ import {
   proofChallenges,
   Proof,
 } from './stellar';
+import * as database from './database';
+import { getAllPublicVotes } from './database';
 
 const debug = require('debug')('stellar-voting:app');
 
@@ -27,13 +29,14 @@ if (!process.env.WEBAPP_DIR) {
 app.use(express.static(process.env.WEBAPP_DIR!));
 
 app.post('/api/init', async (req, res) => {
-  const { tokenId } = req.body;
+  const { tokenId, votingId } = req.body;
   debug(`tokenId: ${tokenId}`);
-  const isAlreadyInited = isAlreadyInitedSession(tokenId);
+  const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
   if (isAlreadyInited) {
     return res.status(405).send('Session already inited');
   }
-  const session = createSession(tokenId);
+  const voting = database.getVoting(votingId);
+  const session = createSession(tokenId, voting);
   return res.status(200).send(session);
 });
 
@@ -74,3 +77,16 @@ app.post('/api/login', (req, res) => {
     })
     .end();
 });
+
+
+app.post('/api/voting', (req, res) => {
+  const { voteId } = req.body;
+  if (voteId) {
+    return res.sendStatus(400).end();
+  }
+  return res
+    .json(getAllPublicVotes()[0])
+    .end();
+});
+
+app.get('/api/wall', (req, res) => res.json(getAllPublicVotes()));
