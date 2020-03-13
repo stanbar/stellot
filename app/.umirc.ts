@@ -34,6 +34,11 @@ const config: IConfig = {
       // },
     },
   },
+  copy: [{
+    from: 'CNAME',
+    to: '.'
+  }],
+  outputPath: '../docs'
 };
 
 export default config;
