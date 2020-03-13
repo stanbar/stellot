@@ -1,7 +1,6 @@
 import { IConfig } from 'umi-types';
-
 // ref: https://umijs.org/config/
-const config: IConfig =  {
+const config: IConfig = {
   treeShaking: true,
   plugins: [
     // ref: https://umijs.org/plugin/umi-plugin-react.html
@@ -26,6 +25,15 @@ const config: IConfig =  {
       },
     }],
   ],
-}
+  proxy: {
+    '/api/': {
+      target: 'http://localhost:8082/',
+      changeOrigin: true,
+      // pathRewrite: {
+      //   '^/api': '',
+      // },
+    },
+  },
+};
 
 export default config;
