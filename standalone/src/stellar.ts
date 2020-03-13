@@ -22,7 +22,7 @@ if (!process.env.DISTRIBUTION_PUBLIC_KEY) {
 const distributionAccountId = process.env.DISTRIBUTION_PUBLIC_KEY;
 
 if (!process.env.BALLOT_BOX_PUBLIC_KEY) {
-  throw new Error('process.env.BALLOT_PUBLIC_KEY can not be undefined');
+  throw new Error('process.env.BALLOT_BOX_PUBLIC_KEY can not be undefined');
 }
 const ballotAccountId = process.env.BALLOT_BOX_PUBLIC_KEY;
 
