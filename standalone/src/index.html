@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Voting Stellar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Voting system build on stellar network"/>
+  <meta name="author" content="Stanislaw Baranski"/>
+  <link rel="stylesheet" media="screen" href="css/style.css"/>
+</head>
+
+<body>
+<div class="container text-center">
+  <div id="particles-js"></div>
+  <div id="app" class="container-lg col-md-6">
+    <div id="identify">
+      <h1 class="mt-5">Stellot</h1>
+      <h4>Stellar Voting Platform</h4>
+      <div class="card mx-auto border-secondary bg-light mb-3 mt-5" style="max-width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">
+            Please login with Profil Zaufany
+          </h5>
+          <button class="mx-auto" data-toggle="modal" data-target="#loginWithPzModal">
+            <img src="pz_logo.png" width="100" alt="profil zaufany logo"/>
+          </button>
+        </div>
+        <button id="btnSimpleVote" class="btn mx-auto btn-primary btn-block next" style="max-width: 18rem;">Start
+        </button>
+      </div>
+
+      <div class="modal fade" id="loginWithPzModal" tabindex="-1" role="dialog" aria-labelledby="loginWithPzLabel"
+           aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="loginWithPzLabel">Login with Profil Zaufany</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="login">Login:</label>
+                <input id="login" type="text" required class="form-control"/>
+              </div>
+              <div class="form-group">
+                <label for="password">Password:</label>
+                <input id="password" type="password" required class="form-control"/>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" id="btnLoginWithPz" class="btn btn-primary">
+              <span class="spinner-border spinner-border-sm d-none" id="loginSpinner" role="status"
+                    aria-hidden="true"></span>
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="d-none">UserID: <span id="userId"></span></p>
+      <button class="btnShowResults btn mx-auto btn-outline-secondary btn-block" style="max-width: 18rem;">Show
+        Results
+      </button>
+    </div>
+
+
+    <div id="vote">
+      <h1 class="mt-5">Choose your candidate</h1>
+      <ul id="party-list" class="list-group mx-auto col-lg-10 col-xl-8 my-3">
+      </ul>
+      <button id="btnVote" class="btn mx-auto btn-primary col-lg-10 col-xl-8 btn-block" type="button">
+      <span class="spinner-border spinner-border-sm d-none" id="voteStatusSpinner" role="status"
+            aria-hidden="true"></span>
+        Vote
+      </button>
+      <div class="my-3">
+        <button class="btn btn-light back">Back</button>
+        <button class="btn btn-outline-primary next">Show results</button>
+      </div>
+    </div>
+
+    <div id="results">
+      <h1 class="mt-5">Results</h1>
+      <div id="resultsPlot"></div>
+      <button class="btn btn-light back">Back</button>
+    </div>
+    <div class="alert alert-warning alert-dismissible fade" role="alert">
+      <span id="alert-text">Error</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="./index.ts"></script>
+</body>
+</html>
