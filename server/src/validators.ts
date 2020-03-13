@@ -2,7 +2,7 @@
 import { ChallengeSession, Proof } from './stellar';
 
 if (!process.env.BALLOT_BOX_PUBLIC_KEY) {
-  throw new Error('process.env.BALLOT_PUBLIC_KEY can not be undefined');
+  throw new Error('process.env.BALLOT_BOX_PUBLIC_KEY can not be undefined');
 }
 
 /*
