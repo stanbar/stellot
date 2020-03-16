@@ -1,5 +1,6 @@
-import Voting from './types/voting';
+import Voting, { Authorization, Visibility } from './types/voting';
 import Option from './types/option';
+import { Keypair } from 'stellar-sdk';
 
 const issues: { [votingId: string]: { [userId: string]: boolean } } = {};
 const votings: { [votingId: string]: Voting } = {};
@@ -35,8 +36,12 @@ votings.presidentElection2019 = {
   assetCode: 'Vote01122019',
   distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
   ballotBoxAccountId: 'GCIHXHZJNZYYQ6P63NMJWXGY6LDMSXRTBCKPNNOJLTE5NI4UBGWM4DAJ',
-  authorizationCode: 'code',
-  visibility: 'public',
+  votesCap: 100,
+  authorization: Authorization.PUBLIC,
+  visibility: Visibility.PUBLIC,
+  encrypted: false,
+  startDate: new Date(2020, 1),
+  endDate: new Date(2020, 12),
 };
 
 interface KeyChain {
@@ -61,10 +66,24 @@ export function getVoting(votingId: string): Voting {
   return votings[votingId]
 }
 
+export function setVoting(voting: Voting) {
+  votings[voting.id] = voting;
+}
+
 export function getAllPublicVotes(): Voting[] {
   return Object.values(votings).filter(voting => voting.visibility === 'public');
 }
 
 export function getKeychain(votingId: string): KeyChain {
   return secrets[votingId]
+}
+
+export function setKeychain(
+  votingId: string,
+  issuer: Keypair,
+  distribution: Keypair,
+  ballotBox: Keypair) {
+  secrets[votingId] = {
+    issuer: issuer.secret(), distribution: distribution.secret(), ballotBox: ballotBox.secret(),
+  }
 }

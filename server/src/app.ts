@@ -13,6 +13,7 @@ import {
 } from './stellar';
 import * as database from './database';
 import { getAllPublicVotes } from './database';
+import { createVoting } from './createVoting';
 
 const debug = require('debug')('stellar-voting:app');
 
@@ -90,3 +91,12 @@ app.post('/api/voting', (req, res) => {
 });
 
 app.get('/api/wall', (req, res) => res.json(getAllPublicVotes()));
+
+app.post('/api/createVoting', async (req, res) => {
+  const { createVotingRequest } = req.body;
+  if (createVotingRequest) {
+    return res.sendStatus(400).end();
+  }
+  const createVotingResponse = await createVoting(createVotingRequest);
+  return res.json(createVotingResponse).end();
+});
