@@ -1,6 +1,7 @@
 import Voting from '@/types/voting';
 import BN from "bn.js";
 import { Memo, Transaction } from "stellar-sdk";
+import CreateVotingRequest from "@/types/createVotingRequest";
 
 export async function fetchVotes(): Promise<Voting[]> {
   const res = await fetch('/api/wall');
@@ -130,4 +131,24 @@ export async function proofChallenge(tokenId: string, proofs: Proof[])
   // TODO is it really needed ?
   signedLuckyBatch.sigs = signedLuckyBatch.sigs.map(sig => new BN(sig, 16));
   return signedLuckyBatch
+}
+
+export async function createVoting(createVotingRequest: CreateVotingRequest)
+  : Promise<any> {
+  console.log({ proofs: JSON.stringify({ createVotingRequest }) });
+  const response = await fetch('/api/createVoting', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ createVotingRequest }),
+  });
+
+  if (response.ok) {
+    console.log('Successfully proofed challenges');
+  } else {
+    console.error('Failed to proof challenges');
+    throw new Error(await response.text());
+  }
+  return response.json();
 }
