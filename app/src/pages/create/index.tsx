@@ -111,7 +111,7 @@ export default () => {
       <Form.Item name="authentication" label="Authentication method">
         <Radio.Group>
           <Radio.Button value="emails">Email</Radio.Button>
-          <Radio.Button value="codes">Codes</Radio.Button>
+          <Radio.Button value="codes">Code</Radio.Button>
           <Radio.Button value="public">Public</Radio.Button>
         </Radio.Group>
       </Form.Item>
@@ -130,7 +130,7 @@ export default () => {
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit">
-          Submit
+          Create
         </Button>
       </Form.Item>
     </Form>
