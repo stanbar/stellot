@@ -1,5 +1,18 @@
 import Option from "@/types/option";
 
+export enum Visibility {
+  PUBLIC = 'public',
+  UNLISTED = 'unlisted',
+  PRIVATE = 'private'
+}
+
+export enum Authorization {
+  PUBLIC = 'public',
+  EMAIL = 'email',
+  CODE = 'code',
+  CUSTOM = 'custom',
+}
+
 export default interface Voting {
   id: string;
   title: string;
@@ -9,6 +22,7 @@ export default interface Voting {
   options: Option[];
   distributionAccountId: string;
   ballotBoxAccountId: string;
-  authorizationCode: 'public' | 'email' | 'code' | 'custom';
-  visibility: 'public' | 'unlisted' | 'private';
+  authorization: Authorization;
+  visibility: Visibility;
+  votesCap: number;
 }
