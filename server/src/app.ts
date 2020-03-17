@@ -3,20 +3,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import crypto from 'crypto';
 import errorhandler from 'errorhandler';
-import mongoose from 'mongoose';
-import {
-  isAlreadyInitedSession,
-  createSession,
-  ChallengeRequest,
-  storeAndPickLuckyBatch,
-  proofChallenges,
-  Proof,
-} from './stellar';
-import * as database from './database/database';
-import { getAllPublicVotes, getVoting } from './database/database';
-import { createVoting } from './createVoting';
-
-const debug = require('debug')('stellar-voting:app');
+import router from './routes'
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -34,20 +21,7 @@ app.use(express.static(process.env.WEBAPP_DIR!));
 if (!isProduction) {
   app.use(errorhandler());
 }
-if (isProduction) {
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI must be set');
-  }
-  mongoose.connect(process.env.MONGODB_URI);
-} else {
-  mongoose.connect('mongodb://localhost/stellar-voting');
-  mongoose.set('debug', true);
-}
-
-import Voting from './database/models/Voting';
-
-
-
+app.use(router);
 
 // Mock of Authorization Provider
 app.post('/api/login', (req, res) => {
@@ -64,35 +38,4 @@ app.post('/api/login', (req, res) => {
         .substring(0, 16),
     })
     .end();
-});
-
-
-app.post('/api/voting', (req, res) => {
-  const { votingId } = req.body;
-  console.log({ body: req.body });
-  if (!votingId) {
-    return res.sendStatus(400).end();
-  }
-  return res
-    .json(getVoting(votingId))
-    .end();
-});
-
-app.get('/api/wall', async (req, res) => {
-  const result = await Voting.find({});
-  res.json(result);
-});
-
-app.post('/api/createVoting', async (req, res) => {
-  const { createVotingRequest } = req.body;
-  if (!createVotingRequest) {
-    return res.sendStatus(400).end();
-  }
-  try {
-    const createVotingResponse = await createVoting(createVotingRequest);
-    return res.json(createVotingResponse).end();
-  } catch (e) {
-    console.error(e.response.data.extras);
-    return res.status(500).end();
-  }
 });

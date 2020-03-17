@@ -1,4 +1,6 @@
 import { config } from 'dotenv';
+import http from 'http';
+import mongoose from 'mongoose';
 
 const result = config();
 if (result.error) {
@@ -9,7 +11,6 @@ if (result.error) {
  * Module dependencies.
  */
 
-import http from 'http';
 import app from './app';
 
 
@@ -29,9 +30,23 @@ const httpServer = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-httpServer.listen(httpPort);
-httpServer.on('error', onError(httpPort));
-httpServer.on('listening', onListening(httpServer));
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI must be set');
+  }
+  mongoose.connect(process.env.MONGODB_URI).then(startListening);
+} else {
+  mongoose.set('debug', true);
+  mongoose.connect('mongodb://localhost/stellar-voting').then(startListening);
+}
+
+function startListening() {
+  httpServer.listen(httpPort);
+  httpServer.on('error', onError(httpPort));
+  httpServer.on('listening', onListening(httpServer));
+}
 
 /**
  * Event listener for HTTP server "error" event.
