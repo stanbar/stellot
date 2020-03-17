@@ -4,7 +4,7 @@ import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
 import Voting, { Authorization } from './types/voting';
-import { getKeychain, getVoting } from './database';
+import { getKeychain, getVoting } from './database/database';
 
 export interface Candidate {
   name: string;
