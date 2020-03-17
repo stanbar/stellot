@@ -15,24 +15,24 @@ import Voting from './types/voting';
 import { setKeychain, setVoting } from './database';
 
 const server = new Server('https://horizon-testnet.stellar.org');
-if (!process.env.ISSUE_SECRET_KEY) {
-  throw new Error('ISSUE_SECRET_KEY must be provided in env variable')
+if (!process.env.MASTER_SECRET_KEY) {
+  throw new Error('MASTER_SECRET_KEY must be provided in env variable')
 }
-const issuerSecretKey = process.env.ISSUE_SECRET_KEY;
-const issuerKeypair = Keypair.fromSecret(issuerSecretKey);
+const masterSecretKey = process.env.MASTER_SECRET_KEY;
+const masterKeypair = Keypair.fromSecret(masterSecretKey);
 
-export async function getAccountSequenceNumber(accountId: string) {
-  return (await server.loadAccount(accountId)).sequenceNumber();
-}
-
-export async function createVoting(createVotingRequest: CreateVotingRequest):
-  Promise<CreateVotingResponse> {
+export async function createVoting(createVotingRequest: CreateVotingRequest)
+  : Promise<CreateVotingResponse> {
   const id = uuid();
-  const issuer = await server.loadAccount(issuerKeypair.publicKey());
-  const voteToken = createVoteToken(issuer, createVotingRequest);
-  const [distributionKeypair, ballotboxKeypair] =
-    await createDistributionAndBallotAccount(issuer, createVotingRequest, voteToken);
-
+  const masterAccount = await server.loadAccount(masterKeypair.publicKey());
+  const issuerKeypair = Keypair.random();
+  await createIssuerAccount(masterAccount, issuerKeypair);
+  const voteToken = createVoteToken(issuerKeypair, createVotingRequest);
+  const [distributionKeypair, ballotBoxKeypair] =
+    await createDistributionAndBallotAccount(
+      issuerKeypair,
+      createVotingRequest,
+      voteToken);
   const voting: Voting = {
     id,
     title: createVotingRequest.title,
@@ -41,7 +41,7 @@ export async function createVoting(createVotingRequest: CreateVotingRequest):
     issueAccountId: issuerKeypair.publicKey(),
     assetCode: voteToken.code,
     distributionAccountId: distributionKeypair.publicKey(),
-    ballotBoxAccountId: ballotboxKeypair.publicKey(),
+    ballotBoxAccountId: ballotBoxKeypair.publicKey(),
     authorization: createVotingRequest.authorization,
     visibility: createVotingRequest.visibility,
     votesCap: createVotingRequest.votesCap,
@@ -50,28 +50,49 @@ export async function createVoting(createVotingRequest: CreateVotingRequest):
     endDate: createVotingRequest.endDate,
   };
   setVoting(voting);
-  setKeychain(id, issuerKeypair, distributionKeypair, ballotboxKeypair);
+  setKeychain(id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
   return { ...voting };
 }
 
-function createVoteToken(issuer: AccountResponse, createVotingRequest: CreateVotingRequest): Asset {
-  // TODO make sure of uniqueness
-  return new Asset(createVotingRequest.title.replace(' ', '').substr(0, 12))
+async function createIssuerAccount(masterAccount: AccountResponse, issuerKeypair: Keypair) {
+  const tx = new TransactionBuilder(masterAccount, {
+    fee: BASE_FEE, networkPassphrase: Networks.TESTNET,
+  }).addOperation(Operation.createAccount({
+    destination: issuerKeypair.publicKey(),
+    startingBalance: '10',
+  }))
+    .setTimeout(30)
+    .build();
+  tx.sign(masterKeypair);
+  await server.submitTransaction(tx);
+}
+
+function createVoteToken(issuer: Keypair, createVotingRequest: CreateVotingRequest): Asset {
+  return new Asset(
+    createVotingRequest.title.replace(' ', '').substr(0, 12),
+    issuer.publicKey())
 }
 
 async function createDistributionAndBallotAccount(
-  issuer: AccountResponse,
+  issuerKeypair: Keypair,
   createVotingRequest: CreateVotingRequest,
   voteToken: Asset): Promise<[Keypair, Keypair]> {
+  const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
   const distributionKeypair = Keypair.random();
   const ballotBoxKeypair = Keypair.random();
-  const tx = new TransactionBuilder(issuer, {
+
+  const tx = new TransactionBuilder(issuerAccount, {
     fee: BASE_FEE,
     networkPassphrase: Networks.TESTNET,
   })
     // Create distribution account
     .addOperation(Operation.createAccount({
       destination: distributionKeypair.publicKey(),
+      startingBalance: '2', // TODO calculate exactly
+    }))
+    // Create ballot box
+    .addOperation(Operation.createAccount({
+      destination: ballotBoxKeypair.publicKey(),
       startingBalance: '2', // TODO calculate exactly
     }))
     .addOperation(
@@ -98,11 +119,6 @@ async function createDistributionAndBallotAccount(
         highThreshold: 1,
       }),
     )
-    // Create ballot box
-    .addOperation(Operation.createAccount({
-      destination: ballotBoxKeypair.publicKey(),
-      startingBalance: '2', // TODO calculate exactly
-    }))
     .addOperation(
       Operation.changeTrust({
         source: ballotBoxKeypair.publicKey(),
@@ -113,7 +129,7 @@ async function createDistributionAndBallotAccount(
     .setTimeout(30)
     .build();
 
-  tx.sign(issuerKeypair);
+  tx.sign(issuerKeypair, ballotBoxKeypair, distributionKeypair);
   await server.submitTransaction(tx);
   return [distributionKeypair, ballotBoxKeypair];
 }

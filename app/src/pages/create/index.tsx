@@ -4,9 +4,15 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
 import CreateVotingRequest from '@/types/createVotingRequest';
 import { Authorization, Visibility } from "@/types/voting";
 import { isNotEmpty } from '@/utils/utils';
+import { dispatchCreateVoting } from "@/models/create";
+import { ConnectProps } from "@/models/connect";
+import { connect } from 'dva';
 import styles from './index.css'
 
-export default () => {
+interface CreateVotingProps extends ConnectProps {
+}
+
+const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch }) => {
   const [form] = Form.useForm();
   const onFinish = (values: any) => {
     const val = values as {
@@ -31,7 +37,8 @@ export default () => {
       encrypted: val.encrypted,
       challenges: val.challenges,
     };
-    console.log({ createVoting })
+    console.log({ createVoting });
+    dispatchCreateVoting(dispatch, createVoting);
   };
   return (
     <Form layout="vertical" form={form} name="options_form" onFinish={onFinish}
@@ -139,3 +146,4 @@ export default () => {
     </Form>
   );
 }
+export default connect()(CreateVoting)
