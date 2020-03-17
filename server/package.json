@@ -50,7 +50,8 @@
     "stellar-sdk": "^4.0.2",
     "tweetnacl": "^1.0.3",
     "uuidv4": "^6.0.6",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "minimist": ">=1.2.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
