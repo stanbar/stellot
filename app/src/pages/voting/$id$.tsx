@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
-import { Radio, Button, Form, notification, Input, Progress } from 'antd';
+import { Button, Form, Input, notification, Progress, Radio } from 'antd';
 import stellotWhite from '@/assets/stellot_white.png'
 import {
-  LockOutlined,
-  LinkOutlined,
   EyeOutlined,
   KeyOutlined,
-  NotificationOutlined,
-  MailOutlined
+  LockOutlined,
+  LinkOutlined,
+  MailOutlined,
+  NotificationOutlined
 } from '@ant-design/icons';
 import { dispatchFetchVoting, dispatchPerformVote, VotingStateType } from "@/models/voting";
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
-import Voting from "@/types/voting";
+import Voting, { Authorization, Visibility } from "@/types/voting";
 import { VoteStatus } from '@/types/voteStatus';
 
 interface VotePreviewProps extends ConnectProps {
@@ -48,6 +48,7 @@ const VotePreview: React.FC<VotePreviewProps> = (props: VotePreviewProps) => {
   const [form] = Form.useForm();
   const { match, dispatch, voting, status } = props;
   const votingId = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
+  console.log({ votingId });
 
   useEffect(() => dispatchFetchVoting(dispatch, votingId), [votingId]);
 
@@ -75,13 +76,13 @@ const VotePreview: React.FC<VotePreviewProps> = (props: VotePreviewProps) => {
     (
       <div>
         <p>
-          {voting?.visibility === "private" && <LockOutlined/>}
-          {voting?.visibility === "unlisted" && <LinkOutlined/>}
-          {voting?.visibility === "public" && <EyeOutlined/>}
-          {voting?.authorizationCode === "code" && <KeyOutlined/>}
-          {voting?.authorizationCode === "custom" && <KeyOutlined/>}
-          {voting?.authorizationCode === "email" && <MailOutlined/>}
-          {voting?.authorizationCode === "public" && <NotificationOutlined/>}
+          {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
+          {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
+          {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
+          {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
+          {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
+          {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
+          {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
           Vote {voting.id}
         </p>
         <h1>{voting?.title}</h1>
@@ -97,7 +98,7 @@ const VotePreview: React.FC<VotePreviewProps> = (props: VotePreviewProps) => {
               ))}
             </Radio.Group>
           </Form.Item>
-          {voting?.authorizationCode !== "public" &&
+          {voting?.authorization !== "public" &&
           <Form.Item label="Authorization code" name="authorizationToken" rules={[{
             required: true,
             message: 'Please input your authorization code!'
