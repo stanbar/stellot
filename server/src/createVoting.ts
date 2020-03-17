@@ -12,7 +12,7 @@ import {
 import CreateVotingRequest from './types/createVotingRequest';
 import CreateVotingResponse from './types/createVotingResponse';
 import Voting from './types/voting';
-import { setKeychain, setVoting } from './database';
+import { setKeychain, setVoting } from './database/database';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 if (!process.env.MASTER_SECRET_KEY) {
