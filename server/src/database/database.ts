@@ -1,6 +1,9 @@
+import mongoose from 'mongoose';
+import { Keypair } from 'stellar-sdk';
 import Voting, { Authorization, Visibility } from '../types/voting';
 import Option from '../types/option';
-import { Keypair } from 'stellar-sdk';
+import { KEYCHAIN, VOTING } from './models';
+import Keychain from '../types/keychain'
 
 const issues: { [votingId: string]: { [userId: string]: boolean } } = {};
 const votings: { [votingId: string]: Voting } = {};
@@ -45,13 +48,7 @@ votings.presidentElection2019 = {
   endDate: new Date(2020, 12),
 };
 
-interface KeyChain {
-  distribution: string,
-  issuer: string,
-  ballotBox: string
-}
-
-const secrets: { [votingId: string]: KeyChain } = {};
+const secrets: { [votingId: string]: Keychain } = {};
 
 secrets.presidentElection2019 = {
   distribution: 'SBQ5HMAGX4CIQMIZ3IXOLQHLAEL5NLOWXMU4T2LTKMDLG4WU4IYDTHJN',
@@ -63,28 +60,44 @@ export function setIssued(voting: Voting, userId: string) {
   issues[voting.id][userId] = true;
 }
 
-export function getVoting(votingId: string): Voting | undefined {
-  return votings[votingId]
+const VotingSchema = mongoose.model(VOTING);
+
+export async function getPublicVotings(): Promise<Voting[]> {
+  return (await VotingSchema.find({ visibility: Visibility.PUBLIC }))?.map(doc => doc.toJSON());
 }
 
-export function setVoting(voting: Voting) {
-  votings[voting.id] = voting;
+export function votingExists(votingId: string): Promise<boolean> {
+  return VotingSchema.exists({ _id: votingId })
+}
+
+export async function getVoting(votingId: string): Promise<Voting> {
+  return (await VotingSchema.findById(votingId))?.toJSON();
+}
+
+export async function setVoting(voting: Voting): Promise<Voting> {
+  const votingDoc = new VotingSchema({ ...voting });
+  const saved = await votingDoc.save();
+  return saved.toJSON();
 }
 
 export function getAllPublicVotes(): Voting[] {
   return Object.values(votings).filter(voting => voting.visibility === 'public');
 }
 
-export function getKeychain(votingId: string): KeyChain {
-  return secrets[votingId]
+const KeychainSchema = mongoose.model(KEYCHAIN);
+
+export async function getKeychain(votingId: string): Promise<Keychain | null> {
+  const keychain = await KeychainSchema.findOne({ voting: votingId });
+  return keychain?.toJSON()
 }
 
-export function setKeychain(
+export async function setKeychain(
   votingId: string,
   issuer: Keypair,
   distribution: Keypair,
   ballotBox: Keypair) {
-  secrets[votingId] = {
+  const keychain = new KeychainSchema({
     issuer: issuer.secret(), distribution: distribution.secret(), ballotBox: ballotBox.secret(),
-  }
+  });
+  await keychain.save()
 }

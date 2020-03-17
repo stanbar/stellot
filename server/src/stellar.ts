@@ -3,8 +3,9 @@ import BN from 'bn.js';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
-import Voting, { Authorization } from './types/voting';
-import { getKeychain, getVoting } from './database/database';
+import { Authorization } from './types/voting';
+import { getVoting } from './database/database';
+import Keychain from './types/keychain';
 
 export interface Candidate {
   name: string;
@@ -18,8 +19,9 @@ interface InitSession {
 
 const initSessions: Map<string, Array<InitSession>> = new Map();
 
-export function isAlreadyInitedSession(tokenId: string, votingId: string) {
-  return getVoting(votingId)?.authorization !== Authorization.PUBLIC
+export async function isAlreadyInitedSession(tokenId: string, votingId: string) {
+  const voting = await getVoting(votingId);
+  return voting.authorization !== Authorization.PUBLIC
     && initSessions.get(tokenId) !== undefined;
 }
 
@@ -38,9 +40,8 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(tokenId: string, voting: Voting): Array<InitResponse> {
-  const keyChain = getKeychain(voting.id);
-  const distributionKeypair = Keypair.fromSecret(keyChain.distribution);
+export function createSession(tokenId: string, keychain: Keychain): Array<InitResponse> {
+  const distributionKeypair = Keypair.fromSecret(keychain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
   for (let i = 0; i < cutAndChooseCount; i += 1) {
