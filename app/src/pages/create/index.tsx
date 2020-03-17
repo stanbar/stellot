@@ -4,15 +4,16 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
 import CreateVotingRequest from '@/types/createVotingRequest';
 import { Authorization, Visibility } from "@/types/voting";
 import { isNotEmpty } from '@/utils/utils';
-import { dispatchCreateVoting } from "@/models/create";
+import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
 import styles from './index.css'
 
 interface CreateVotingProps extends ConnectProps {
+  loading?: boolean
 }
 
-const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch }) => {
+const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   const [form] = Form.useForm();
   const onFinish = (values: any) => {
     const val = values as {
@@ -139,11 +140,12 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch }) => {
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button type="primary" htmlType="submit" loading={loading}>
           Create
         </Button>
       </Form.Item>
     </Form>
   );
 }
-export default connect()(CreateVoting)
+export default connect(({ loading }: { loading: any }) =>
+  ({ loading: loading.effects[`${CREATE}/${CREATE_VOTING}`] }))(CreateVoting)
