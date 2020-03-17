@@ -62,7 +62,7 @@ export function setIssued(voting: Voting, userId: string) {
   issues[voting.id][userId] = true;
 }
 
-export function getVoting(votingId: string): Voting {
+export function getVoting(votingId: string): Voting | undefined {
   return votings[votingId]
 }
 

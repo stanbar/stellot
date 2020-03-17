@@ -32,11 +32,15 @@ app.use(express.static(process.env.WEBAPP_DIR!));
 app.post('/api/init', async (req, res) => {
   const { tokenId, votingId } = req.body;
   debug(`tokenId: ${tokenId}`);
+  debug(`votingId: ${votingId}`);
   const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
   if (isAlreadyInited) {
     return res.status(405).send('Session already inited');
   }
   const voting = database.getVoting(votingId);
+  if (!voting) {
+    return res.status(404).send(`Voting with id: ${votingId} not found`);
+  }
   const session = createSession(tokenId, voting);
   return res.status(200).send(session);
 });

@@ -4,13 +4,13 @@ import stellotWhite from '@/assets/stellot_white.png'
 import {
   EyeOutlined,
   KeyOutlined,
-  LockOutlined,
   LinkOutlined,
+  LockOutlined,
   MailOutlined,
   NotificationOutlined
 } from '@ant-design/icons';
-import { dispatchFetchVoting, dispatchPerformVote, VotingStateType } from "@/models/voting";
-import { ConnectProps } from "@/models/connect";
+import { dispatchFetchVoting, dispatchPerformVote, VotingStateType, VOTING, FETCH_VOTING } from "@/models/voting";
+import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
 import Voting, { Authorization, Visibility } from "@/types/voting";
 import { VoteStatus } from '@/types/voteStatus';
@@ -18,6 +18,7 @@ import { VoteStatus } from '@/types/voteStatus';
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
   status?: VoteStatus;
+  loading?: boolean;
 }
 
 function calculateProgressPercent(voteStatus: VoteStatus) {
@@ -41,12 +42,23 @@ function calculateProgressPercent(voteStatus: VoteStatus) {
     case VoteStatus.UNDEFINED:
       return 0;
   }
-
 }
 
-const VotePreview: React.FC<VotePreviewProps> = (props: VotePreviewProps) => {
+function calculateProgressStatus(status: VoteStatus) {
+  switch (status) {
+    case VoteStatus.ERROR:
+      return "exception";
+    case VoteStatus.DONE:
+      return "success";
+    case VoteStatus.UNDEFINED:
+      return "normal";
+    default:
+      return "active";
+  }
+}
+
+const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, voting, status }) => {
   const [form] = Form.useForm();
-  const { match, dispatch, voting, status } = props;
   const votingId = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
   console.log({ votingId });
 
@@ -71,58 +83,68 @@ const VotePreview: React.FC<VotePreviewProps> = (props: VotePreviewProps) => {
   };
 
   console.log({ voting });
+  if (loading) {
+    return (<p>Loading...</p>)
+  }
+  if (!voting) {
+    return (<p>Failed to load voting</p>)
+  }
   // TODO set rule to make option required
-  return voting === undefined ? (<p>Loading...</p>) :
-    (
-      <div>
-        <p>
-          {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
-          {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
-          {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
-          {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
-          {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
-          {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
-          {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
-          Vote {voting.id}
-        </p>
-        <h1>{voting?.title}</h1>
-        <h4>{voting?.description}</h4>
-        <Form layout="vertical" name="vote_form" onFinish={onFinish} form={form}>
-          <Form.Item name="optionCode" rules={[{
-            required: true,
-            message: 'Please select your option!'
-          }]}>
-            <Radio.Group buttonStyle="solid" size="large">
-              {voting.options?.map(option => (
-                <Radio.Button style={radioStyle} key={option.code} value={option.code}>{option.name}</Radio.Button>
-              ))}
-            </Radio.Group>
-          </Form.Item>
-          {voting?.authorization !== "public" &&
-          <Form.Item label="Authorization code" name="authorizationToken" rules={[{
-            required: true,
-            message: 'Please input your authorization code!'
-          }]}>
-            <Input style={{ maxWidth: 200 }}/>
-          </Form.Item>
-          }
-          <Form.Item>
-            <Button type="primary" size="large"
-                    icon={<img alt="ballot" height={20} style={{ marginRight: 8, marginBottom: 4 }}
-                               src={stellotWhite}/>}
-                    htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-        {status && <div>
-          <Progress percent={calculateProgressPercent(status)} steps={7} strokeColor="#1890ff"/>
-          <p>{status}</p>
-        </div>
+  return (
+    <div>
+      <p>
+        {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
+        {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
+        {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
+        {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
+        {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
+        {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
+        {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
+        Vote {voting.id}
+      </p>
+      <h1>{voting?.title}</h1>
+      <h4>{voting?.description}</h4>
+      <Form layout="vertical" name="vote_form" onFinish={onFinish} form={form}>
+        <Form.Item name="optionCode" rules={[{
+          required: true,
+          message: 'Please select your option!'
+        }]}>
+          <Radio.Group buttonStyle="solid" size="large">
+            {voting.options?.map(option => (
+              <Radio.Button style={radioStyle} key={option.code} value={option.code}>{option.name}</Radio.Button>
+            ))}
+          </Radio.Group>
+        </Form.Item>
+        {voting?.authorization !== "public" &&
+        <Form.Item label="Authorization code" name="authorizationToken" rules={[{
+          required: true,
+          message: 'Please input your authorization code!'
+        }]}>
+          <Input style={{ maxWidth: 200 }}/>
+        </Form.Item>
         }
+        <Form.Item>
+          <Button type="primary" size="large"
+                  icon={<img alt="ballot" height={20} style={{ marginRight: 8, marginBottom: 4 }}
+                             src={stellotWhite}/>}
+                  htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+      {status && <div>
+        <Progress percent={calculateProgressPercent(status)} steps={7} strokeColor="#1890ff"
+                  status={calculateProgressStatus(status)}
+        />
+        <p>{status}</p>
       </div>
-    );
+      }
+    </div>
+  );
 };
-
-export default connect(({ voting }: { voting: VotingStateType }) =>
-  ({ voting: voting.voting, status: voting.status }))(VotePreview);
+export default connect(({ voting, loading }: { voting: VotingStateType, loading: Loading }) =>
+  ({
+    voting: voting.voting,
+    status: voting.status,
+    loading: loading.effects[`${VOTING}/${FETCH_VOTING}`]
+  }))(VotePreview);
