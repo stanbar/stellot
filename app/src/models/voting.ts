@@ -7,7 +7,7 @@ import { fetchVoting } from "@/services/tokenDistributionServer";
 import { VoteStatus } from "@/types/voteStatus";
 
 export const VOTING = 'voting';
-const FETCH_VOTING = 'fetchVoting';
+export const FETCH_VOTING = 'fetchVoting';
 const SET_STATUS = 'setStatus';
 const SET_VOTING = 'setVoting';
 

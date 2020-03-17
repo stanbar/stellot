@@ -1,6 +1,6 @@
 export enum VoteStatus {
   UNDEFINED = 'undefined',
-  ERROR = 'error',
+  ERROR = 'Error',
   INITIALIZING = 'Initializing interactive blind signature protocol',
   CREATING_BLINDED_TRANSACTIONS = 'Creating blinded transactions',
   REQUESTED_CHALLENGE = 'Requested challenge',
