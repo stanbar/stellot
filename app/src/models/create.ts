@@ -1,12 +1,11 @@
 import { Effect, Dispatch } from "dva";
 import { createVoting } from '@/services/tokenDistributionServer';
-import { Reducer } from "redux";
 import Voting from "@/types/voting";
 import CreateVotingRequest from "@/types/createVotingRequest";
+import router from 'umi/router';
 
 const CREATE = 'create';
 const CREATE_VOTING = 'createVoting';
-const SET_CREATED_VOTING = 'setCreatedVoting';
 
 export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: CreateVotingRequest) {
   dispatch({
@@ -24,9 +23,6 @@ export interface CreateModelType {
   state: CreateStateType;
   effects: {
     [CREATE_VOTING]: Effect
-  },
-  reducers: {
-    [SET_CREATED_VOTING]: Reducer,
   }
 }
 
@@ -34,19 +30,11 @@ export const CreateModel: CreateModelType = {
   namespace: CREATE,
   state: {},
   effects: {
-    * [CREATE_VOTING]({ createVotingRequest }, { call, put }) {
+    * [CREATE_VOTING]({ createVotingRequest }, { call }) {
       const voting = yield call(createVoting, createVotingRequest);
-      yield put({ type: SET_CREATED_VOTING, payload: voting })
+      router.replace(`/voting/${voting.id}`);
     }
   },
-  reducers: {
-    [SET_CREATED_VOTING](state: CreateStateType, { payload }): CreateStateType {
-      return {
-        ...state,
-        createdVoting: payload,
-      }
-    }
-  }
 };
 
 export default CreateModel;

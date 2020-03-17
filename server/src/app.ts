@@ -12,7 +12,7 @@ import {
   Proof,
 } from './stellar';
 import * as database from './database';
-import { getAllPublicVotes } from './database';
+import { getAllPublicVotes, getVoting } from './database';
 import { createVoting } from './createVoting';
 
 const debug = require('debug')('stellar-voting:app');
@@ -81,12 +81,13 @@ app.post('/api/login', (req, res) => {
 
 
 app.post('/api/voting', (req, res) => {
-  const { voteId } = req.body;
-  if (voteId) {
+  const { votingId } = req.body;
+  console.log({ body: req.body });
+  if (!votingId) {
     return res.sendStatus(400).end();
   }
   return res
-    .json(getAllPublicVotes()[0])
+    .json(getVoting(votingId))
     .end();
 });
 
