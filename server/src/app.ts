@@ -94,9 +94,14 @@ app.get('/api/wall', (req, res) => res.json(getAllPublicVotes()));
 
 app.post('/api/createVoting', async (req, res) => {
   const { createVotingRequest } = req.body;
-  if (createVotingRequest) {
+  if (!createVotingRequest) {
     return res.sendStatus(400).end();
   }
-  const createVotingResponse = await createVoting(createVotingRequest);
-  return res.json(createVotingResponse).end();
+  try {
+    const createVotingResponse = await createVoting(createVotingRequest);
+    return res.json(createVotingResponse).end();
+  } catch (e) {
+    console.error(e.response.data.extras);
+    return res.status(500).end();
+  }
 });

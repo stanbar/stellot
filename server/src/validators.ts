@@ -1,10 +1,6 @@
 // import { Networks, Transaction } from 'stellar-sdk'
 import { ChallengeSession, Proof } from './stellar';
 
-if (!process.env.BALLOT_BOX_PUBLIC_KEY) {
-  throw new Error('process.env.BALLOT_BOX_PUBLIC_KEY can not be undefined');
-}
-
 /*
 const ballotAccountId = process.env.BALLOT_BOX_PUBLIC_KEY;
 

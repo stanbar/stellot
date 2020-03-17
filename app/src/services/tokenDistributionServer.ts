@@ -2,6 +2,7 @@ import Voting from '@/types/voting';
 import BN from "bn.js";
 import { Memo, Transaction } from "stellar-sdk";
 import CreateVotingRequest from "@/types/createVotingRequest";
+import CreateVotingResponse from "@/types/createVotingResponse";
 
 export async function fetchVotes(): Promise<Voting[]> {
   const res = await fetch('/api/wall');
@@ -134,8 +135,7 @@ export async function proofChallenge(tokenId: string, proofs: Proof[])
 }
 
 export async function createVoting(createVotingRequest: CreateVotingRequest)
-  : Promise<any> {
-  console.log({ proofs: JSON.stringify({ createVotingRequest }) });
+  : Promise<CreateVotingResponse> {
   const response = await fetch('/api/createVoting', {
     method: 'POST',
     headers: {
@@ -145,9 +145,9 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
   });
 
   if (response.ok) {
-    console.log('Successfully proofed challenges');
+    console.log('Successfully created voting');
   } else {
-    console.error('Failed to proof challenges');
+    console.error('Failed to create voting');
     throw new Error(await response.text());
   }
   return response.json();

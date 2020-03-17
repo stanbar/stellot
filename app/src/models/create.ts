@@ -2,14 +2,16 @@ import { Effect, Dispatch } from "dva";
 import { createVoting } from '@/services/tokenDistributionServer';
 import { Reducer } from "redux";
 import Voting from "@/types/voting";
+import CreateVotingRequest from "@/types/createVotingRequest";
 
 const CREATE = 'create';
 const CREATE_VOTING = 'createVoting';
 const SET_CREATED_VOTING = 'setCreatedVoting';
 
-export function dispatchCreateVoting(dispatch: Dispatch) {
+export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: CreateVotingRequest) {
   dispatch({
-    type: `${CREATE}/${CREATE_VOTING}`
+    type: `${CREATE}/${CREATE_VOTING}`,
+    createVotingRequest,
   })
 }
 
