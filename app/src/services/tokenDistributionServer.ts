@@ -12,10 +12,14 @@ export async function fetchVotes(): Promise<Voting[]> {
   return res.json()
 }
 
-export async function fetchVoting(voteId: string): Promise<Voting> {
+export async function fetchVoting(votingId: string): Promise<Voting> {
+  console.log({ fetchVoting: votingId });
   const res = await fetch('/api/voting', {
     method: 'POST',
-    body: JSON.stringify({ voteId })
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ votingId })
   });
   if (!res.ok) {
     throw new Error(await res.text())
