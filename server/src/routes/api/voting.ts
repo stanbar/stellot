@@ -10,9 +10,9 @@ router.get('/', async (req, res) => {
   res.json(result);
 });
 
-router.get('/:slug', async (req, res) => {
-  const { slug } = req.params;
-  const result = await Voting.find({ slug });
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const result = await Voting.findById(id);
   res.json(result);
 });
 
