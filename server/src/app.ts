@@ -2,7 +2,8 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import crypto from 'crypto';
-
+import errorhandler from 'errorhandler';
+import mongoose from 'mongoose';
 import {
   isAlreadyInitedSession,
   createSession,
@@ -11,11 +12,13 @@ import {
   proofChallenges,
   Proof,
 } from './stellar';
-import * as database from './database';
-import { getAllPublicVotes, getVoting } from './database';
+import * as database from './database/database';
+import { getAllPublicVotes, getVoting } from './database/database';
 import { createVoting } from './createVoting';
 
 const debug = require('debug')('stellar-voting:app');
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 export default app;
@@ -28,42 +31,22 @@ if (!process.env.WEBAPP_DIR) {
   throw new Error('Could not find webapp dir');
 }
 app.use(express.static(process.env.WEBAPP_DIR!));
-
-app.post('/api/init', async (req, res) => {
-  const { tokenId, votingId } = req.body;
-  debug(`tokenId: ${tokenId}`);
-  debug(`votingId: ${votingId}`);
-  const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
-  if (isAlreadyInited) {
-    return res.status(405).send('Session already inited');
+if (!isProduction) {
+  app.use(errorhandler());
+}
+if (isProduction) {
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI must be set');
   }
-  const voting = database.getVoting(votingId);
-  if (!voting) {
-    return res.status(404).send(`Voting with id: ${votingId} not found`);
-  }
-  const session = createSession(tokenId, voting);
-  return res.status(200).send(session);
-});
+  mongoose.connect(process.env.MONGODB_URI);
+} else {
+  mongoose.connect('mongodb://localhost/stellar-voting');
+  mongoose.set('debug', true);
+}
 
-app.post('/api/getChallenges', async (req, res) => {
-  const { tokenId, blindedTransactionBatches }
-    : { tokenId: string, blindedTransactionBatches: ChallengeRequest } = req.body;
-  debug(`tokenId: ${tokenId}`);
-  const luckyBatchIndex = storeAndPickLuckyBatch(tokenId, blindedTransactionBatches);
-  return res.status(200).send({ luckyBatchIndex });
-});
+import Voting from './database/models/Voting';
 
-app.post('/api/proofChallenges', async (req, res) => {
-  const { tokenId, proofs }: { tokenId: string, proofs: Proof[] } = req.body;
-  debug(`tokenId: ${tokenId}`);
-  try {
-    const signedBatch = proofChallenges(tokenId, proofs);
-    return res.status(200).send(signedBatch);
-  } catch (e) {
-    console.error(e);
-    return res.status(405).send(e.message);
-  }
-});
+
 
 
 // Mock of Authorization Provider
@@ -95,7 +78,10 @@ app.post('/api/voting', (req, res) => {
     .end();
 });
 
-app.get('/api/wall', (req, res) => res.json(getAllPublicVotes()));
+app.get('/api/wall', async (req, res) => {
+  const result = await Voting.find({});
+  res.json(result);
+});
 
 app.post('/api/createVoting', async (req, res) => {
   const { createVotingRequest } = req.body;
