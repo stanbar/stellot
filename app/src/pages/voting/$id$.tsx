@@ -68,6 +68,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
     display: 'block',
     height: '50px',
     lineHeight: '50px',
+    minWidth: '200px',
   };
   const onFinish = (values: any) => {
     console.log(values);

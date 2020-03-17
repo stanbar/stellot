@@ -1,5 +1,5 @@
-import Voting, { Authorization, Visibility } from './types/voting';
-import Option from './types/option';
+import Voting, { Authorization, Visibility } from '../types/voting';
+import Option from '../types/option';
 import { Keypair } from 'stellar-sdk';
 
 const issues: { [votingId: string]: { [userId: string]: boolean } } = {};
@@ -29,6 +29,7 @@ const CANDIDATES: Option[] = [
 ];
 votings.presidentElection2019 = {
   id: 'presidentElection2019',
+  slug: 'presidentElection2019',
   title: '2020 Polish presidential election',
   description: 'Chose candidate',
   options: CANDIDATES,
