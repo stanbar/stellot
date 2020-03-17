@@ -4,8 +4,8 @@ import Voting from "@/types/voting";
 import CreateVotingRequest from "@/types/createVotingRequest";
 import router from 'umi/router';
 
-const CREATE = 'create';
-const CREATE_VOTING = 'createVoting';
+export const CREATE = 'create';
+export const CREATE_VOTING = 'createVoting';
 
 export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: CreateVotingRequest) {
   dispatch({
@@ -16,6 +16,7 @@ export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: Cr
 
 export interface CreateStateType {
   createdVoting?: Voting;
+  loading?: boolean;
 }
 
 export interface CreateModelType {
