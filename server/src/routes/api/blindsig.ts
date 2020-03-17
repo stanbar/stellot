@@ -1,5 +1,5 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import { votingExists } from '../../database/database';
 import {
   ChallengeRequest,
   createSession,
@@ -8,11 +8,10 @@ import {
   proofChallenges,
   storeAndPickLuckyBatch,
 } from '../../stellar';
-import * as database from '../../database/database';
 
 const debug = require('debug')('stellar-voting:app');
+
 const router = express.Router();
-const Voting = mongoose.model('Voting');
 
 router.post('/init', async (req, res) => {
   const { tokenId, votingId } = req.body;
@@ -22,11 +21,11 @@ router.post('/init', async (req, res) => {
   if (isAlreadyInited) {
     return res.status(405).send('Session already inited');
   }
-  const voting = await Voting.findOne({ slug: votingId });
+  const voting = await votingExists(votingId);
   if (!voting) {
     return res.status(404).send(`Voting with id: ${votingId} not found`);
   }
-  const session = createSession(tokenId, voting);
+  const session = createSession(tokenId, votingId);
   return res.status(200).send(session);
 });
 

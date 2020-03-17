@@ -1,18 +1,17 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import { createVoting } from '../../createVoting';
+import { getPublicVotings, getVoting } from '../../database/database';
 
 const router = express.Router();
-const Voting = mongoose.model('Voting');
 
 router.get('/', async (req, res) => {
-  const result = await Voting.find({});
+  const result = await getPublicVotings();
   res.json(result);
 });
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const result = await Voting.findById(id);
+  const result = await getVoting(id);
   res.json(result);
 });
 

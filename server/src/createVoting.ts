@@ -1,4 +1,3 @@
-import { uuid } from 'uuidv4';
 import {
   Server,
   Keypair,
@@ -23,7 +22,6 @@ const masterKeypair = Keypair.fromSecret(masterSecretKey);
 
 export async function createVoting(createVotingRequest: CreateVotingRequest)
   : Promise<CreateVotingResponse> {
-  const id = uuid();
   const masterAccount = await server.loadAccount(masterKeypair.publicKey());
   const issuerKeypair = Keypair.random();
   await createIssuerAccount(masterAccount, issuerKeypair);
@@ -34,7 +32,7 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
       createVotingRequest,
       voteToken);
   const voting: Voting = {
-    id,
+    slug: '',
     title: createVotingRequest.title,
     description: createVotingRequest.description,
     options: createVotingRequest.options,
@@ -49,9 +47,9 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
     startDate: createVotingRequest.startDate,
     endDate: createVotingRequest.endDate,
   };
-  setVoting(voting);
-  setKeychain(id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
-  return { ...voting };
+  const savedVoting = await setVoting(voting);
+  await setKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
+  return { ...savedVoting };
 }
 
 async function createIssuerAccount(masterAccount: AccountResponse, issuerKeypair: Keypair) {
