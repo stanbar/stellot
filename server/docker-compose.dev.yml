@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   mongo:
-    container_name: "stellar-voting-mongodb"
+    container_name: "stellar-voting-mongodb-dev"
     image: mongo
     restart: 'unless-stopped'
     env_file: ".env"
@@ -9,15 +9,16 @@ services:
       - "27017:27017"
 
   web:
-    container_name: "stellar-voting-authorization-server"
+    container_name: "stellar-voting-authorization-server-dev"
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     env_file: ".env"
     ports:
       - "${PORT}:${PORT}"
     volumes:
       - "${WEBAPP_DIR}:${WEBAPP_DIR}"
+      - .:/server
     restart: 'unless-stopped'
     links:
       - mongo
