@@ -8,7 +8,6 @@ import router from './routes'
 const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
-export default app;
 
 app.use(logger('dev'));
 app.use(express.json({ limit: '0.5mb' }));
@@ -18,9 +17,12 @@ if (!process.env.WEBAPP_DIR) {
   throw new Error('Could not find webapp dir');
 }
 app.use(express.static(process.env.WEBAPP_DIR!));
-if (!isProduction) {
-  app.use(errorhandler());
-}
+// if (!isProduction) {
+//   app.use(errorhandler());
+// }
+app.get('/health', (req, res) => {
+  return res.sendStatus(200).end();
+});
 app.use(router);
 
 // Mock of Authorization Provider
@@ -39,3 +41,5 @@ app.post('/api/login', (req, res) => {
     })
     .end();
 });
+
+export default app;
