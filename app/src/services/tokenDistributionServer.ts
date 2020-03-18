@@ -5,7 +5,7 @@ import CreateVotingRequest from "@/types/createVotingRequest";
 import CreateVotingResponse from "@/types/createVotingResponse";
 
 export async function fetchVotes(): Promise<Voting[]> {
-  const res = await fetch('/api/wall');
+  const res = await fetch('/api/voting');
   if (!res.ok) {
     throw new Error(await res.text())
   }
@@ -14,17 +14,34 @@ export async function fetchVotes(): Promise<Voting[]> {
 
 export async function fetchVoting(votingId: string): Promise<Voting> {
   console.log({ fetchVoting: votingId });
-  const res = await fetch('/api/voting', {
-    method: 'POST',
+  const res = await fetch(`/api/voting/${votingId}`, {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ votingId })
   });
   if (!res.ok) {
     throw new Error(await res.text())
   }
   return res.json()
+}
+
+export async function createVoting(createVotingRequest: CreateVotingRequest)
+  : Promise<CreateVotingResponse> {
+  const response = await fetch('/api/voting', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ createVotingRequest }),
+  });
+
+  if (response.ok) {
+    console.log('Successfully created voting');
+  } else {
+    console.error('Failed to create voting');
+    throw new Error(await response.text());
+  }
+  return response.json();
 }
 
 export interface ResSession {
@@ -138,21 +155,3 @@ export async function proofChallenge(tokenId: string, proofs: Proof[])
   return signedLuckyBatch
 }
 
-export async function createVoting(createVotingRequest: CreateVotingRequest)
-  : Promise<CreateVotingResponse> {
-  const response = await fetch('/api/createVoting', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ createVotingRequest }),
-  });
-
-  if (response.ok) {
-    console.log('Successfully created voting');
-  } else {
-    console.error('Failed to create voting');
-    throw new Error(await response.text());
-  }
-  return response.json();
-}
