@@ -34,10 +34,10 @@ if (isProduction) {
     .then(() => debug('connected to db'));
 }
 
-require('./database/models');
-
-// eslint-disable-next-line global-require
-const app = require('./app');
+// eslint-disable-next-line import/first
+import './database/models';
+// eslint-disable-next-line import/first
+import app from './app';
 
 /**
  * Create HTTP server.
