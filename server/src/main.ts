@@ -11,8 +11,6 @@ if (result.error) {
  * Module dependencies.
  */
 
-import app from './app';
-
 
 const debug = require('debug')('stellar-voting:server');
 
@@ -20,6 +18,26 @@ const debug = require('debug')('stellar-voting:server');
  * Get port from environment and store in Express.
  */
 const httpPort = parseInt(process.env.PORT || '8080', 10);
+
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI must be set');
+  }
+  mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => debug('connected to db'));
+} else {
+  mongoose.set('debug', true);
+  mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => debug('connected to db'));
+}
+
+require('./database/models');
+
+// eslint-disable-next-line global-require
+const app = require('./app');
 
 /**
  * Create HTTP server.
@@ -29,24 +47,9 @@ const httpServer = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-const isProduction = process.env.NODE_ENV === 'production';
-
-if (isProduction) {
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI must be set');
-  }
-  mongoose.connect(process.env.MONGODB_URI).then(startListening);
-} else {
-  mongoose.set('debug', true);
-  mongoose.connect('mongodb://localhost/stellar-voting').then(startListening);
-}
-
-function startListening() {
-  httpServer.listen(httpPort);
-  httpServer.on('error', onError(httpPort));
-  httpServer.on('listening', onListening(httpServer));
-}
+httpServer.listen(httpPort);
+httpServer.on('error', onError(httpPort));
+httpServer.on('listening', onListening(httpServer));
 
 /**
  * Event listener for HTTP server "error" event.
