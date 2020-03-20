@@ -1,4 +1,4 @@
-import Option from './option';
+import Poll from './poll';
 
 export enum Visibility {
   PUBLIC = 'public',
@@ -17,16 +17,15 @@ export default interface Voting {
   id: string;
   slug: string;
   title: string;
-  description: string;
-  assetCode: string;
-  options: Option[];
-  authorization: Authorization;
-  visibility: Visibility;
   issueAccountId: string;
+  assetCode: string;
+  polls: Poll[];
   distributionAccountId: string;
   ballotBoxAccountId: string;
+  authorization: Authorization;
+  visibility: Visibility;
+  encrypted: boolean;
   votesCap: number;
-  encrypted: boolean,
-  startDate: Date,
-  endDate: Date,
+  startDate: Date;
+  endDate: Date;
 }

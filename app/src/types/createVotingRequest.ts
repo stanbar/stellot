@@ -1,10 +1,9 @@
-import Option from "@/types/option";
 import { Authorization, Visibility } from "@/types/voting";
+import Poll from "@/types/poll";
 
 export default interface CreateVotingRequest {
   title: string;
-  description: string;
-  options: Option[];
+  polls: Poll[]
   authorization: Authorization;
   visibility: Visibility;
   votesCap: number;

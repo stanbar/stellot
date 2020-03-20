@@ -18,7 +18,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   const onFinish = (values: any) => {
     const val = values as {
       title: string,
-      description: string,
+      question: string,
       options?: string[] | undefined,
       authorization: Authorization,
       visibility: Visibility,
@@ -27,12 +27,17 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       encrypted: boolean,
       challenges: number,
     };
+
     console.log({ val });
 
     const createVoting: CreateVotingRequest = {
       title: val.title,
-      description: val.description,
-      options: val.options!.filter(isNotEmpty).map((option, index) => ({ name: option, code: index + 1 })),
+      polls: [{
+        question: val.question,
+        options: val.options!
+          .filter(isNotEmpty)
+          .map((option, index) => ({ name: option, code: index + 1 })),
+      }],
       authorization: val.authorization,
       visibility: val.visibility,
       votesCap: val.votesCap,
@@ -57,7 +62,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         <Input placeholder="Favorite color"/>
       </Form.Item>
 
-      <Form.Item name="description" label="Description" rules={[{ required: true }]}>
+      <Form.Item name="question" label="Question" rules={[{ required: true }]}>
         <Input placeholder="What is your favorite color ?"/>
       </Form.Item>
 
@@ -153,6 +158,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       </Form.Item>
     </Form>
   );
-}
+};
 export default connect(({ loading }: { loading: any }) =>
   ({ loading: loading.effects[`${CREATE}/${CREATE_VOTING}`] }))(CreateVoting)

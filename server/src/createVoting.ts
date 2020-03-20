@@ -31,11 +31,10 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
       issuerKeypair,
       createVotingRequest,
       voteToken);
-  const voting: Voting = {
+  const voting: Omit<Voting, 'id'> = {
     slug: '',
     title: createVotingRequest.title,
-    description: createVotingRequest.description,
-    options: createVotingRequest.options,
+    polls: createVotingRequest.polls,
     issueAccountId: issuerKeypair.publicKey(),
     assetCode: voteToken.code,
     distributionAccountId: distributionKeypair.publicKey(),

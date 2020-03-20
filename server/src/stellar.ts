@@ -3,8 +3,7 @@ import BN from 'bn.js';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
-import { Authorization } from './types/voting';
-import { getVoting } from './database/database';
+import Voting from './types/voting';
 import Keychain from './types/keychain';
 
 export interface Candidate {
@@ -19,10 +18,8 @@ interface InitSession {
 
 const initSessions: Map<string, Array<InitSession>> = new Map();
 
-export async function isAlreadyInitedSession(tokenId: string, votingId: string) {
-  const voting = await getVoting(votingId);
-  return voting.authorization !== Authorization.PUBLIC
-    && initSessions.get(tokenId) !== undefined;
+export async function isUserAuthorizedToInitSession(tokenId: string, voting: Voting) {
+  return initSessions.get(voting.id) === undefined;
 }
 
 export interface ChallengeSession extends InitSession {

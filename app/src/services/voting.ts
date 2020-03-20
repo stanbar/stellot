@@ -18,12 +18,7 @@ import {
 import { createTransaction, getAccountSequenceNumber } from "@/services/stellar";
 import Voting from "@/types/voting";
 import { VoteStatus } from "@/types/voteStatus";
-
-
-export interface Candidate {
-  name: string;
-  code: number;
-}
+import Option from "@/types/option";
 
 interface Session {
   id: number;
@@ -112,8 +107,8 @@ async function createRandomBatchOfTransaction(
   voting: Voting, optionCode: number)
   : Promise<TransactionsBatch> {
   const distributionKeypair = Keypair.fromPublicKey(voting.distributionAccountId);
-  const shuffledCandidates: Candidate[] = voting.options
-    .map(candidate => ({ sort: Math.random(), value: candidate }))
+  const shuffledCandidates: Option[] = voting.polls[0].options
+    .map(option => ({ sort: Math.random(), value: option }))
     .sort((a: any, b: any) => a.sort - b.sort)
     .map(a => a.value);
 
