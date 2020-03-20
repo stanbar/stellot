@@ -34,8 +34,7 @@ votings.presidentElection2019 = {
   id: 'presidentElection2019',
   slug: 'presidentElection2019',
   title: '2020 Polish presidential election',
-  description: 'Chose candidate',
-  options: CANDIDATES,
+  polls: [{ question: 'chose chandidate', options: CANDIDATES }],
   issueAccountId: 'GBCKKOTXWVHRHTWWSKN53HD3BMVXZCOFJAINKHL7YGGTXCFDVD7FMJSH',
   assetCode: 'Vote01122019',
   distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
@@ -70,11 +69,15 @@ export function votingExists(votingId: string): Promise<boolean> {
   return VotingSchema.exists({ _id: votingId })
 }
 
-export async function getVoting(votingSlug: string): Promise<Voting | undefined> {
+export async function getVotingById(votingId: string): Promise<Voting | undefined> {
+  return (await VotingSchema.findById(votingId))?.toJSON();
+}
+
+export async function getVotingBySlug(votingSlug: string): Promise<Voting | undefined> {
   return (await VotingSchema.findOne({ slug: votingSlug }))?.toJSON();
 }
 
-export async function setVoting(voting: Voting): Promise<Voting> {
+export async function setVoting(voting: Omit<Voting, 'id'>): Promise<Voting> {
   const votingDoc = new VotingSchema({ ...voting });
   const saved = await votingDoc.save();
   return saved.toJSON();
@@ -97,7 +100,10 @@ export async function setKeychain(
   distribution: Keypair,
   ballotBox: Keypair) {
   const keychain = new KeychainSchema({
-    issuer: issuer.secret(), distribution: distribution.secret(), ballotBox: ballotBox.secret(),
+    voting: votingId,
+    issuer: issuer.secret(),
+    distribution: distribution.secret(),
+    ballotBox: ballotBox.secret(),
   });
   await keychain.save()
 }

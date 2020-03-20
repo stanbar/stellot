@@ -11,8 +11,8 @@ import {
   Asset
 } from "stellar-sdk";
 import { decodeAnswersFromMemo } from "@/crypto/utils";
-import { Candidate } from "@/services/voting";
 import Voting from "@/types/voting";
+import Option from "@/types/option";
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -42,7 +42,7 @@ export function createTransaction(account: Account, memo: Memo, voting: Voting)
 
 
 export interface Result {
-  candidate: Candidate;
+  option: Option;
   votes: number
 }
 
@@ -60,8 +60,8 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
       tx.asset_issuer === voting.issueAccountId,
   ).map(payment => payment.transaction()));
 
-  const results = voting.options.map((candidate: Candidate) => ({
-    candidate,
+  const results = voting.polls[0].options.map((option: Option) => ({
+    option,
     votes: 0,
   }));
 
@@ -69,7 +69,7 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
     .filter(tx => tx.memo_type === MemoText && tx.memo)
     .forEach(tx => {
       const candidateCode: Array<number> = decodeAnswersFromMemo(tx.memo!, 1); // TODO dont hardcore one answer
-      const result = results.find(it => it.candidate.code === candidateCode[0]);
+      const result = results.find(it => it.option.code === candidateCode[0]);
       if (result === undefined) {
         console.log(`Detected invalid vote on candidateCode: ${candidateCode}`)
       } else {
@@ -84,3 +84,4 @@ export function castVote(tx: Transaction) {
   console.log('Submitting transaction');
   return server.submitTransaction(tx);
 }
+

@@ -7,8 +7,10 @@ import { VOTING } from '.';
 const VotingSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true, required: true },
   title: { type: String, required: true },
-  description: { type: String, required: true },
-  options: { type: [{ name: String, code: Number }], required: true },
+  polls: [{
+    question: { type: String, required: true },
+    options: { type: [{ name: String, code: Number }], required: true },
+  }],
   votesCap: { type: Number, required: true },
   encrypted: { type: Boolean, required: true },
   startDate: { type: Date, required: true },
