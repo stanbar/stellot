@@ -12,9 +12,9 @@ export async function fetchVotes(): Promise<Voting[]> {
   return res.json()
 }
 
-export async function fetchVoting(votingId: string): Promise<Voting> {
-  console.log({ fetchVoting: votingId });
-  const res = await fetch(`/api/voting/${votingId}`, {
+export async function fetchVoting(votingSlug: string): Promise<Voting> {
+  console.log({ fetchVoting: votingSlug });
+  const res = await fetch(`/api/voting/${votingSlug}`, {
     headers: {
       'Content-Type': 'application/json',
     },
