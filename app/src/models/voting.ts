@@ -40,10 +40,10 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
   }
 }
 
-export function dispatchFetchVoting(dispatch: Dispatch, votingId: string) {
+export function dispatchFetchVoting(dispatch: Dispatch, votingSlug: string) {
   dispatch({
     type: `${VOTING}/${FETCH_VOTING}`,
-    votingId
+    votingSlug
   })
 }
 
@@ -71,8 +71,8 @@ export const VotingModel: VotingModelType = {
     status: undefined,
   },
   effects: {
-    * [FETCH_VOTING]({ votingId }, { call, put }) {
-      const voting = yield call(fetchVoting, votingId);
+    * [FETCH_VOTING]({ votingSlug }, { call, put }) {
+      const voting = yield call(fetchVoting, votingSlug);
       yield put({
         type: SET_VOTING,
         payload: voting

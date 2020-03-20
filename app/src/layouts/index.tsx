@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, Col, Layout } from 'antd';
-import logo from '@/assets/stellotLogo.png';
+import { Col, Layout } from 'antd';
+import Logo from "@/components/Logo";
 import { Link } from "umi";
+import { BtnHeading } from '@/components/ActionButton';
 import styles from './index.css';
 
 const { Header, Footer, Content } = Layout;
@@ -11,17 +12,18 @@ const { Header, Footer, Content } = Layout;
 const BasicLayout: React.FC = props => (
   <Layout className={styles.normal}>
     <Header className={styles.header}>
-      <Link to="/">
-        <img className={styles.logo} alt="Stellot" src={logo}/>
+      <Link to="/" className={styles.logo}>
+        <Logo large={false}/>
+      </Link>
+      <Link to="/create">
+        <BtnHeading className={styles.heading}>
+          Create Voting
+        </BtnHeading>
       </Link>
     </Header>
-    <Content className={styles.siteLayoutContent}>
-      <Col sm={{ span: 20, offset: 2 }} xl={{ span: 16, offset: 4 }}>
-        <Card>
-          <Col sm={{ span: 20, offset: 2 }} xl={{ span: 16, offset: 4 }}>
-            <div>{props.children}</div>
-          </Col>
-        </Card>
+    <Content>
+      <Col className={styles.content} sm={{ span: 20, offset: 2 }} xl={{ span: 16, offset: 4 }}>
+        <div>{props.children}</div>
       </Col>
     </Content>
     <Footer style={{ textAlign: 'center' }}>Stellot 2020 build with ❤️to Stellar</Footer>

@@ -24,6 +24,7 @@ const config: IConfig = {
         ],
       },
     }],
+    ['babel-plugin-styled-components', {}],
   ],
   proxy: {
     '/api/': {
