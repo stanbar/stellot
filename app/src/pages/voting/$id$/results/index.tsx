@@ -14,18 +14,21 @@ import { VoteStatus } from '@/types/voteStatus';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import Result from '@/types/result';
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
   status?: VoteStatus;
   loading?: boolean;
   loadingResults?: boolean;
+  results?: Result[];
 }
 
 const VoteResults: React.FC<VotePreviewProps> = props => {
-  const { loading, loadingResults, match, dispatch, voting } = props;
+  const { loading, loadingResults, results, match, dispatch, voting } = props;
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
   console.log({ votingSlug });
+  console.log({ results });
 
   useEffect(() => {
     if (!voting) {
@@ -38,18 +41,6 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       dispatchFetchResults(dispatch, voting)
     }
   }, [voting]);
-
-  const data = [
-    {
-      name: 'Yellow', votes: 12,
-    },
-    {
-      name: 'Green', votes: 32,
-    },
-    {
-      name: 'Blue', votes: 25,
-    },
-  ];
 
   console.log({ voting });
   if (loading) {
@@ -68,7 +59,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       <BarChart
         width={500}
         height={300}
-        data={data}
+        data={results}
         margin={{
           top: 5, right: 30, left: 20, bottom: 5,
         }}
@@ -88,5 +79,6 @@ export default connect(({ voting, loading }: { voting: VotingStateType, loading:
     voting: voting.voting,
     status: voting.status,
     loading: loading.effects[`${VOTING}/${FETCH_VOTING}`],
-    loadingResults: loading.effects[`${VOTING}/${FETCH_RESULTS}`]
+    loadingResults: loading.effects[`${VOTING}/${FETCH_RESULTS}`],
+    results: voting.results,
   }))(VoteResults);
