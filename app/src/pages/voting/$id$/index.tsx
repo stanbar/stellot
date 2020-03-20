@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
-import { Button, Form, Input, notification, Progress, Radio } from 'antd';
-import stellotWhite from '@/assets/stellot_white.png'
+import { Form, Input, notification, Progress, Radio } from 'antd';
+import { dispatchFetchVoting, dispatchPerformVote, VotingStateType, VOTING, FETCH_VOTING } from "@/models/voting";
+import { ConnectProps, Loading } from "@/models/connect";
+import { connect } from 'dva';
+import Voting, { Authorization, Visibility } from "@/types/voting";
+import { VoteStatus } from '@/types/voteStatus';
+import { BtnSubmit } from "@/components/ActionButton";
 import {
   EyeOutlined,
   KeyOutlined,
@@ -8,12 +13,8 @@ import {
   LockOutlined,
   MailOutlined,
   NotificationOutlined
-} from '@ant-design/icons';
-import { dispatchFetchVoting, dispatchPerformVote, VotingStateType, VOTING, FETCH_VOTING } from "@/models/voting";
-import { ConnectProps, Loading } from "@/models/connect";
-import { connect } from 'dva';
-import Voting, { Authorization, Visibility } from "@/types/voting";
-import { VoteStatus } from '@/types/voteStatus';
+} from "@ant-design/icons/lib";
+import moment from "moment";
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -68,7 +69,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
     display: 'block',
     height: '50px',
     lineHeight: '50px',
-    minWidth: '200px',
+    minWidth: '150px',
   };
   const onFinish = (values: any) => {
     console.log(values);
@@ -93,25 +94,34 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
   // TODO set rule to make option required
   return (
     <div>
-      <p>
-        {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
-        {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
-        {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
-        {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
+      {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
+      {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
+      {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
+      <span style={{ marginLeft: 4 }}>
+      {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
         {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
         {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
         {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
-        {voting.slug}
-      </p>
-      <h1>{voting?.title}</h1>
-      <h4>{voting?.description}</h4>
+      </span>
+      <span style={{ marginLeft: 4 }}>
+        <span style={{ marginRight: 4 }}>
+        {moment(voting?.startDate).format('ll')}
+        </span>
+        -
+        <span style={{ marginLeft: 4 }}>
+        {moment(voting?.endDate).format('ll')}
+        </span>
+      </span>
+
+      <h1 style={{ marginTop: 8 }}>{voting?.title}</h1>
+      <h4>{voting?.polls[0].question}</h4>
       <Form layout="vertical" name="vote_form" onFinish={onFinish} form={form}>
         <Form.Item name="optionCode" rules={[{
           required: true,
           message: 'Please select your option!'
         }]}>
           <Radio.Group buttonStyle="solid" size="large">
-            {voting.options?.map(option => (
+            {voting.polls[0].options?.map(option => (
               <Radio.Button style={radioStyle} key={option.code} value={option.code}>{option.name}</Radio.Button>
             ))}
           </Radio.Group>
@@ -125,16 +135,15 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
         </Form.Item>
         }
         <Form.Item>
-          <Button type="primary" size="large"
-                  icon={<img alt="ballot" height={20} style={{ marginRight: 8, marginBottom: 4 }}
-                             src={stellotWhite}/>}
-                  htmlType="submit">
+          <BtnSubmit htmlType="submit">
             Submit
-          </Button>
+          </BtnSubmit>
         </Form.Item>
       </Form>
       {status && <div>
-        <Progress percent={calculateProgressPercent(status)} steps={7} strokeColor="#1890ff"
+        <Progress percent={calculateProgressPercent(status)} strokeColor="#1890ff"
+                  size="small"
+                  style={{ maxWidth: 150 }}
                   status={calculateProgressStatus(status)}
         />
         <p>{status}</p>

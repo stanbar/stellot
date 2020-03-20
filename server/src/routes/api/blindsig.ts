@@ -1,13 +1,14 @@
 import express from 'express';
-import { votingExists } from '../../database/database';
+import { getKeychain, getVotingById } from '../../database/database';
 import {
   ChallengeRequest,
   createSession,
-  isAlreadyInitedSession,
+  isUserAuthorizedToInitSession,
   Proof,
   proofChallenges,
   storeAndPickLuckyBatch,
 } from '../../stellar';
+import { Authorization } from '../../types/voting';
 
 const debug = require('debug')('stellar-voting:app');
 
@@ -18,15 +19,21 @@ router.post('/init', async (req, res, next) => {
   debug(`tokenId: ${tokenId}`);
   debug(`votingId: ${votingId}`);
   try {
-    const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
-    if (isAlreadyInited) {
-      return res.status(405).send('Session already inited');
-    }
-    const voting = await votingExists(votingId);
+    const voting = await getVotingById(votingId);
     if (!voting) {
       return res.status(404).send(`Voting with id: ${votingId} not found`);
     }
-    const session = createSession(tokenId, votingId);
+    if (voting.authorization !== Authorization.PUBLIC) {
+      const isAlreadyInited = isUserAuthorizedToInitSession(tokenId, voting);
+      if (isAlreadyInited) {
+        return res.status(405).send('Session already inited');
+      }
+    }
+    const keychain = await getKeychain(votingId);
+    if (!keychain) {
+      return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
+    }
+    const session = createSession(tokenId, keychain);
     return res.status(200).send(session);
   } catch (e) {
     return next(e)

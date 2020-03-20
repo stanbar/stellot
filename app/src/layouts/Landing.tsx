@@ -2,9 +2,9 @@ import React from 'react';
 import { Col, Layout } from 'antd';
 import Logo from "@/components/Logo";
 import { Link } from "umi";
-import { ConnectProps } from "@/models/connect";
-import { BtnHeading } from "@/components/ActionButton";
+import { BtnHeading } from '@/components/ActionButton';
 import styles from './index.css';
+import { ConnectProps } from "@/models/connect";
 
 const { Header, Footer, Content } = Layout;
 
@@ -24,18 +24,15 @@ const BasicLayout: React.FC<LayoutProps> = props => {
         <Link to="/" className={styles.logo}>
           <Logo large={false}/>
         </Link>
-        {location && location.pathname === '/' &&
         <Link to="/create">
           <BtnHeading className={styles.heading}>
             Create Voting
           </BtnHeading>
         </Link>
-        }
       </Header>
       <Content>
-        <Col className={styles.content} sm={{ span: 20, offset: 2 }} md={{ span: 16, offset: 4 }}
-             xl={{ span: 14, offset: 5 }}>
-          {props.children}
+        <Col className={styles.content} sm={{ span: 20, offset: 2 }} xl={{ span: 16, offset: 4 }}>
+          <div>{props.children}</div>
         </Col>
       </Content>
       <Footer style={{ textAlign: 'center' }}>Stellot 2020 build with ❤️to Stellar</Footer>
