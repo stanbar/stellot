@@ -4,18 +4,26 @@ import { getPublicVotings, getVoting } from '../../database/database';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const result = await getPublicVotings();
-  res.json(result);
+router.get('/', async (req, res, next) => {
+  try {
+    const result = await getPublicVotings();
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
 });
 
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  const result = await getVoting(id);
-  res.json(result);
+router.get('/:slug', async (req, res, next) => {
+  const { slug } = req.params;
+  try {
+    const result = await getVoting(slug);
+    res.json(result);
+  } catch (e) {
+    next(e)
+  }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   const { createVotingRequest } = req.body;
   if (!createVotingRequest) {
     return res.sendStatus(400).end();
@@ -24,8 +32,7 @@ router.post('/', async (req, res) => {
     const createVotingResponse = await createVoting(createVotingRequest);
     return res.json(createVotingResponse).end();
   } catch (e) {
-    console.error(e.response.data.extras);
-    return res.status(500).end();
+    next(e)
   }
 });
 
