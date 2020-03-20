@@ -22,10 +22,10 @@ const httpPort = parseInt(process.env.PORT || '8080', 10);
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+if (!process.env.MONGODB_URI) {
+  throw new Error('MONGODB_URI must be set');
+}
 if (isProduction) {
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI must be set');
-  }
   mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => debug('connected to db'));
 } else {
