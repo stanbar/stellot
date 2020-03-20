@@ -5,8 +5,8 @@ import { performSignedTransaction } from "@/services/voting";
 import { castVote, fetchResults } from "@/services/stellar";
 import { fetchVoting } from "@/services/tokenDistributionServer";
 import { VoteStatus } from "@/types/voteStatus";
-import Results from "@/types/results";
 import router from "umi/router";
+import Result from '@/types/result';
 
 export const VOTING = 'voting';
 export const FETCH_VOTING = 'fetchVoting';
@@ -64,7 +64,7 @@ export function dispatchFetchResults(dispatch: Dispatch, voting: Voting) {
 export interface VotingStateType {
   voting?: Voting
   status?: VoteStatus;
-  results?: Results;
+  results?: Result[];
 }
 
 export interface VotingModelType {
@@ -117,6 +117,7 @@ export const VotingModel: VotingModelType = {
       }
     },
     [SET_RESULTS](state: VotingStateType, { payload }): VotingStateType {
+      console.log({ setResults: payload });
       return {
         ...state,
         results: payload,
