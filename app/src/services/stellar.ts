@@ -13,6 +13,7 @@ import {
 import { decodeAnswersFromMemo } from "@/crypto/utils";
 import Voting from "@/types/voting";
 import Option from "@/types/option";
+import Result from "@/types/result";
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -40,11 +41,6 @@ export function createTransaction(account: Account, memo: Memo, voting: Voting)
     .build();
 }
 
-
-export interface Result {
-  option: Option;
-  votes: number
-}
 
 export async function fetchResults(voting: Voting): Promise<Result[]> {
   const payments = await server
@@ -77,7 +73,7 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
         console.log(`Detected valid vote on candidateCode: ${candidateCode}`)
       }
     });
-  return results;
+  return results.map(result => ({ name: result.option.name, votes: result.votes }));
 }
 
 export function castVote(tx: Transaction) {
