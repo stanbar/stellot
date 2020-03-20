@@ -42,7 +42,9 @@ export const BtnHeading = styled(Btn)<{
 
 export const BtnSubmit = styled(Btn)<{ color?: string }>`
   background-color: ${props => (props.color ? props.color : CORNFLOWER)};
-  width: 250px;
+  width: 150px;
+  font-size: 16px;
+  padding: 10px 0;
   &:disabled {
     opacity: 0.5;
     cursor: default;

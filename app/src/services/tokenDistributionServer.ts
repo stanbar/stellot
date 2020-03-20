@@ -51,7 +51,7 @@ export interface ResSession {
 }
 
 export async function initSessions(tokenId: string, votingId: string): Promise<Array<ResSession>> {
-  const response = await fetch('/api/init', {
+  const response = await fetch('/api/blindsig/init', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export async function getChallenges(
   tokenId: string,
   blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>)
   : Promise<number> {
-  const response = await fetch('/api/getChallenges', {
+  const response = await fetch('/api/blindsig/getChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ interface Proof {
 export async function proofChallenge(tokenId: string, proofs: Proof[])
   : Promise<{ id: number, sigs: Array<BN> }> {
   console.log({ proofs: JSON.stringify({ tokenId, proofs }) });
-  const response = await fetch('/api/proofChallenges', {
+  const response = await fetch('/api/blindsig/proofChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
