@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Radio, Input, Col, Typography, Row, InputNumber, Switch } from 'antd';
+import { Form, Button, Radio, Input, Col, Typography, Row, InputNumber, Switch, DatePicker } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
 import CreateVotingRequest from '@/types/createVotingRequest';
 import { Authorization, Visibility } from "@/types/voting";
@@ -23,6 +23,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       authorization: Authorization,
       visibility: Visibility,
       votesCap: number,
+      period: Array<Date>,
       encrypted: boolean,
       challenges: number,
     };
@@ -37,6 +38,8 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       votesCap: val.votesCap,
       encrypted: val.encrypted,
       challenges: val.challenges,
+      startDate: val.period[0],
+      endDate: val.period[1],
     };
     console.log({ createVoting });
     dispatchCreateVoting(dispatch, createVoting);
@@ -130,6 +133,10 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         <Form.Item name="votesCap" noStyle>
           <InputNumber min={2}/>
         </Form.Item>
+      </Form.Item>
+      <Form.Item name="period" label="Select time period"
+                 rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
+        <DatePicker.RangePicker showTime format="YYYY-MM-DD HH:mm:ss"/>
       </Form.Item>
       <Form.Item name="encrypted" label="Encrypt results until the end of voting" valuePropName="checked">
         <Switch/>

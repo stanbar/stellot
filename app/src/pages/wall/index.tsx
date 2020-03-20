@@ -10,13 +10,13 @@ interface WallProps extends ConnectProps {
   votes: Voting[]
 }
 
-const Votes: React.FC<WallProps> = ({ dispatch, votes }) => {
+const Wall: React.FC<WallProps> = ({ dispatch, votes }) => {
     useEffect(() => dispatchFetchVotes(dispatch), []);
     return (
       <div>
         {votes.map(vote => (
-          <Link key={vote.id} to={`/voting/${vote.id}`}>
-            <Card key={vote.id}>
+          <Link key={vote.slug} to={`/voting/${vote.slug}`}>
+            <Card key={vote.slug}>
               <Card.Meta title={vote.title}/>
             </Card>
           </Link>))}
@@ -25,4 +25,4 @@ const Votes: React.FC<WallProps> = ({ dispatch, votes }) => {
   }
 ;
 export default connect(({ wall }: { wall: WallStateType }) =>
-  ({ votes: wall.votes }))(Votes)
+  ({ votes: wall.votes }))(Wall)
