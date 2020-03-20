@@ -33,7 +33,7 @@ export const CreateModel: CreateModelType = {
   effects: {
     * [CREATE_VOTING]({ createVotingRequest }, { call }) {
       const voting = yield call(createVoting, createVotingRequest);
-      router.replace(`/voting/${voting.id}`);
+      router.replace(`/voting/${voting.slug}`);
     }
   },
 };
