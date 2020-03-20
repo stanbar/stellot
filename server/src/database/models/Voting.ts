@@ -5,26 +5,28 @@ import { Authorization, Visibility } from '../../types/voting';
 import { VOTING } from '.';
 
 const VotingSchema = new mongoose.Schema({
-  slug: { type: String, lowercase: true, unique: true },
-  title: String,
-  description: String,
-  options: [{ name: String, code: Number }],
-  votesVap: Number,
-  encrypted: Boolean,
-  startDate: { type: Date, default: Date.now },
-  endDate: Date,
+  slug: { type: String, lowercase: true, unique: true, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  options: { type: [{ name: String, code: Number }], required: true },
+  votesCap: { type: Number, required: true },
+  encrypted: { type: Boolean, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
   authorization: {
     type: String,
     enum: [Authorization.PUBLIC, Authorization.EMAIL, Authorization.CODE, Authorization.CUSTOM],
+    required: true,
   },
   visibility: {
     type: String,
     enum: [Visibility.PUBLIC, Visibility.UNLISTED, Visibility.UNLISTED],
+    required: true,
   },
-  assetCode: String,
-  issueAccountId: String,
-  distributionAccountId: String,
-  ballotBoxAccountId: String,
+  assetCode: { type: String, required: true },
+  issueAccountId: { type: String, required: true },
+  distributionAccountId: { type: String, required: true },
+  ballotBoxAccountId: { type: String, required: true },
 }, { timestamps: true });
 
 VotingSchema.plugin(uniqueValidator, { message: 'is already taken' });

@@ -13,23 +13,27 @@ const debug = require('debug')('stellar-voting:app');
 
 const router = express.Router();
 
-router.post('/init', async (req, res) => {
+router.post('/init', async (req, res, next) => {
   const { tokenId, votingId } = req.body;
   debug(`tokenId: ${tokenId}`);
   debug(`votingId: ${votingId}`);
-  const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
-  if (isAlreadyInited) {
-    return res.status(405).send('Session already inited');
+  try {
+    const isAlreadyInited = isAlreadyInitedSession(tokenId, votingId);
+    if (isAlreadyInited) {
+      return res.status(405).send('Session already inited');
+    }
+    const voting = await votingExists(votingId);
+    if (!voting) {
+      return res.status(404).send(`Voting with id: ${votingId} not found`);
+    }
+    const session = createSession(tokenId, votingId);
+    return res.status(200).send(session);
+  } catch (e) {
+    return next(e)
   }
-  const voting = await votingExists(votingId);
-  if (!voting) {
-    return res.status(404).send(`Voting with id: ${votingId} not found`);
-  }
-  const session = createSession(tokenId, votingId);
-  return res.status(200).send(session);
 });
 
-router.post('/getChallenges', async (req, res) => {
+router.post('/getChallenges', (req, res) => {
   const {
     tokenId,
     blindedTransactionBatches,
@@ -39,15 +43,14 @@ router.post('/getChallenges', async (req, res) => {
   return res.status(200).send({ luckyBatchIndex });
 });
 
-router.post('/proofChallenges', async (req, res) => {
+router.post('/proofChallenges', async (req, res, next) => {
   const { tokenId, proofs }: { tokenId: string; proofs: Proof[] } = req.body;
   debug(`tokenId: ${tokenId}`);
   try {
     const signedBatch = proofChallenges(tokenId, proofs);
-    return res.status(200).send(signedBatch);
+    res.status(200).send(signedBatch);
   } catch (e) {
-    console.error(e);
-    return res.status(405).send(e.message);
+    next(e);
   }
 });
 
