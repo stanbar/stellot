@@ -10,4 +10,6 @@ export default interface CreateVotingRequest {
   votesCap: number;
   encrypted: boolean;
   challenges: number;
+  startDate: Date;
+  endDate: Date;
 }
