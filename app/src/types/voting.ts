@@ -15,6 +15,7 @@ export enum Authorization {
 
 export default interface Voting {
   id: string;
+  slug: string;
   title: string;
   issueAccountId: string;
   assetCode: string;

@@ -59,10 +59,10 @@ function calculateProgressStatus(status: VoteStatus) {
 
 const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, voting, status }) => {
   const [form] = Form.useForm();
-  const votingId = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
-  console.log({ votingId });
+  const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
+  console.log({ votingSlug });
 
-  useEffect(() => dispatchFetchVoting(dispatch, votingId), [votingId]);
+  useEffect(() => dispatchFetchVoting(dispatch, votingSlug), [votingSlug]);
 
   const radioStyle = {
     display: 'block',
@@ -101,7 +101,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
         {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
         {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
         {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
-        Vote {voting.id}
+        {voting.slug}
       </p>
       <h1>{voting?.title}</h1>
       <h4>{voting?.description}</h4>
