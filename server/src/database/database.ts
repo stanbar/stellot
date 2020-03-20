@@ -70,8 +70,8 @@ export function votingExists(votingId: string): Promise<boolean> {
   return VotingSchema.exists({ _id: votingId })
 }
 
-export async function getVoting(votingId: string): Promise<Voting> {
-  return (await VotingSchema.findById(votingId))?.toJSON();
+export async function getVoting(votingSlug: string): Promise<Voting | undefined> {
+  return (await VotingSchema.findOne({ slug: votingSlug }))?.toJSON();
 }
 
 export async function setVoting(voting: Voting): Promise<Voting> {
