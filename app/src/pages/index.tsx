@@ -4,6 +4,8 @@ import VotingsTable from "@/components/VotingsTable";
 import styles from './index.css';
 import { Col } from 'antd';
 import { BtnOutlined } from '@/components/ActionButton';
+import { Link } from "umi";
+import { GITHUB_URL, PAPER_URL } from "@/constants";
 
 const Title = styled.h1`
 font-size: 28px;
@@ -33,7 +35,9 @@ export default function () {
         <SubSubTitle>Stellot is designed around voter privacy, ensuring that everyone can be sure about its vote
           anonimity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
           verify the election results without having to trust central authority.</SubSubTitle>
-        <BtnOutlined>Read more</BtnOutlined>
+
+        <a href={PAPER_URL} target="_blank" rel="noreferrer noopener"><BtnOutlined>Read more</BtnOutlined></a>
+
       </Col>
       <TitleParagraph>Explore public votings</TitleParagraph>
       <VotingsTable/>
