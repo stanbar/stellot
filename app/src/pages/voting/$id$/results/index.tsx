@@ -15,6 +15,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 import Result from '@/types/result';
+import { BtnSubmit } from "@/components/ActionButton";
+import { Link } from 'umi';
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -55,13 +57,13 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
   return (
     <div>
       <h1>{voting?.title}</h1>
-      <h4>{voting?.polls[0].question}</h4>
+      <h4 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h4>
       <BarChart
         width={500}
         height={300}
         data={results}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5, bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3"/>
@@ -71,6 +73,12 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
         <Legend/>
         <Bar dataKey="votes" fill="#8884d8"/>
       </BarChart>
+
+      <Link to="/wall">
+        <BtnSubmit style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
+          More
+        </BtnSubmit>
+      </Link>
     </div>
   );
 };

@@ -28,14 +28,12 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
           type: `${VOTING}/${SET_STATUS}`,
           payload: VoteStatus.CASTING_VOTE,
         });
-        await castVote(tx);
+        const res = await castVote(tx);
         dispatch({
           type: `${VOTING}/${SET_STATUS}`,
           payload: VoteStatus.DONE,
+          txHash: res.hash,
         });
-        setTimeout(() => {
-          router.replace(`/voting/${voting.slug}/results`);
-        }, 500)
       }
     }
   } catch (e) {
@@ -45,6 +43,14 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
       payload: VoteStatus.ERROR,
     });
   }
+}
+
+export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash?: string) {
+  dispatch({
+    type: `${VOTING}/${SET_STATUS}`,
+    payload: status,
+    txHash,
+  });
 }
 
 export function dispatchFetchVoting(dispatch: Dispatch, votingSlug: string) {
@@ -65,6 +71,7 @@ export interface VotingStateType {
   voting?: Voting
   status?: VoteStatus;
   results?: Result[];
+  txHash?: string;
 }
 
 export interface VotingModelType {
@@ -104,10 +111,11 @@ export const VotingModel: VotingModelType = {
     }
   },
   reducers: {
-    [SET_STATUS](state: VotingStateType, { payload }): VotingStateType {
+    [SET_STATUS](state: VotingStateType, { payload, txHash }): VotingStateType {
       return {
         ...state,
         status: payload,
+        txHash,
       }
     },
     [SET_VOTING](state: VotingStateType, { payload }): VotingStateType {
