@@ -66,7 +66,7 @@ async function createIssuerAccount(masterAccount: AccountResponse, issuerKeypair
 
 function createVoteToken(issuer: Keypair, createVotingRequest: CreateVotingRequest): Asset {
   return new Asset(
-    createVotingRequest.title.replace(' ', '').substr(0, 12),
+    createVotingRequest.title.replace(/[^0-9a-z]/gi, '').substr(0, 11),
     issuer.publicKey())
 }
 
