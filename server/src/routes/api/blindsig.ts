@@ -24,9 +24,9 @@ router.post('/init', async (req, res, next) => {
       return res.status(404).send(`Voting with id: ${votingId} not found`);
     }
     if (voting.authorization !== Authorization.PUBLIC) {
-      const isAlreadyInited = isUserAuthorizedToInitSession(tokenId, voting);
-      if (isAlreadyInited) {
-        return res.status(405).send('Session already inited');
+      const isUserAuthorized = isUserAuthorizedToInitSession(tokenId, voting);
+      if (!isUserAuthorized) {
+        return res.status(405).send('Init session failed authorization');
       }
     }
     const keychain = await getKeychain(votingId);
