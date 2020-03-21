@@ -2,6 +2,10 @@ export function isNotEmpty(str?: string) {
   return str && str.length !== 0 && str.trim();
 }
 
+export function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.substring(1);
+}
+
 export function decodeAnswersFromMemo(memo: Buffer | string, answerCount: number)
   : Array<number> {
   if (typeof memo === 'string') {

@@ -5,7 +5,6 @@ import { performSignedTransaction } from "@/services/voting";
 import { castVote, fetchResults } from "@/services/stellar";
 import { fetchVoting } from "@/services/tokenDistributionServer";
 import { VoteStatus } from "@/types/voteStatus";
-import router from "umi/router";
 import Result from '@/types/result';
 
 export const VOTING = 'voting';

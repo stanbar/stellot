@@ -3,7 +3,7 @@ import { Form, Button, Radio, Input, Col, Typography, Row, InputNumber, Switch, 
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
 import CreateVotingRequest from '@/types/createVotingRequest';
 import { Authorization, Visibility } from "@/types/voting";
-import { isNotEmpty } from '@/utils/utils';
+import { isNotEmpty, capitalize } from '@/utils/utils';
 import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
@@ -53,17 +53,17 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
     <Form layout="vertical" form={form} name="options_form" onFinish={onFinish}
           initialValues={{
             votesCap: 100,
-            authorization: 'public',
-            visibility: 'public',
+            authorization: Authorization.OPEN,
+            visibility: Visibility.PUBLIC,
             encrypted: false,
             challenges: 100,
           }}>
       <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-        <Input placeholder="Favorite color"/>
+        <Input placeholder="Favourite colour"/>
       </Form.Item>
 
       <Form.Item name="question" label="Question" rules={[{ required: true }]}>
-        <Input placeholder="What is your favorite color ?"/>
+        <Input placeholder="What is your favourite colour ?"/>
       </Form.Item>
 
       <Form.List name="options">
@@ -122,16 +122,16 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       </Form.List>
       <Form.Item name="authorization" label="Authorization method">
         <Radio.Group>
-          <Radio.Button value={Authorization.PUBLIC}>Public</Radio.Button>
-          <Radio.Button value={Authorization.EMAIL}>Emails</Radio.Button>
-          <Radio.Button value={Authorization.CODE}>Codes</Radio.Button>
+          <Radio.Button value={Authorization.OPEN}>{capitalize(Authorization.OPEN)}</Radio.Button>
+          <Radio.Button value={Authorization.EMAIL}>{capitalize(Authorization.EMAIL)}</Radio.Button>
+          <Radio.Button value={Authorization.CODE}>{capitalize(Authorization.CODE)}</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item name="visibility" label="Voting visibility">
+      <Form.Item name="visibility" label="Listing visibility">
         <Radio.Group>
-          <Radio.Button value={Visibility.PUBLIC}>Public</Radio.Button>
-          <Radio.Button value={Visibility.UNLISTED}>Unlisted</Radio.Button>
-          <Radio.Button value={Visibility.PRIVATE}>Private</Radio.Button>
+          <Radio.Button value={Visibility.PUBLIC}>{capitalize(Visibility.PUBLIC)}</Radio.Button>
+          <Radio.Button value={Visibility.UNLISTED}>{capitalize(Visibility.UNLISTED)}</Radio.Button>
+          <Radio.Button value={Visibility.PRIVATE}>{capitalize(Visibility.PRIVATE)}</Radio.Button>
         </Radio.Group>
       </Form.Item>
       <Form.Item label="Number of votes cap">

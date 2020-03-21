@@ -34,7 +34,7 @@ async function sendTransaction() {
     fee,
     // Uncomment the following line to build transactions for the live network. Be
     // sure to also change the horizon hostname.
-    // networkPassphrase: StellarSdk.Networks.PUBLIC,
+    // networkPassphrase: StellarSdk.Networks.OPEN,
     networkPassphrase: StellarSdk.Networks.TESTNET,
   })
     // Add a payment operation to the transaction
