@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, Input, notification, Progress, Radio } from 'antd';
+import { Form, Input, notification, Radio } from 'antd';
 import { dispatchFetchVoting, dispatchPerformVote, VotingStateType, VOTING, FETCH_VOTING } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
@@ -15,53 +15,18 @@ import {
   NotificationOutlined
 } from "@ant-design/icons/lib";
 import moment from "moment";
+import CastVoteModal from "@/components/CastVoteModal";
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
   status?: VoteStatus;
   loading?: boolean;
+  txHash?: string;
 }
 
-function calculateProgressPercent(voteStatus: VoteStatus) {
-  const totalNumberOfStates = 7; // TODO figure out how to prevent from hardcoding
-  switch (voteStatus) {
-    case VoteStatus.INITIALIZING:
-      return Math.round(1 / totalNumberOfStates * 100);
-    case VoteStatus.CREATING_BLINDED_TRANSACTIONS:
-      return Math.round(2 / totalNumberOfStates * 100);
-    case VoteStatus.REQUESTED_CHALLENGE:
-      return Math.round(3 / totalNumberOfStates * 100);
-    case VoteStatus.PROOFING_CHALLENGE:
-      return Math.round(4 / totalNumberOfStates * 100);
-    case VoteStatus.CALCULATING_SIGNATURE:
-      return Math.round(5 / totalNumberOfStates * 100);
-    case VoteStatus.CASTING_VOTE:
-      return Math.round(6 / totalNumberOfStates * 100);
-    case VoteStatus.DONE:
-      return Math.round(7 / totalNumberOfStates * 100);
-    default:
-    case VoteStatus.UNDEFINED:
-      return 0;
-  }
-}
-
-function calculateProgressStatus(status: VoteStatus) {
-  switch (status) {
-    case VoteStatus.ERROR:
-      return "exception";
-    case VoteStatus.DONE:
-      return "success";
-    case VoteStatus.UNDEFINED:
-      return "normal";
-    default:
-      return "active";
-  }
-}
-
-const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, voting, status }) => {
+const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispatch, voting }) => {
   const [form] = Form.useForm();
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
-  console.log({ votingSlug });
 
   useEffect(() => dispatchFetchVoting(dispatch, votingSlug), [votingSlug]);
 
@@ -71,27 +36,24 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
     lineHeight: '50px',
     minWidth: '150px',
   };
+
   const onFinish = (values: any) => {
-    console.log(values);
     const { authorizationToken, optionCode } = values;
     if (!voting) {
       notification.error({
         message: 'Voting not found',
       });
     } else {
-      console.log({ authorizationToken, voting, optionCode });
       dispatchPerformVote(dispatch, authorizationToken, voting, optionCode)
     }
   };
 
-  console.log({ voting });
   if (loading) {
     return (<p>Loading...</p>)
   }
   if (!voting) {
     return (<p>Failed to load voting</p>)
   }
-  // TODO set rule to make option required
   return (
     <div>
       {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
@@ -135,20 +97,12 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, match, dispatch, vot
         </Form.Item>
         }
         <Form.Item>
-          <BtnSubmit htmlType="submit">
+          <BtnSubmit disabled={txHash} htmlType="submit">
             Submit
           </BtnSubmit>
         </Form.Item>
       </Form>
-      {status && <div>
-        <Progress percent={calculateProgressPercent(status)} strokeColor="#1890ff"
-                  size="small"
-                  style={{ maxWidth: 150 }}
-                  status={calculateProgressStatus(status)}
-        />
-        <p>{status}</p>
-      </div>
-      }
+      <CastVoteModal/>
     </div>
   );
 };
@@ -156,5 +110,6 @@ export default connect(({ voting, loading }: { voting: VotingStateType, loading:
   ({
     voting: voting.voting,
     status: voting.status,
-    loading: loading.effects[`${VOTING}/${FETCH_VOTING}`]
+    loading: loading.effects[`${VOTING}/${FETCH_VOTING}`],
+    txHash: voting.txHash,
   }))(VotePreview);

@@ -1,5 +1,6 @@
-# Stellar Voting
+# Stellot
 
+Demo [voting.stasbar.com](https://voting.stasbar.com)
 Election voting system backed by [stellar blockchain network](http://stellar.org/).
 
 ## Roadmap
