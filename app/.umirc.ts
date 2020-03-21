@@ -30,6 +30,8 @@ const config: IConfig = {
       // "primary-color": "#8EE3C3",
       // "primary-color": "#7ECBB4",
       "primary-color": "#6c72f9",
+      "layout-header-padding": "0",
+      "table-header-bg": "#fff",
     },
     proxy: {
       '/api/': {

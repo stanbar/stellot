@@ -7,7 +7,7 @@ export enum Visibility {
 }
 
 export enum Authorization {
-  PUBLIC = 'public',
+  OPEN = 'open',
   EMAIL = 'email',
   CODE = 'code',
   CUSTOM = 'custom',

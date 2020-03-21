@@ -1,21 +1,13 @@
 import React, { useEffect } from 'react';
-import { Form, Input, notification, Radio } from 'antd';
-import { dispatchFetchVoting, dispatchPerformVote, VotingStateType, VOTING, FETCH_VOTING } from "@/models/voting";
+import { Form, notification, Radio, Input } from 'antd';
+import { dispatchFetchVoting, dispatchPerformVote, FETCH_VOTING, VOTING, VotingStateType } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
-import Voting, { Authorization, Visibility } from "@/types/voting";
+import Voting, { Authorization } from "@/types/voting";
 import { VoteStatus } from '@/types/voteStatus';
 import { BtnSubmit } from "@/components/ActionButton";
-import {
-  EyeOutlined,
-  KeyOutlined,
-  LinkOutlined,
-  LockOutlined,
-  MailOutlined,
-  NotificationOutlined
-} from "@ant-design/icons/lib";
-import moment from "moment";
 import CastVoteModal from "@/components/CastVoteModal";
+import VotingMetadata from "@/components/VotingMetadata";
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -56,26 +48,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
   }
   return (
     <div>
-      {voting?.visibility === Visibility.PRIVATE && <LockOutlined/>}
-      {voting?.visibility === Visibility.UNLISTED && <LinkOutlined/>}
-      {voting?.visibility === Visibility.PUBLIC && <EyeOutlined/>}
-      <span style={{ marginLeft: 4 }}>
-      {voting?.authorization === Authorization.CODE && <KeyOutlined/>}
-        {voting?.authorization === Authorization.CUSTOM && <KeyOutlined/>}
-        {voting?.authorization === Authorization.EMAIL && <MailOutlined/>}
-        {voting?.authorization === Authorization.PUBLIC && <NotificationOutlined/>}
-      </span>
-      <span style={{ marginLeft: 4 }}>
-        <span style={{ marginRight: 4 }}>
-        {moment(voting?.startDate).format('ll')}
-        </span>
-        -
-        <span style={{ marginLeft: 4 }}>
-        {moment(voting?.endDate).format('ll')}
-        </span>
-      </span>
-
-      <h1 style={{ marginTop: 8 }}>{voting?.title}</h1>
+      <VotingMetadata voting={voting}/>
       <h4>{voting?.polls[0].question}</h4>
       <Form layout="vertical" name="vote_form" onFinish={onFinish} form={form}>
         <Form.Item name="optionCode" rules={[{
@@ -88,7 +61,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
             ))}
           </Radio.Group>
         </Form.Item>
-        {voting?.authorization !== "public" &&
+        {voting?.authorization !== Authorization.OPEN &&
         <Form.Item label="Authorization code" name="authorizationToken" rules={[{
           required: true,
           message: 'Please input your authorization code!'

@@ -23,7 +23,7 @@ router.post('/init', async (req, res, next) => {
     if (!voting) {
       return res.status(404).send(`Voting with id: ${votingId} not found`);
     }
-    if (voting.authorization !== Authorization.PUBLIC) {
+    if (voting.authorization !== Authorization.OPEN) {
       const isUserAuthorized = isUserAuthorizedToInitSession(tokenId, voting);
       if (!isUserAuthorized) {
         return res.status(405).send('Init session failed authorization');
