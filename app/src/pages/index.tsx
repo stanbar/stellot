@@ -1,11 +1,10 @@
 import React from 'react';
 import styled from "styled-components";
 import VotingsTable from "@/components/VotingsTable";
-import styles from './index.css';
 import { Col } from 'antd';
 import { BtnOutlined } from '@/components/ActionButton';
-import { Link } from "umi";
-import { GITHUB_URL, PAPER_URL } from "@/constants";
+import { PAPER_URL } from "@/constants";
+import styles from './index.css';
 
 const Title = styled.h1`
 font-size: 28px;
