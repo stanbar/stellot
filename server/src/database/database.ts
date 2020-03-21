@@ -40,7 +40,7 @@ votings.presidentElection2019 = {
   distributionAccountId: 'GA3WFG5ZB4CCEU6JOOTLQ5QPG73EX5E5MM5GZJEJ7CFLY7XZYSG73LEU',
   ballotBoxAccountId: 'GCIHXHZJNZYYQ6P63NMJWXGY6LDMSXRTBCKPNNOJLTE5NI4UBGWM4DAJ',
   votesCap: 100,
-  authorization: Authorization.PUBLIC,
+  authorization: Authorization.OPEN,
   visibility: Visibility.PUBLIC,
   encrypted: false,
   startDate: new Date(2020, 1),

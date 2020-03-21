@@ -2,6 +2,8 @@ import React from 'react';
 import styled from "styled-components";
 import VotingsTable from "@/components/VotingsTable";
 import styles from './index.css';
+import { Col } from 'antd';
+import { BtnOutlined } from '@/components/ActionButton';
 
 const Title = styled.h1`
 font-size: 28px;
@@ -25,19 +27,16 @@ margin-bottom: 10px;
 export default function () {
   return (
     <div className={styles.normal}>
-      <ul className={styles.list}>
-        <li style={{ marginBottom: 100 }}>
-          <Title>Welcome in Stellot</Title>
-          <SubTitle>Voting platform backed by Stellar blockchain network</SubTitle>
-          <SubSubTitle>Stellot is designed around voter privacy, ensuring that everyone can be sure about its vote
-            anonimity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
-            verify the election results without having to trust central authority.</SubSubTitle>
-        </li>
-        <li>
-          <TitleParagraph>Explore public votings</TitleParagraph>
-          <VotingsTable/>
-        </li>
-      </ul>
+      <Col style={{ marginBottom: 100 }}>
+        <Title>Welcome in Stellot</Title>
+        <SubTitle>Voting platform backed by Stellar blockchain network</SubTitle>
+        <SubSubTitle>Stellot is designed around voter privacy, ensuring that everyone can be sure about its vote
+          anonimity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
+          verify the election results without having to trust central authority.</SubSubTitle>
+        <BtnOutlined>Read more</BtnOutlined>
+      </Col>
+      <TitleParagraph>Explore public votings</TitleParagraph>
+      <VotingsTable/>
     </div>
   );
 }

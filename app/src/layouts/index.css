@@ -16,10 +16,10 @@
   min-height: 80vh;
 }
 .logo {
-  margin: 12px 16px 16px 12px;
+  margin: 12px 0 16px 0;
   float: left;
 }
 
 .heading {
-  margin: 12px 16px 16px 12px;
+  margin: 12px 0 16px 0;
 }
