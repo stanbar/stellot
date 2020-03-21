@@ -1,0 +1,70 @@
+import React from "react";
+import styled from "styled-components";
+import Voting, { Authorization, Visibility } from "@/types/voting";
+import {
+  EyeOutlined,
+  KeyOutlined,
+  LinkOutlined,
+  LockOutlined,
+  MailOutlined,
+  NotificationOutlined
+} from "@ant-design/icons/lib";
+import { capitalize } from "@/utils/utils";
+import moment from "moment";
+
+export const Badge = styled.span`
+      display: inline-block;
+      background: #e2f7f3;
+      color: #41ccb4;
+      padding: 5px 6px 5px 5px;
+      border-radius: 5px;
+      border: 0;
+      font-size: 100%;
+      vertical-align: baseline;
+      margin-right: 4px;
+  `;
+
+export const Caption = styled.p`
+    font-size: .833rem;
+    line-height: 1.4;
+    font-weight: 500;
+    font-family: inherit;
+`;
+
+const VotingMetadata: React.FC<{ voting: Voting }> = ({ voting }) => (
+  <div>
+    <h1 style={{ marginTop: 8, fontSize: '2rem' }}>{voting?.title}</h1>
+    <div style={{ fontSize: 12 }}>
+      <Caption>
+        <Badge>
+          {{
+            [Visibility.PUBLIC]: <EyeOutlined/>,
+            [Visibility.UNLISTED]: <LinkOutlined/>,
+            [Visibility.PRIVATE]: <LockOutlined/>,
+          }[voting?.visibility]}
+          {capitalize(voting?.visibility)}
+        </Badge>
+        <Badge>
+          {{
+            [Authorization.OPEN]: <NotificationOutlined/>,
+            [Authorization.EMAIL]: <MailOutlined/>,
+            [Authorization.CODE]: <KeyOutlined/>,
+            [Authorization.CUSTOM]: <KeyOutlined/>,
+          }[voting?.authorization]}
+          {capitalize(voting?.authorization)}
+        </Badge>
+        <span style={{ color: '#999' }}>
+          <span style={{ marginRight: 4 }}>
+            {moment(voting?.startDate).format('ll')}
+          </span>
+          -
+          <span style={{ marginLeft: 4 }}>
+            {moment(voting?.endDate).format('ll')}
+          </span>
+        </span>
+      </Caption>
+    </div>
+  </div>
+);
+
+export default VotingMetadata;

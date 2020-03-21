@@ -17,7 +17,7 @@ const VotingSchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   authorization: {
     type: String,
-    enum: [Authorization.PUBLIC, Authorization.EMAIL, Authorization.CODE, Authorization.CUSTOM],
+    enum: [Authorization.OPEN, Authorization.EMAIL, Authorization.CODE, Authorization.CUSTOM],
     required: true,
   },
   visibility: {

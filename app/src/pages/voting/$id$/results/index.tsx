@@ -12,11 +12,12 @@ import { connect } from 'dva';
 import Voting from "@/types/voting";
 import { VoteStatus } from '@/types/voteStatus';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import Result from '@/types/result';
 import { BtnSubmit } from "@/components/ActionButton";
 import { Link } from 'umi';
+import VotingMetadata from "@/components/VotingMetadata";
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -29,8 +30,6 @@ interface VotePreviewProps extends ConnectProps {
 const VoteResults: React.FC<VotePreviewProps> = props => {
   const { loading, loadingResults, results, match, dispatch, voting } = props;
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
-  console.log({ votingSlug });
-  console.log({ results });
 
   useEffect(() => {
     if (!voting) {
@@ -44,7 +43,6 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
     }
   }, [voting]);
 
-  console.log({ voting });
   if (loading) {
     return (<p>Loading voting metadata...</p>)
   }
@@ -56,23 +54,24 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
   }
   return (
     <div>
-      <h1>{voting?.title}</h1>
+      <VotingMetadata voting={voting}/>
       <h4 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h4>
-      <BarChart
-        width={500}
-        height={300}
-        data={results}
-        margin={{
-          top: 5, bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3"/>
-        <XAxis dataKey="name"/>
-        <YAxis/>
-        <Tooltip/>
-        <Legend/>
-        <Bar dataKey="votes" fill="#8884d8"/>
-      </BarChart>
+
+      <ResponsiveContainer width="100%" aspect={4.0/3.0}>
+        <BarChart
+          data={results}
+          margin={{
+            top: 5, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3"/>
+          <XAxis dataKey="name"/>
+          <YAxis/>
+          <Tooltip/>
+          <Legend/>
+          <Bar dataKey="votes" fill="#8884d8"/>
+        </BarChart>
+      </ResponsiveContainer>
 
       <Link to="/wall">
         <BtnSubmit style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
