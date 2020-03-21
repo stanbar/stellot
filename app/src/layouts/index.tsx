@@ -6,6 +6,7 @@ import { ConnectProps } from "@/models/connect";
 import { BtnHeading } from "@/components/ActionButton";
 import { GithubOutlined } from '@ant-design/icons';
 import styles from './index.css';
+import { GITHUB_URL, PAPER_URL } from "@/constants";
 
 const { Header, Footer, Content } = Layout;
 
@@ -52,13 +53,15 @@ const BasicLayout: React.FC<LayoutProps> = props => {
       <Footer style={{ textAlign: 'center', }}>
         <div>
           <a style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href="https://github.com/stasbar/stellar-voting">Source </a>
+             href={GITHUB_URL}>Source</a>
 
           <a style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href="https://github.com/stasbar/stellar-voting"><GithubOutlined/></a>
+             href={GITHUB_URL}>
+            <GithubOutlined/>
+          </a>
 
           <a style={{ color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href="https://github.com/stasbar/stellar-voting/releases/download/0.0.1/draft_evoting_on_stellar.pdf">Paper</a>
+             href={PAPER_URL}>Paper</a>
         </div>
         <div>Stellot 2020 build with ❤️to Stellar</div>
       </Footer>
