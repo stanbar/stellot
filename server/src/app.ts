@@ -4,6 +4,7 @@ import logger from 'morgan';
 import crypto from 'crypto';
 import errorhandler from 'errorhandler';
 import router from './routes'
+import path from 'path';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -38,6 +39,9 @@ app.post('/api/login', (req, res) => {
         .substring(0, 16),
     })
     .end();
+});
+app.get('*', (req, res) => {
+  res.sendFile(path.join(process.env.WEBAPP_DIR!, '/index.html'));
 });
 
 class HttpError extends Error {
