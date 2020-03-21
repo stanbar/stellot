@@ -48,7 +48,7 @@ const BasicLayout: React.FC<LayoutProps> = props => {
              href="https://github.com/stasbar/stellar-voting"><GithubOutlined/></a>
 
           <a style={{ color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href="https://github.com/stasbar/stellar-voting">Paper</a>
+             href="https://github.com/stasbar/stellar-voting/releases/download/0.0.1/draft_evoting_on_stellar.pdf">Paper</a>
         </div>
         <div>Stellot 2020 build with ❤️to Stellar</div>
       </Footer>
