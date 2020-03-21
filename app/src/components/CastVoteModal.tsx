@@ -59,6 +59,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
   const enableShowResultsBtn = status === VoteStatus.ERROR || status === VoteStatus.DONE;
   const showResults = () => {
     router.replace(`/voting/${voting.slug}/results`);
+    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined)
   };
   return (
     <Modal visible={shouldShowVoteModal}
