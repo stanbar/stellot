@@ -65,3 +65,15 @@ export const BtnOutlined = styled(Btn)<{ color?: string }>`
     cursor: default;
   }
 `;
+
+export const BtnLink = styled(Btn)<{ color?: string }>`
+  background-color: #00000000;
+  color: ${props => (props.color ? props.color : CORNFLOWER)};
+  width: 150px;
+  font-size: 16px;
+  padding: 10px 0;
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
