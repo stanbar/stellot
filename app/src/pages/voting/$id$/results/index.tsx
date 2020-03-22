@@ -57,7 +57,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       <VotingMetadata voting={voting}/>
       <h4 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h4>
 
-      <ResponsiveContainer width="100%" aspect={4.0/3.0}>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={results}
           margin={{
