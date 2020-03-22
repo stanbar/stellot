@@ -11,6 +11,7 @@ interface CastVoteModalProps extends ConnectProps {
   voting?: Voting;
   status?: VoteStatus;
   txHash?: string;
+  errorMessage?: string;
 }
 
 
@@ -51,7 +52,7 @@ function calculateProgressStatus(status: VoteStatus) {
 }
 
 const CastVoteModal: React.FC<CastVoteModalProps> = props => {
-  const { dispatch, voting, status, txHash } = props;
+  const { dispatch, voting, status, txHash, errorMessage } = props;
   if (!voting || !status) {
     return <></>
   }
@@ -75,6 +76,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
       <Progress type="circle"
                 percent={calculateProgressPercent(status)}
                 status={calculateProgressStatus(status)}/>
+      {errorMessage && <p>{errorMessage}</p>}
       <p>{status}</p>
       {txHash &&
       <a href={`http://testnet.stellarchain.io/tx/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction
@@ -89,4 +91,5 @@ export default connect(({ voting }: { voting: VotingStateType }) =>
     voting: voting.voting,
     status: voting.status,
     txHash: voting.txHash,
+    errorMessage: voting.errorMessage,
   }))(CastVoteModal);

@@ -40,6 +40,7 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
     dispatch({
       type: `${VOTING}/${SET_STATUS}`,
       payload: VoteStatus.ERROR,
+      errorMessage: e.message,
     });
   }
 }
@@ -49,6 +50,7 @@ export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash
     type: `${VOTING}/${SET_STATUS}`,
     payload: status,
     txHash,
+    errorMessage: undefined,
   });
 }
 
@@ -71,6 +73,7 @@ export interface VotingStateType {
   status?: VoteStatus;
   results?: Result[];
   txHash?: string;
+  errorMessage?: string;
 }
 
 export interface VotingModelType {
@@ -110,11 +113,12 @@ export const VotingModel: VotingModelType = {
     }
   },
   reducers: {
-    [SET_STATUS](state: VotingStateType, { payload, txHash }): VotingStateType {
+    [SET_STATUS](state: VotingStateType, { payload, txHash, errorMessage }): VotingStateType {
       return {
         ...state,
         status: payload,
         txHash,
+        errorMessage,
       }
     },
     [SET_VOTING](state: VotingStateType, { payload }): VotingStateType {
