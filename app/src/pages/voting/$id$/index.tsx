@@ -5,9 +5,10 @@ import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
 import Voting, { Authorization } from "@/types/voting";
 import { VoteStatus } from '@/types/voteStatus';
-import { BtnSubmit } from "@/components/ActionButton";
+import { BtnLink, BtnSubmit } from "@/components/ActionButton";
 import CastVoteModal from "@/components/CastVoteModal";
 import VotingMetadata from "@/components/VotingMetadata";
+import { Link } from "umi";
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -69,12 +70,17 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
           <Input style={{ maxWidth: 200 }}/>
         </Form.Item>
         }
-        <Form.Item>
+        <Form.Item style={{ marginBottom: 0 }}>
           <BtnSubmit disabled={txHash} htmlType="submit">
             Submit
           </BtnSubmit>
         </Form.Item>
       </Form>
+      <Link to={`/voting/${votingSlug}/results`}>
+        <BtnLink>
+          Show results
+        </BtnLink>
+      </Link>
       <CastVoteModal/>
     </div>
   );
