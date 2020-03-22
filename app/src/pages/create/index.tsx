@@ -19,6 +19,8 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
     const val = values as {
       title: string,
       question: string,
+      first: string,
+      second: string,
       options?: string[] | undefined,
       authorization: Authorization,
       visibility: Visibility,
@@ -34,7 +36,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       title: val.title,
       polls: [{
         question: val.question,
-        options: val.options!
+        options: [val.first, val.second, ...(val.options || [])]
           .filter(isNotEmpty)
           .map((option, index) => ({ name: option, code: index + 1 })),
       }],
@@ -58,26 +60,86 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
             encrypted: false,
             challenges: 100,
           }}>
-      <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+      <Form.Item name="title" label="Title" rules={[{
+        required: true,
+        whitespace: true,
+        message: "Please input option value or delete this field.",
+      }]}>
         <Input placeholder="Favourite colour"/>
       </Form.Item>
 
-      <Form.Item name="question" label="Question" rules={[{ required: true }]}>
+      <Form.Item name="question" label="Question" rules={[{
+        required: true,
+        whitespace: true,
+        message: "Please input option value or delete this field.",
+      }]}>
         <Input placeholder="What is your favourite colour ?"/>
       </Form.Item>
-
+      <Form.Item
+        label="Options"
+      >
+        <Row>
+          <Col flex="10px" style={{ marginRight: 10 }}>
+            <Typography>1</Typography>
+          </Col>
+          <Col flex="auto">
+            <Form.Item
+              name="first"
+              key="first"
+              validateTrigger={['onChange', 'onBlur']}
+              rules={[
+                {
+                  required: true,
+                  whitespace: true,
+                  message: "Please input option value or delete this field.",
+                },
+              ]}
+              noStyle
+            >
+              <Input placeholder="Blue" style={{ marginRight: 32 }}/>
+            </Form.Item>
+          </Col>
+          <Col flex="30px" style={{ marginRight: 10 }}/>
+        </Row>
+      </Form.Item>
+      <Form.Item
+      >
+        <Row>
+          <Col flex="10px" style={{ marginRight: 10 }}>
+            <Typography>2</Typography>
+          </Col>
+          <Col flex="auto">
+            <Form.Item
+              name="second"
+              key="second"
+              validateTrigger={['onChange', 'onBlur']}
+              rules={[
+                {
+                  required: true,
+                  whitespace: true,
+                  message: "Please input option value or delete this field.",
+                },
+              ]}
+              noStyle
+            >
+              <Input placeholder="Red" style={{ marginRight: 32 }}/>
+            </Form.Item>
+          </Col>
+          <Col flex="30px" style={{ marginRight: 10 }}/>
+        </Row>
+      </Form.Item>
       <Form.List name="options">
         {(fields, { add, remove }) => (
           <div>
             {fields.map((field, index) => (
               <Form.Item
-                label={index === 0 ? "Options" : ""}
-                required={index === 0}
+                label=""
+                required={false}
                 key={field.key}
               >
                 <Row>
                   <Col flex="10px" style={{ marginRight: 10 }}>
-                    <Typography>{index + 1}</Typography>
+                    <Typography>{index + 3}</Typography>
                   </Col>
                   <Col flex="auto">
                     <Form.Item
@@ -141,7 +203,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       </Form.Item>
       <Form.Item name="period" label="Select time period"
                  rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
-        <DatePicker.RangePicker showTime format="YYYY-MM-DD HH:mm:ss"/>
+        <DatePicker.RangePicker/>
       </Form.Item>
       <Form.Item name="encrypted" label="Encrypt results until the end of voting" valuePropName="checked">
         <Switch/>
@@ -153,7 +215,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading}>
-          Create
+          {loading ? "Creating..." : "Create"}
         </Button>
       </Form.Item>
     </Form>
