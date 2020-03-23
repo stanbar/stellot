@@ -33,7 +33,8 @@ router.post('/init', async (req, res, next) => {
     if (!keychain) {
       return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
     }
-    const session = createSession(tokenId, keychain);
+    const [sessionId, session] = createSession(tokenId, keychain);
+    res.setHeader('SESSION-ID', sessionId);
     return res.status(200).send(session);
   } catch (e) {
     return next(e)
@@ -46,18 +47,30 @@ router.post('/getChallenges', (req, res) => {
     blindedTransactionBatches,
   }: { tokenId: string; blindedTransactionBatches: ChallengeRequest } = req.body;
   debug(`tokenId: ${tokenId}`);
-  const luckyBatchIndex = storeAndPickLuckyBatch(tokenId, blindedTransactionBatches);
-  return res.status(200).send({ luckyBatchIndex });
+  const sessionId = req.header('SESSION-ID');
+  debug(`sessionId: ${sessionId}`);
+  if (!sessionId) {
+    res.status(405).send('SESSION-ID header not found').end();
+  } else {
+    const luckyBatchIndex = storeAndPickLuckyBatch(sessionId, blindedTransactionBatches);
+    res.status(200).send({ luckyBatchIndex });
+  }
 });
 
 router.post('/proofChallenges', async (req, res, next) => {
   const { tokenId, proofs }: { tokenId: string; proofs: Proof[] } = req.body;
   debug(`tokenId: ${tokenId}`);
-  try {
-    const signedBatch = proofChallenges(tokenId, proofs);
-    res.status(200).send(signedBatch);
-  } catch (e) {
-    next(e);
+  const sessionId = req.header('SESSION-ID');
+  debug(`sessionId: ${sessionId}`);
+  if (!sessionId) {
+    res.status(405).send('SESSION-ID header not found').end();
+  } else {
+    try {
+      const signedBatch = proofChallenges(sessionId, proofs);
+      res.status(200).send(signedBatch);
+    } catch (e) {
+      next(e);
+    }
   }
 });
 
