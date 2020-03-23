@@ -50,7 +50,7 @@ export interface ResSession {
   P: string; // hex
 }
 
-export async function initSessions(tokenId: string, votingId: string): Promise<Array<ResSession>> {
+export async function initSessions(tokenId: string, votingId: string): Promise<[string, ResSession[]]> {
   const response = await fetch('/api/blindsig/init', {
     method: 'POST',
     headers: {
@@ -65,27 +65,36 @@ export async function initSessions(tokenId: string, votingId: string): Promise<A
     console.error('Failed to init session');
     throw new Error(await response.text());
   }
+
+  const sessionId = response.headers.get('SESSION-ID');
+  if (!sessionId) {
+    console.error(`Didn't receive SESSION-ID`);
+    throw new Error(`Didn't receive SESSION-ID`);
+  }
+
   const responseJson: Array<{
     id: number,
     R: Array<number>,
     P: Array<number>
   }> = await response.json();
 
-  return responseJson.map(res => ({
+  return [sessionId, responseJson.map(res => ({
     id: res.id,
     R: Buffer.from(res.R).toString('hex'),
     P: Buffer.from(res.P).toString('hex'),
-  }))
+  }))]
 }
 
 export async function getChallenges(
   tokenId: string,
+  sessionId: string,
   blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>)
   : Promise<number> {
   const response = await fetch('/api/blindsig/getChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'SESSION-ID': sessionId,
     },
     body: JSON.stringify({ tokenId, blindedTransactionBatches }),
   });
@@ -132,13 +141,14 @@ interface Proof {
   transactionsBatch: TransactionsBatch;
 }
 
-export async function proofChallenge(tokenId: string, proofs: Proof[])
+export async function proofChallenge(tokenId: string, sessionId: string, proofs: Proof[])
   : Promise<{ id: number, sigs: Array<BN> }> {
   console.log({ proofs: JSON.stringify({ tokenId, proofs }) });
   const response = await fetch('/api/blindsig/proofChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'SESSION-ID': sessionId,
     },
     body: JSON.stringify({ tokenId, proofs }),
   });
