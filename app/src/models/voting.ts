@@ -37,11 +37,17 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
     }
   } catch (e) {
     console.error(e);
-    dispatch({
-      type: `${VOTING}/${SET_STATUS}`,
-      payload: VoteStatus.ERROR,
-      errorMessage: e.message,
-    });
+    const errorCode = e?.response?.data?.extras?.result_codes?.transaction;
+    if (errorCode === 'tx_bad_seq') {
+      // Interrupted between another session, retry
+      await dispatchPerformVote(dispatch, tokenId, voting, optionCode);
+    } else {
+      dispatch({
+        type: `${VOTING}/${SET_STATUS}`,
+        payload: VoteStatus.ERROR,
+        errorMessage: e.message,
+      });
+    }
   }
 }
 

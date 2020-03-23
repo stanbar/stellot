@@ -1,15 +1,11 @@
 import { Keypair, Memo, Transaction } from 'stellar-sdk'
 import BN from 'bn.js';
+import { uuid } from 'uuidv4';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
 import Voting from './types/voting';
 import Keychain from './types/keychain';
-
-export interface Candidate {
-  name: string;
-  code: number;
-}
 
 interface InitSession {
   id: number;
@@ -37,7 +33,7 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(tokenId: string, keychain: Keychain): Array<InitResponse> {
+export function createSession(tokenId: string, keychain: Keychain): [string, InitResponse[]] {
   const distributionKeypair = Keypair.fromSecret(keychain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
@@ -52,8 +48,9 @@ export function createSession(tokenId: string, keychain: Keychain): Array<InitRe
     };
     userSessions[i] = { id: i, signerSession };
   }
-  initSessions.set(tokenId, userSessions);
-  return response;
+  const sessionId = uuid();
+  initSessions.set(sessionId, userSessions);
+  return [sessionId, response];
 }
 
 export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>

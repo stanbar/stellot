@@ -65,7 +65,7 @@ export async function* performSignedTransaction(tokenId: string, voting: Voting,
   : AsyncGenerator<[Transaction | undefined, string | undefined]> {
   // 1. Initialize interactive session
   yield [undefined, VoteStatus.INITIALIZING];
-  const resSessions = await initSessions(tokenId, voting.id);
+  const [sessionId, resSessions] = await initSessions(tokenId, voting.id);
   // 2. Signer has generated X number of sessions (associated id with R),
   // will use them now to blind transaction
 
@@ -76,11 +76,11 @@ export async function* performSignedTransaction(tokenId: string, voting: Voting,
   // 4. Request challenges given blindedTransactions
   yield [undefined, VoteStatus.REQUESTED_CHALLENGE];
   const blindTransactions = createBlindTransactions();
-  const luckyBatchIndex = await getChallenges(tokenId, blindTransactions);
+  const luckyBatchIndex = await getChallenges(tokenId, sessionId, blindTransactions);
   // 5. Proof my honesty, and receive signed blind transacion in result
   yield [undefined, VoteStatus.PROOFING_CHALLENGE];
   const proofs = createProofs(luckyBatchIndex);
-  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, proofs);
+  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, sessionId, proofs);
   // 6. Extract signed batch of signatures
   const luckySession = sessions.find(session => session.id === signedLuckyBatch.id);
   if (!luckySession) {
