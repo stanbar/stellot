@@ -35,7 +35,7 @@ export default function () {
           anonimity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
           verify the election results without having to trust central authority.</SubSubTitle>
 
-        <a href={PAPER_URL} target="_blank" rel="noreferrer noopener"><BtnOutlined>Read more</BtnOutlined></a>
+        <a href={PAPER_URL} target="_blank" rel="noreferrer noopener"><BtnOutlined>Whitepaper</BtnOutlined></a>
 
       </Col>
       <TitleParagraph>Explore public votings</TitleParagraph>
