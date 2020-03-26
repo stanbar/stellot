@@ -102,8 +102,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           <Col flex="30px" style={{ marginRight: 10 }}/>
         </Row>
       </Form.Item>
-      <Form.Item
-      >
+      <Form.Item>
         <Row>
           <Col flex="10px" style={{ marginRight: 10 }}>
             <Typography>2</Typography>

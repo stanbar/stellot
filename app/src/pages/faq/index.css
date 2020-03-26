@@ -1,0 +1,38 @@
+.site-collapse-custom-collapse .site-collapse-custom-panel {
+  background: #ffffff;
+  border-radius: 2px;
+  margin-bottom: 24px;
+  border: 0;
+  overflow: hidden;
+
+}
+
+h2 {
+  font-size: 18px;
+  box-sizing: inherit;
+  line-height: 1.24;
+  font-weight: 400;
+  overflow-wrap: break-word;
+}
+
+article {
+  text-align: left;
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  -webkit-transition: all .1s linear;
+  transition: all .1s linear;
+  color: #666;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+code {
+  line-height: normal;
+  font-size: 12px;
+  white-space: pre;
+  font-weight: 400;
+}

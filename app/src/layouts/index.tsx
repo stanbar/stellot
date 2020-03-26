@@ -52,8 +52,8 @@ const BasicLayout: React.FC<LayoutProps> = props => {
       </Content>
       <Footer style={{ textAlign: 'center', }}>
         <div>
-          <a style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href={GITHUB_URL}>Source</a>
+          <Link to="/faq"><span
+            style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}>FAQ</span></Link>
 
           <a style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}
              href={GITHUB_URL}>

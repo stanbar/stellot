@@ -8,7 +8,7 @@ const config: IConfig = {
         antd: true,
         dva: true,
         dynamicImport: { webpackChunkName: true },
-        title: 'app',
+        title: 'Stellot - Voting platform powered by Stellar blockchain',
         dll: true,
         locale: {
           enable: true,
