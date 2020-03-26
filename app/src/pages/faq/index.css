@@ -4,7 +4,6 @@
   margin-bottom: 24px;
   border: 0;
   overflow: hidden;
-
 }
 
 h2 {
@@ -13,6 +12,7 @@ h2 {
   line-height: 1.24;
   font-weight: 400;
   overflow-wrap: break-word;
+  margin-bottom: 0;
 }
 
 article {
