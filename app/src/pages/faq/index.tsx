@@ -53,30 +53,37 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       </Panel>
       <Panel header={<h2>How is this app different from centralized apps?</h2>} key="2"
              className="site-collapse-custom-panel">
-        <p>{`
+        <article>
+          <p>{`
         Besides auth, everything is recorded on the blockchain. Each user can count the voting results on its behalf, without the trust to government.
         The user is responsible for publishing the vote transaction to the stellar voting, so he can be sure that his vote was taken into account.
         But the biggest advantage is the fact that the votes are completely anonymous since no one (besides the voter) knows who cast the particular transaction to the network.
         But everyone can be sure that this transaction was authorized by TDS (because he blindly signed the transaction).
         `}</p>
+        </article>
       </Panel>
-      <Panel header="how can a user verify that his vote is correct counted and stored in the blockchain ?" key="3"
+      <Panel header={<h2>how can a user verify that his vote is correct counted and stored in the blockchain ?</h2>}
+             key="3"
              className="site-collapse-custom-panel">
-        <p>{`
+        <article>
+          <p>{`
         Casting vote is basically creating payment transaction of particular token from TDS account to ballot-box account.
         User know that transaction. He is responsible of publishing it to the Blockchain.
         You can see this transaction after you cast the ballot (publish it to the Blockchain).
         The app, shows you the link to this transaction. If user lose the transaction's id, he can not prove his vote option.
         We considered it rather as a privacy feature than flaw.`}</p>
+        </article>
       </Panel>
-      <Panel header="Does people can vote using proof of stake like on Binance with BNB?" key="4"
+      <Panel header={<h2>Does people can vote using proof of stake like on Binance with BNB?</h2>} key="4"
              className="site-collapse-custom-panel">
-        <p>{`
+        <article>
+          <p>{`
         This solution is built with non-crypto users in mind. I argue that this is the only way to use this solution on large scale.
 
         Proof-of-stake voting or I would rather say stake-weighted voting, would be very interesting in crypto space.
         If we take the basic weighting model, i.e. based just on amount of XLM on your account, then the implementation is really straightforward. Instead of the vote token go directly from distribution account to ballotBox account, it would go first from distributing account to the user account, and then from the user account to ballotBox account. This way, counting results would involve one additional step, checking the account balance at the end of elections.
         `}</p>
+        </article>
       </Panel>
     </Collapse>
   </div>
