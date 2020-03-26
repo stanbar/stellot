@@ -1,0 +1,12 @@
+title Create voting (One-time authorization code)
+
+Admin->Admin: Open voting webapp
+Admin->Webapp: Fill voting Form
+Admin->Webapp: Click Submit
+Webapp->TDS: Create voting (Form)
+TDS->Horizon: Create \n- issuer account\n- vote token\n- distribution account\n- ballot-box account
+TDS->TDS: Generate authorization codes
+TDS->TDS: Save matadata in database
+TDS-->Webapp: Authorization codes
+Webapp-->Admin: Display authorization codes
+Admin->Admin: Save codes and redistribute to users

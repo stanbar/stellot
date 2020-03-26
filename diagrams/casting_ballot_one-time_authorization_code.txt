@@ -1,0 +1,21 @@
+title Performing vote (One-time authorization code)
+
+User->Webapp: Open voting webapp
+Webapp-->User:
+Webapp->TDS: Fetch voting metadata
+TDS-->Webapp: 
+Webapp-->User: Display voting metadata
+User->Webapp: Select option and \nenter authorization code
+User->Webapp: Click Submit
+Webapp->TDS: Initialize session (code)
+TDS->TDS: Ensure authorization code \nhas not already been redeemed
+TDS->TDS: Ensure authorization code is valid
+TDS->TDS: Generate random nonce
+TDS-->Webapp: Return (nonce)
+Webapp->Webapp: Create payment transaction of 1 vote token \nfrom distribution account \nto ballot-box account. \nEncode option in memo field.
+Webapp->Webapp: Generate blinded transaction hash
+Webapp->TDS: Request sign on blinded transaction
+TDS->TDS: Finish blind signature and \nmark authorization code as redeemed
+TDS-->Webapp: Return blind signature
+Webapp->Webapp: Add unblinded signature to transaction
+Webapp->Horizon: Publish transaction

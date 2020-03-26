@@ -1,0 +1,13 @@
+title Create voting (Keybase Authentication)
+
+Admin->Admin: Open voting webapp
+Admin->Webapp: Fill voting Form
+Admin->Webapp: Enter keybase usernames of eligible users.
+Admin->Webapp: Click Submit
+Webapp->TDS: Create voting (Form)
+TDS->Horizon: Create \n- issuer account\n- vote token\n- distribution account\n- ballot-box account
+TDS->TDS: Persist eligable keybase usernames
+TDS->TDS: Save matadata in database
+TDS-->Webapp: 
+Webapp-->Admin: 
+Admin-->Admin: Redistribute link to voting
