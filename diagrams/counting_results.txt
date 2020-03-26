@@ -1,0 +1,12 @@
+title Counting results
+
+User->Webapp: Open voting webapp
+Webapp-->User:
+Webapp->TDS: Fetch voting metadata
+TDS-->Webapp: 
+Webapp->Horizon: Fetch all incoming transactions to ballot-box account
+Horizon-->Webapp:
+Webapp->Webapp: Filter out invalid and irrelevant transactions
+Webapp->Webapp: Decode memos for valid transactions
+Webapp->Webapp: Calculate results
+Webapp-->User: Display results
