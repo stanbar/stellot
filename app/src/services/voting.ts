@@ -78,7 +78,7 @@ export async function* performSignedTransaction(tokenId: string, voting: Voting,
   const blindTransactions = createBlindTransactions();
   const luckyBatchIndex = await getChallenges(tokenId, sessionId, blindTransactions);
   // 5. Proof my honesty, and receive signed blind transacion in result
-  yield [undefined, VoteStatus.PROOFING_CHALLENGE];
+  yield [undefined, VoteStatus.PROVING_CHALLENGE];
   const proofs = createProofs(luckyBatchIndex);
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await proofChallenge(tokenId, sessionId, proofs);
   // 6. Extract signed batch of signatures

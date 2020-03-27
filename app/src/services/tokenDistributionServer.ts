@@ -160,7 +160,7 @@ export async function proofChallenge(tokenId: string, sessionId: string, proofs:
     throw new Error(await response.text());
   }
   const signedLuckyBatch: { id: number, sigs: Array<BN> } = await response.json();
-  // TODO is it really needed ?
+  // TODO it is working, but is it really needed ? does the BN serialize it anyway ?
   signedLuckyBatch.sigs = signedLuckyBatch.sigs.map(sig => new BN(sig, 16));
   return signedLuckyBatch
 }
