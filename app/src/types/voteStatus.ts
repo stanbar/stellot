@@ -4,7 +4,7 @@ export enum VoteStatus {
   INITIALIZING = 'Initializing interactive blind signature protocol',
   CREATING_BLINDED_TRANSACTIONS = 'Creating blinded transactions',
   REQUESTED_CHALLENGE = 'Requested challenge',
-  PROOFING_CHALLENGE = 'Proofing challenge',
+  PROVING_CHALLENGE = 'Proving challenge',
   CALCULATING_SIGNATURE = 'Calculating signature',
   CASTING_VOTE = 'Casting vote',
   DONE = 'Done!',

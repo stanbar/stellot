@@ -24,7 +24,7 @@ function calculateProgressPercent(voteStatus: VoteStatus) {
       return Math.round(2 / totalNumberOfStates * 100);
     case VoteStatus.REQUESTED_CHALLENGE:
       return Math.round(3 / totalNumberOfStates * 100);
-    case VoteStatus.PROOFING_CHALLENGE:
+    case VoteStatus.PROVING_CHALLENGE:
       return Math.round(4 / totalNumberOfStates * 100);
     case VoteStatus.CALCULATING_SIGNATURE:
       return Math.round(5 / totalNumberOfStates * 100);
