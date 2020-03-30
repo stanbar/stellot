@@ -40,7 +40,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
           Stellar Network is DECENTRALIZED.
           `}</p>
           <p>{`
-          So yes, the government layer is centralized. I addressed this issue in section8 Fully Decentralized Blockchain Application.
+          So yes, the government layer is centralized. We addressed this issue in section 8. Fully Decentralized Blockchain Application in our paper.
           But it's important to realize how limited the power of government is in this system. Since he (the government) manages the authorization, he can block a certain users from casting vote.
           But he can not perform votes on other user behalf since there is only the limited publicly known number of created tokens (e.g. the number of galactictalk active users).
           Yes, he can assume that only 20% of users will take part in the election, and use the 80% of unspent tokens to perform vote on his behalf.
@@ -55,7 +55,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
              className="site-collapse-custom-panel">
         <article>
           <p>{`
-        Besides auth, everything is recorded on the blockchain. Each user can count the voting results on its behalf, without the trust to government.
+        In Stellot, besides auth, everything is recorded on the blockchain. Each user can count the voting results on its behalf, without the trust to government.
         The user is responsible for publishing the vote transaction to the stellar voting, so he can be sure that his vote was taken into account.
         But the biggest advantage is the fact that the votes are completely anonymous since no one (besides the voter) knows who cast the particular transaction to the network.
         But everyone can be sure that this transaction was authorized by TDS (because he blindly signed the transaction).
@@ -78,9 +78,9 @@ const FAQ: React.FC<VotePreviewProps> = () => (
              className="site-collapse-custom-panel">
         <article>
           <p>{`
-        This solution is built with non-crypto users in mind. I argue that this is the only way to use this solution on large scale.
+        This solution is built with non-crypto users in mind. We argue that this is the only way to use this solution on large scale.
 
-        Proof-of-stake voting or I would rather say stake-weighted voting, would be very interesting in crypto space.
+        Proof-of-stake voting or rather stake-weighted voting, would be very interesting in crypto space.
         If we take the basic weighting model, i.e. based just on amount of XLM on your account, then the implementation is really straightforward. Instead of the vote token go directly from distribution account to ballotBox account, it would go first from distributing account to the user account, and then from the user account to ballotBox account. This way, counting results would involve one additional step, checking the account balance at the end of elections.
         `}</p>
         </article>
