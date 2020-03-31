@@ -5,8 +5,6 @@ services:
     image: mongo
     restart: 'unless-stopped'
     env_file: ".env"
-    ports:
-      - "27017:27017"
 
   web:
     container_name: "stellar-voting-authorization-server-dev"

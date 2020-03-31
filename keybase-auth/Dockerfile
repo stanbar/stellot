@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM keybaseio/client:nightly-node-slim
 
 # Create app directory
 WORKDIR /server
@@ -13,4 +13,4 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start:dev" ]
+CMD [ "npm", "run", "start" ]

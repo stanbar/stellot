@@ -1,0 +1,13 @@
+version: '3.1'
+services:
+  web:
+    container_name: "stellot-keybase-auth-dev"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ".env"
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - .:/server
+    restart: 'unless-stopped'
