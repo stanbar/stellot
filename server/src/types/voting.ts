@@ -11,6 +11,7 @@ export enum Authorization {
   EMAIL = 'email',
   CODE = 'code',
   CUSTOM = 'custom',
+  KEYBASE = 'keybase',
 }
 
 export default interface Voting {
@@ -23,6 +24,7 @@ export default interface Voting {
   distributionAccountId: string;
   ballotBoxAccountId: string;
   authorization: Authorization;
+  authorizationOptions: any | undefined;
   visibility: Visibility;
   encrypted: boolean;
   votesCap: number;

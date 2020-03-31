@@ -1,17 +1,18 @@
 import {
-  Server,
-  Keypair,
   AccountResponse,
-  BASE_FEE,
-  Networks,
-  TransactionBuilder,
-  Operation,
   Asset,
+  BASE_FEE,
+  Keypair,
+  Networks,
+  Operation,
+  Server,
+  TransactionBuilder,
 } from 'stellar-sdk';
 import CreateVotingRequest from './types/createVotingRequest';
 import CreateVotingResponse from './types/createVotingResponse';
-import Voting from './types/voting';
+import Voting, { Authorization } from './types/voting';
 import { setKeychain, setVoting } from './database/database';
+import * as keybase from './keybase';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 if (!process.env.MASTER_SECRET_KEY) {
@@ -40,12 +41,18 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
     distributionAccountId: distributionKeypair.publicKey(),
     ballotBoxAccountId: ballotBoxKeypair.publicKey(),
     authorization: createVotingRequest.authorization,
+    authorizationOptions: createVotingRequest.authorizationOptions,
     visibility: createVotingRequest.visibility,
     votesCap: createVotingRequest.votesCap,
     encrypted: createVotingRequest.encrypted,
     startDate: createVotingRequest.startDate,
     endDate: createVotingRequest.endDate,
   };
+  if (voting.authorization === Authorization.KEYBASE
+    && voting.authorizationOptions?.requiredTeamMembership) {
+    const { requiredTeamMembership } = voting.authorizationOptions;
+    keybase.joinTeam(requiredTeamMembership);
+  }
   const savedVoting = await setVoting(voting);
   await setKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
   return { ...savedVoting };
