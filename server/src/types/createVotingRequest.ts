@@ -5,6 +5,7 @@ export default interface CreateVotingRequest {
   title: string;
   polls: Poll[]
   authorization: Authorization;
+  authorizationOptions?: any;
   visibility: Visibility;
   votesCap: number;
   encrypted: boolean;

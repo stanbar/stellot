@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM keybaseio/client:nightly-node-slim
 
 # Create app directory
 WORKDIR /server
