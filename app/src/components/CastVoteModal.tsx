@@ -5,7 +5,7 @@ import { Modal, Progress } from 'antd';
 import { dispatchSetStatus, VotingStateType } from "@/models/voting";
 import { VoteStatus } from "@/types/voteStatus";
 import router from "umi/router";
-import Voting from "@/types/voting";
+import { Voting } from "@stellot/types";
 
 interface CastVoteModalProps extends ConnectProps {
   voting?: Voting;

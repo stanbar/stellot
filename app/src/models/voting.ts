@@ -1,4 +1,4 @@
-import Voting from "@/types/voting";
+import { Voting } from "@stellot/types";
 import { Reducer } from 'redux';
 import { Effect, Dispatch } from "dva";
 import { performSignedTransaction } from "@/services/voting";

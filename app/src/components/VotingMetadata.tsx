@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import Voting, { Authorization, Visibility } from "@/types/voting";
+import { Voting, Authorization, Visibility } from "@stellot/types";
 import {
   EyeOutlined,
   KeyOutlined,
@@ -49,7 +49,7 @@ const VotingMetadata: React.FC<{ voting: Voting }> = ({ voting }) => (
             [Authorization.OPEN]: <NotificationOutlined/>,
             [Authorization.EMAIL]: <MailOutlined/>,
             [Authorization.CODE]: <KeyOutlined/>,
-            [Authorization.CUSTOM]: <KeyOutlined/>,
+            [Authorization.KEYBASE]: <KeyOutlined/>,
           }[voting?.authorization]}
           {capitalize(voting?.authorization)}
         </Badge>

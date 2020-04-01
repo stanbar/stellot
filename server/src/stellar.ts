@@ -1,10 +1,10 @@
 import { Keypair, Memo, Transaction } from 'stellar-sdk'
 import BN from 'bn.js';
 import { uuid } from 'uuidv4';
+import { Voting } from '@stellot/types';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
-import Voting from './types/voting';
 import Keychain from './types/keychain';
 
 interface InitSession {

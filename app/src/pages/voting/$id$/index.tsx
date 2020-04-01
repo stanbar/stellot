@@ -3,7 +3,7 @@ import { Form, notification, Radio, Input } from 'antd';
 import { dispatchFetchVoting, dispatchPerformVote, FETCH_VOTING, VOTING, VotingStateType } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
-import Voting, { Authorization } from "@/types/voting";
+import { Voting, Authorization } from "@stellot/types";
 import { VoteStatus } from '@/types/voteStatus';
 import { BtnLink, BtnSubmit } from "@/components/ActionButton";
 import CastVoteModal from "@/components/CastVoteModal";

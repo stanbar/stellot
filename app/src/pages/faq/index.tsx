@@ -1,7 +1,7 @@
 import React from 'react';
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
-import Voting from "@/types/voting";
+import { Voting } from "@stellot/types";
 import { VoteStatus } from '@/types/voteStatus';
 import { Collapse } from "antd";
 import { CaretRightOutlined } from "@ant-design/icons/lib";
@@ -26,7 +26,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
     >
       <Panel header={<h2>Is the system decentralized ?</h2>} key="1" className="site-collapse-custom-panel">
         <article>
-          <p>{`Let's start with the big picture of the system`}</p>
+          <p>Let&apos;s start with the big picture of the system</p>
           <img src={stellotDecentralization} alt="decentralized and centralized parts"/>
           <p style={{ whiteSpace: 'pre-line' }}>
             {`

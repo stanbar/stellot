@@ -1,4 +1,5 @@
 import express from 'express';
+import { Authorization } from '@stellot/types';
 import { getKeychain, getVotingById } from '../../database/database';
 import {
   ChallengeRequest,
@@ -8,7 +9,6 @@ import {
   proofChallenges,
   storeAndPickLuckyBatch,
 } from '../../stellar';
-import { Authorization } from '../../types/voting';
 
 const debug = require('debug')('stellar-voting:app');
 

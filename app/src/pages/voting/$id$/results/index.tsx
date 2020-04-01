@@ -9,7 +9,7 @@ import {
 } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
-import Voting from "@/types/voting";
+import { Voting } from "@stellot/types";
 import { VoteStatus } from '@/types/voteStatus';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
