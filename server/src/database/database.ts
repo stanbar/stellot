@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Keypair } from 'stellar-sdk';
-import Voting, { Visibility } from '../types/voting';
+import { Voting, Visibility } from '@stellot/types';
 import { KEYCHAIN, VOTING } from './models';
 import Keychain from '../types/keychain'
 
@@ -29,7 +29,7 @@ export async function getVotingBySlug(votingSlug: string): Promise<Voting | unde
   return (await VotingSchema.findOne({ slug: votingSlug }))?.toJSON();
 }
 
-export async function setVoting(voting: Omit<Voting, 'id'>): Promise<Voting> {
+export async function setVoting(voting: Omit<Omit<Voting, 'id'>, 'slug'>): Promise<Voting> {
   const votingDoc = new VotingSchema({ ...voting });
   const saved = await votingDoc.save();
   return saved.toJSON();

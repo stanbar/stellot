@@ -41,6 +41,13 @@ const config: IConfig = {
         //   '^/api': '',
         // },
       },
+      '/auth/': {
+        target: 'http://localhost:8083/',
+        changeOrigin: true,
+        // pathRewrite: {
+        //   '^/api': '',
+        // },
+      },
     },
     copy: [{
       from: 'CNAME',

@@ -28,12 +28,9 @@ async function main(): Promise<void> {
 
 const initing = main().then(() => console.log('Successfully inited keybase bot'));
 
-export async function joinTeam(team: string) {
-  try {
-    await advancedTeamClient.join({ team })
-  } catch (e) {
-
-  }
+export async function joinTeam(team: string): Promise<any> {
+  await initing;
+  return advancedTeamClient.requestAccess(team)
 }
 
 export async function verifyUserMembership(username: string, requiredTeamMembership?: string) {
@@ -47,7 +44,7 @@ export async function verifyUserMembership(username: string, requiredTeamMembers
   }
 }
 
-export async function sendCode(username: string, token: string,) {
+export async function sendCode(username: string, token: string) {
   const channel = { name: `stellotbot,${username}`, public: false, topicType: 'chat' };
   await bot.chat.send(channel, { body: token });
   console.log(`successfully send code to user: ${username} `);

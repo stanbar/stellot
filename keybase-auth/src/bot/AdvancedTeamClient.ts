@@ -1,35 +1,9 @@
-import ClientBase from 'keybase-bot/lib/client-base';
-import {
-  MemberEmail,
-  MemberUsername,
-  TeamAddMemberResult,
-  TeamCreateResult,
-  TeamDetails,
-} from 'keybase-bot/lib/types/keybase1';
+import ClientBase, { ErrorWithCode } from 'keybase-bot/lib/client-base';
+import { keybaseExec } from 'keybase-bot/lib/utils';
 
 
 /* eslint-disable no-underscore-dangle */
-
-export interface CreateTeamParam {
-  team: string
-}
-
-export interface AddMembersParam {
-  team: string
-  emails?: MemberEmail[]
-  usernames?: MemberUsername[]
-}
-
-export interface RemoveMemberParam {
-  team: string
-  username: string
-}
-
-export interface ListTeamMembershipsParam {
-  team: string
-}
-
-export interface JoinTeamParam {
+export interface RequestAccessTeamParam {
   team: string
 }
 
@@ -37,92 +11,22 @@ export interface JoinTeamParam {
  * For more info about the API this module uses, you may want to check out `keybase team api`. */
 export default class AdvancedTeamClient extends ClientBase {
   /**
-   * Create a new Keybase team or subteam
+   * Request access to Keybase team or subteam
    * @memberof Team
-   * @param creation - the name of the team to create
+   * @param team - the name of the team to request access
    * @returns -
    * @example
-   * bot.team.create({"team": "phoenix"}).then(res => console.log(res))
+   * bot.team.requestAccess({"team": "phoenix"}).then(res => console.log(res))
    */
-  public async create(creation: CreateTeamParam): Promise<TeamCreateResult> {
-    await this._guardInitialized()
-    const options = creation
-    const res = await this._runApiCommand({ apiName: 'team', method: 'create-team', options })
-    if (!res) {
-      throw new Error('create')
-    }
-    return res
-  }
-
-  /**
-   * Add a bunch of people with different privileges to a team
-   * @memberof Team
-   * @param additions - an array of the users to add, with privs
-   * @returns - A result object of adding these members to the team.
-   * @example
-   * bot.team.addMembers({"team": "phoenix", "emails":
-   * [{"email": "alice@keybase.io", "role": "writer"},
-   * {"email": "cleo@keybase.io", "role": "admin"}],
-   * "usernames": [{"username": "frank", "role": "reader"}, {"username": "keybaseio@twitter",
-   * "role": "writer"}]}).then(res => console.log(res))
-   */
-  public async addMembers(additions: AddMembersParam): Promise<TeamAddMemberResult> {
+  public async requestAccess(team: string): Promise<any> {
     await this._guardInitialized();
-    const options = additions;
-    const res = await this._runApiCommand({ apiName: 'team', method: 'add-members', options });
-    if (!res) {
-      throw new Error('addMembers')
+    // TODO unsafe for command injections!
+    const output =
+      await keybaseExec(this._workingDir, this.homeDir, ['team', 'request-access', team]);
+    if (output.hasOwnProperty('error')) {
+      // TODO already member of a team is not actually error, handle differently
+      throw new ErrorWithCode(output.error.code, output.error.message)
     }
-    return res
-  }
-
-  /**
-   * Remove someone from a team.
-   * @memberof Team
-   * @param removal - object with the `team` name and `username`
-   * @example
-   * bot.team.removeMember({"team": "phoenix", "username": "frank"}).then(res => console.log(res))
-   */
-  public async removeMember(removal: RemoveMemberParam): Promise<void> {
-    await this._guardInitialized();
-    const options = removal;
-    await this._runApiCommand({ apiName: 'team', method: 'remove-member', options })
-  }
-
-  /**
-   * List a team's members.
-   * @memberof Team
-   * @param team - an object with the `team` name in it.
-   * @returns - Details about the team.
-   * @example
-   * bot.team.listTeamMemberships({"team": "phoenix"}).then(res => console.log(res))
-   */
-  public async listTeamMemberships(team: ListTeamMembershipsParam): Promise<TeamDetails> {
-    await this._guardInitialized();
-    const options = team;
-    const res = await this._runApiCommand({ apiName: 'team', method: 'list-team-memberships', options });
-    if (!res) {
-      throw new Error('listTeamMemberships')
-    }
-    return res
-  }
-
-  /**
-   * Create a new Keybase team or subteam
-   * @memberof Team
-   * @param team - the name of the team to join
-   * @returns -
-   * @example
-   * bot.team.join({"team": "phoenix"}).then(res => console.log(res))
-   */
-  public async join(team: JoinTeamParam): Promise<TeamCreateResult> {
-    await this._guardInitialized();
-    const options = team;
-    const res = await this._runApiCommand({ apiName: 'team', method: 'request-access', options });
-    console.log({ res });
-    if (!res) {
-      throw new Error('request-accesss')
-    }
-    return res
+    return output;
   }
 }
