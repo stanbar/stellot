@@ -1,6 +1,6 @@
 import React from "react";
 import { ConnectProps } from "@/models/connect";
-import Voting from '@/types/voting';
+import { Voting } from '@stellot/types';
 import { TitleParagraph } from "@/pages";
 import VotingsTable from "@/components/VotingsTable";
 

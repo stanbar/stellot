@@ -1,8 +1,7 @@
 import React from 'react';
 import { Form, Button, Radio, Input, Col, Typography, Row, InputNumber, Switch, DatePicker } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
-import CreateVotingRequest from '@/types/createVotingRequest';
-import { Authorization, Visibility } from "@/types/voting";
+import { CreateVotingRequest, Authorization, Visibility, KeybaseAuthOptions, EmailAuthOptions } from '@stellot/types';
 import { isNotEmpty, capitalize } from '@/utils/utils';
 import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
 import { ConnectProps } from "@/models/connect";
@@ -23,6 +22,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       second: string,
       options?: string[] | undefined,
       authorization: Authorization,
+      authorizationOptions: KeybaseAuthOptions | EmailAuthOptions | undefined,
       visibility: Visibility,
       votesCap: number,
       period: Array<Date>,
@@ -41,6 +41,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           .map((option, index) => ({ name: option, code: index + 1 })),
       }],
       authorization: val.authorization,
+      authorizationOptions: val.authorizationOptions,
       visibility: val.visibility,
       votesCap: val.votesCap,
       encrypted: val.encrypted,
@@ -53,6 +54,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   };
   return (
     <Form layout="vertical" form={form} name="options_form" onFinish={onFinish}
+          scrollToFirstError
           initialValues={{
             votesCap: 100,
             authorization: Authorization.OPEN,
@@ -184,10 +186,44 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       <Form.Item name="authorization" label="Authorization method">
         <Radio.Group>
           <Radio.Button value={Authorization.OPEN}>{capitalize(Authorization.OPEN)}</Radio.Button>
-          <Radio.Button value={Authorization.EMAIL}>{capitalize(Authorization.EMAIL)}</Radio.Button>
-          <Radio.Button value={Authorization.CODE}>{capitalize(Authorization.CODE)}</Radio.Button>
+          <Radio.Button disabled value={Authorization.EMAIL}>{capitalize(Authorization.EMAIL)}</Radio.Button>
+          <Radio.Button disabled value={Authorization.CODE}>{capitalize(Authorization.CODE)}</Radio.Button>
+          <Radio.Button value={Authorization.KEYBASE}>{capitalize(Authorization.KEYBASE)}</Radio.Button>
         </Radio.Group>
       </Form.Item>
+      <Form.Item
+        noStyle
+        shouldUpdate={(prevValues, currentValues) => prevValues.authorization !== currentValues.authorization}
+      >
+        {({ getFieldValue }) => {
+          console.log(getFieldValue('authorization'));
+
+          return getFieldValue('authorization') === Authorization.KEYBASE ? (
+            <div>
+              <Form.Item name={['authorizationOptions', 'team']}
+                         label="(Optional) Team membership"
+                         rules={[{
+                           whitespace: true,
+                           message: "Please input option value or delete this field.",
+                         }]}
+              >
+                <Input placeholder="stellar.public"/>
+              </Form.Item>
+              <Form.Item name={['authorizationOptions', 'channel']}
+                         label="(Optional) Channel membership"
+                         rules={[{
+                           whitespace: true,
+                           message: "Please input option value or delete this field.",
+                         }]}
+              >
+                <Input placeholder="dev-discussions"/>
+              </Form.Item>
+            </div>
+          ) : null
+        }
+        }
+      </Form.Item>
+
       <Form.Item name="visibility" label="Listing visibility">
         <Radio.Group>
           <Radio.Button value={Visibility.PUBLIC}>{capitalize(Visibility.PUBLIC)}</Radio.Button>

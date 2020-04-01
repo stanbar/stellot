@@ -1,7 +1,6 @@
 import { Effect, Dispatch } from "dva";
 import { createVoting } from '@/services/tokenDistributionServer';
-import Voting from "@/types/voting";
-import CreateVotingRequest from "@/types/createVotingRequest";
+import { Voting, CreateVotingRequest } from "@stellot/types";
 import router from 'umi/router';
 
 export const CREATE = 'create';

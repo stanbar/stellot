@@ -16,9 +16,8 @@ import {
   ResSession
 } from "@/services/tokenDistributionServer";
 import { createTransaction, getAccountSequenceNumber } from "@/services/stellar";
-import Voting from "@/types/voting";
+import { Voting, Option } from "@stellot/types";
 import { VoteStatus } from "@/types/voteStatus";
-import Option from "@/types/option";
 
 interface Session {
   id: number;

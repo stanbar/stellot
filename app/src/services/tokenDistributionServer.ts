@@ -1,8 +1,6 @@
-import Voting from '@/types/voting';
+import { Voting, CreateVotingRequest, CreateVotingResponse } from '@stellot/types';
 import BN from "bn.js";
 import { Memo, Transaction } from "stellar-sdk";
-import CreateVotingRequest from "@/types/createVotingRequest";
-import CreateVotingResponse from "@/types/createVotingResponse";
 
 export async function fetchVotes(): Promise<Voting[]> {
   const res = await fetch('/api/voting');

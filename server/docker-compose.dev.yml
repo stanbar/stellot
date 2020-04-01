@@ -4,7 +4,6 @@ services:
     container_name: "stellar-voting-mongodb-dev"
     image: mongo
     restart: 'unless-stopped'
-    env_file: ".env"
 
   web:
     container_name: "stellar-voting-authorization-server-dev"
@@ -16,7 +15,6 @@ services:
       - "${PORT}:${PORT}"
     volumes:
       - "${WEBAPP_DIR}:${WEBAPP_DIR}"
-      - .:/server
     restart: 'unless-stopped'
     links:
       - mongo
