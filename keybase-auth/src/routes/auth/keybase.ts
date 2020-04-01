@@ -6,7 +6,7 @@ import { verifyUserMembership } from '../../bot';
 
 const router = express.Router();
 
-router.post('/', async (req, res, next) => {
+router.post('/sendToken', async (req, res, next) => {
   const { username, requiredTeam } = req.body;
   if (!username) {
     return res.status(400).send('You need to specify username').end();
@@ -34,7 +34,7 @@ function getTokenFromHeader(req: Request) {
   return null;
 }
 
-router.get('/', async (req, res, next) => {
+router.get('/getUsername', async (req, res, next) => {
   const token = getTokenFromHeader(req);
   if (!token) {
     return res.status(400).send('please specify authorization token in header').end();
@@ -47,14 +47,15 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/team/:teamname', async (req, res, next) => {
-  const { teamname } = req.params;
-  if (!teamname) {
-    return res.status(400).send('please specify /:teamname').end();
+router.post('/joinTeam', async (req, res, next) => {
+  const { team } = req.body;
+  if (!team) {
+    return res.status(400).send('please specify team to join').end();
   }
   try {
-    const members = await bot.listMembers(teamname);
-    return res.json({ members });
+    const result = await bot.joinTeam(team);
+    console.log({ result });
+    return res.status(200).send(result).end();
   } catch (e) {
     return next(e)
   }

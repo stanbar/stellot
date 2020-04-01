@@ -1,7 +1,7 @@
 import mongoose, { model } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 import slug from 'slug';
-import { Authorization, Visibility } from '../../types/voting';
+import { Authorization, Visibility } from '@stellot/types';
 import { VOTING } from '.';
 
 const VotingSchema = new mongoose.Schema({
@@ -17,7 +17,7 @@ const VotingSchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   authorization: {
     type: String,
-    enum: [Authorization.OPEN, Authorization.EMAIL, Authorization.CODE, Authorization.CUSTOM],
+    enum: [Authorization.OPEN, Authorization.EMAIL, Authorization.CODE, Authorization.KEYBASE],
     required: true,
   },
   visibility: {

@@ -1,0 +1,41 @@
+version: '3.1'
+services:
+  mongo:
+    container_name: "stellot-tds-mongodb-dev"
+    image: mongo
+    restart: 'unless-stopped'
+    expose:
+      - 27017
+
+  tds:
+    container_name: "stellot-tds-dev"
+    build:
+      context: server
+      dockerfile: Dockerfile.dev
+    env_file: ./server/.env
+    ports:
+      - $TDS_PORT:$TDS_PORT
+    volumes:
+      - "${WEBAPP_DIR}:${WEBAPP_DIR}"
+    restart: 'unless-stopped'
+    environment:
+      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
+    links:
+      - mongo
+      - keybase-auth
+    depends_on:
+      - mongo
+      - keybase-auth
+
+  keybase-auth:
+    container_name: "stellot-keybase-auth-dev"
+    build:
+      context: keybase-auth
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./keybase-auth/.env
+    ports:
+      - $KEYBASE_AS_PORT:$KEYBASE_AS_PORT
+    volumes:
+      - ./server:/server
+    restart: 'unless-stopped'
