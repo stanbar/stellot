@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/stasbar/stellar-voting#readme",
   "dependencies": {
+    "@stellot/types": "0.0.3",
     "bn.js": "^5.1.1",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -48,6 +49,7 @@
     "mongoose": "^5.9.5",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "~1.9.1",
+    "node-fetch": "^2.6.0",
     "prettier": "^1.19.1",
     "request": "^2.88.0",
     "slug": "^2.1.1",

@@ -8,9 +8,7 @@ import {
   Server,
   TransactionBuilder,
 } from 'stellar-sdk';
-import CreateVotingRequest from './types/createVotingRequest';
-import CreateVotingResponse from './types/createVotingResponse';
-import Voting, { Authorization } from './types/voting';
+import { Voting, Authorization, KeybaseAuthOptions, CreateVotingRequest, CreateVotingResponse } from '@stellot/types';
 import { setKeychain, setVoting } from './database/database';
 import * as keybase from './keybase';
 
@@ -32,8 +30,7 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
       issuerKeypair,
       createVotingRequest,
       voteToken);
-  const voting: Omit<Voting, 'id'> = {
-    slug: '',
+  const voting: Omit<Omit<Voting, 'id'>, 'slug'> = {
     title: createVotingRequest.title,
     polls: createVotingRequest.polls,
     issueAccountId: issuerKeypair.publicKey(),
@@ -48,10 +45,12 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
     startDate: createVotingRequest.startDate,
     endDate: createVotingRequest.endDate,
   };
-  if (voting.authorization === Authorization.KEYBASE
-    && voting.authorizationOptions?.requiredTeamMembership) {
-    const { requiredTeamMembership } = voting.authorizationOptions;
-    keybase.joinTeam(requiredTeamMembership);
+  if (voting.authorization === Authorization.KEYBASE) {
+    const keybaseAuthOptions = voting.authorizationOptions as KeybaseAuthOptions | undefined;
+    if (keybaseAuthOptions) {
+      const { team } = keybaseAuthOptions;
+      keybase.joinTeam(team);
+    }
   }
   const savedVoting = await setVoting(voting);
   await setKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair);

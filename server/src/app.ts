@@ -3,8 +3,8 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import crypto from 'crypto';
 import errorhandler from 'errorhandler';
-import router from './routes'
 import path from 'path';
+import router from './routes'
 
 const isProduction = process.env.NODE_ENV === 'production';
 

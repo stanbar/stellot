@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { WallStateType, dispatchFetchVotes } from "@/models/wall";
 import { ConnectProps } from "@/models/connect";
 import { Table } from 'antd';
-import Voting, { Authorization } from '@/types/voting';
+import { Voting, Authorization } from '@stellot/types';
 import { Link } from 'umi';
 import moment from "moment";
 

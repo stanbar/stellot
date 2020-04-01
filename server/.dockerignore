@@ -3,6 +3,7 @@
 # dependencies
 **/node_modules
 /src/utils/request-temp.js
+dist
 
 # production
 /.vscode

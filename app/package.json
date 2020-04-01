@@ -8,6 +8,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "@stellot/types": "0.0.3",
     "@ant-design/icons": "^4.0.2",
     "antd": "^4.0.2",
     "bn.js": "^5.1.1",

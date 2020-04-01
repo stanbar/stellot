@@ -11,8 +11,7 @@ import {
   Asset
 } from "stellar-sdk";
 import { decodeAnswersFromMemo } from "@/crypto/utils";
-import Voting from "@/types/voting";
-import Option from "@/types/option";
+import {Voting, Option } from "@stellot/types";
 import Result from "@/types/result";
 
 const server = new Server('https://horizon-testnet.stellar.org');
