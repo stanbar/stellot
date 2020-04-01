@@ -18,6 +18,7 @@ yarn.lock
 package-lock.json
 *bak
 .vscode
+dist
 
 # visual studio code
 .history

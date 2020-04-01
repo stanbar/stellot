@@ -1,7 +1,7 @@
 FROM keybaseio/client:nightly-node-slim
 
 # Create app directory
-WORKDIR /server
+WORKDIR /home/keybase
 
 # Install app dependencies
 COPY package*.json ./
