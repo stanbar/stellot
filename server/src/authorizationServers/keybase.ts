@@ -23,7 +23,8 @@ export async function authenticateToken(authToken: string, voting: Voting)
   return getUsername(authToken, (voting.authorizationOptions as KeybaseAuthOptions)?.team);
 }
 
-async function getUsername(authToken: string, requireTeam?: string): Promise<string> {
+async function getUsername(authToken: string, requiredTeam?: string)
+  : Promise<string> {
   const decodedToken = jwt.verify(authToken, publicKey, { audience, issuer, algorithms: ['ES256'] });
 
   // @ts-ignore
@@ -31,15 +32,15 @@ async function getUsername(authToken: string, requireTeam?: string): Promise<str
     throw new Error('token is missing sub field')
   }
   // @ts-ignore
-  if (requireTeam) {
+  if (requiredTeam) {
     // @ts-ignore
-    if (!decodedToken.requiredToken) {
+    if (!decodedToken.requiredTeam) {
       throw new Error('token does not contain requiredTeam field while it is required')
     }
     // @ts-ignore
-    if (decodedToken.requiredToken !== requireTeam) {
+    if (decodedToken.requiredTeam !== requiredTeam) {
       // @ts-ignore
-      throw new Error(`token has different requireTeam proof ${decodedToken.requiredToken}`)
+      throw new Error(`token has different requiredTeam proof ${decodedToken.requiredTeam}`)
     }
   }
   // @ts-ignore
