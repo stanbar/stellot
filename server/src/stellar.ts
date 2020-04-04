@@ -1,7 +1,6 @@
 import { Keypair, Memo, Transaction } from 'stellar-sdk'
 import BN from 'bn.js';
-import { uuid } from 'uuidv4';
-import { Voting } from '@stellot/types';
+import { Voting, Authorization } from '@stellot/types';
 import { ed25519, SignerSession, VoterSession } from './blindsig';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
@@ -14,7 +13,11 @@ interface InitSession {
 
 const initSessions: Map<string, Array<InitSession>> = new Map();
 
-export async function isUserAuthorizedToInitSession(tokenId: string, voting: Voting) {
+export async function isUserAuthorizedToInitSession(voting: Voting, userId?: string) {
+  if (voting.authorization === Authorization.KEYBASE) {
+    return userId && initSessions.get(userId) === undefined; // TODO move to database
+  }
+
   return initSessions.get(voting.id) === undefined;
 }
 
@@ -33,7 +36,7 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(tokenId: string, keychain: Keychain): [string, InitResponse[]] {
+export function createSession(userId: string, keychain: Keychain): InitResponse[] {
   const distributionKeypair = Keypair.fromSecret(keychain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
@@ -48,17 +51,17 @@ export function createSession(tokenId: string, keychain: Keychain): [string, Ini
     };
     userSessions[i] = { id: i, signerSession };
   }
-  const sessionId = uuid();
-  initSessions.set(sessionId, userSessions);
-  return [sessionId, response];
+  initSessions.set(userId, userSessions);
+  // should we key session by uuid or username or jwt maybe ?
+  return response;
 }
 
 export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>
 
 export function storeAndPickLuckyBatch(
-  tokenId: string,
+  userId: string,
   blindedTransactionBatches: ChallengeRequest): number {
-  const userSessions = initSessions.get(tokenId);
+  const userSessions = initSessions.get(userId);
   if (!userSessions) {
     throw new Error('Could not find corresponding user session')
   }
@@ -73,7 +76,7 @@ export function storeAndPickLuckyBatch(
       lucky: i === luckyBatchId,
     };
   }
-  challengeSessions.set(tokenId, session);
+  challengeSessions.set(userId, session);
   // TODO save number of attempts preventing DoS
   return luckyBatchId;
 }

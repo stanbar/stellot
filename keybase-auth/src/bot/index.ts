@@ -33,18 +33,22 @@ export async function joinTeam(team: string): Promise<any> {
   return advancedTeamClient.requestAccess(team)
 }
 
-export async function verifyUserMembership(username: string, requiredTeamMembership?: string) {
+export async function verifyUserMembership(username: string, requiredTeamMembership?: string)
+  : Promise<Error | undefined> {
   await initing;
   if (requiredTeamMembership) {
     const members = await listMembers(requiredTeamMembership);
-    const isPresent = members?.some(member => member.username === username);
-    if (!isPresent) {
-      throw new Error(`Username ${username} is not present on team membership list`)
+    const userMembership = members?.find(member => member.username === username);
+    console.log(`user ${username} is member of ${requiredTeamMembership}`);
+    console.log({ userMembership });
+    if (!userMembership) {
+      throw new Error(`${username} is not present on ${requiredTeamMembership} team membership list`)
     }
   }
+  return undefined;
 }
 
-export async function sendCode(username: string, token: string) {
+export async function sendToken(username: string, token: string) {
   const channel = { name: `stellotbot,${username}`, public: false, topicType: 'chat' };
   await bot.chat.send(channel, { body: token });
   console.log(`successfully send code to user: ${username} `);
@@ -52,6 +56,7 @@ export async function sendCode(username: string, token: string) {
 
 export async function listMembers(team: string): Promise<TeamMemberDetails[] | null> {
   await initing;
+  console.log(`fetching ${team} listTeamMembership`);
   const members = await bot.team.listTeamMemberships({ team });
   const { readers } = members.members;
   console.log({ readers });

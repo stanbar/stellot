@@ -193,35 +193,21 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       </Form.Item>
       <Form.Item
         noStyle
-        shouldUpdate={(prevValues, currentValues) => prevValues.authorization !== currentValues.authorization}
-      >
+        shouldUpdate={(prevValues, currentValues) => prevValues.authorization !== currentValues.authorization}>
         {({ getFieldValue }) => {
           console.log(getFieldValue('authorization'));
 
           return getFieldValue('authorization') === Authorization.KEYBASE ? (
-            <div>
-              <Form.Item name={['authorizationOptions', 'team']}
-                         label="(Optional) Team membership"
-                         rules={[{
-                           whitespace: true,
-                           message: "Please input option value or delete this field.",
-                         }]}
-              >
-                <Input placeholder="stellar.public"/>
-              </Form.Item>
-              <Form.Item name={['authorizationOptions', 'channel']}
-                         label="(Optional) Channel membership"
-                         rules={[{
-                           whitespace: true,
-                           message: "Please input option value or delete this field.",
-                         }]}
-              >
-                <Input placeholder="dev-discussions"/>
-              </Form.Item>
-            </div>
+            <Form.Item name={['authorizationOptions', 'team']}
+                       label="(Optional) Team membership"
+                       rules={[{
+                         whitespace: true,
+                         message: "Please input option value or delete this field.",
+                       }]}>
+              <Input placeholder="stellar.public"/>
+            </Form.Item>
           ) : null
-        }
-        }
+        }}
       </Form.Item>
 
       <Form.Item name="visibility" label="Listing visibility">
