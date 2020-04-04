@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "start": "umi dev",
-    "build": "umi build",
+    "start": "REACT_APP_ENV=development umi dev",
+    "build": "REACT_APP_ENV=production umi build",
     "test": "umi test",
     "lint:es": "eslint --ext .js src mock tests",
     "precommit": "lint-staged"
