@@ -1,9 +1,13 @@
-version: '3.1'
+version: '3.7'
 services:
   mongo:
     container_name: "stellot-tds-mongodb"
-    image: mongo
+    image: mongo:latest
     restart: 'unless-stopped'
+    ports:
+      - 27017:27017
+    volumes:
+      - $DOCKER_VOLUMES/stellot-tds:/data/db
 
   tds:
     container_name: "stellot-tds"
@@ -11,8 +15,8 @@ services:
       context: server
       dockerfile: Dockerfile
     env_file: ./server/.env
-    expose:
-      - $TDS_PORT
+    ports:
+      - $TDS_PORT:$TDS_PORT
     volumes:
       - "${WEBAPP_DIR}:${WEBAPP_DIR}"
     restart: 'unless-stopped'
@@ -28,10 +32,10 @@ services:
   keybase-auth:
     container_name: "stellot-keybase-auth"
     build:
-      context: ./keybase-auth
+      context: keybase-auth
       dockerfile: Dockerfile
     env_file:
       - ./keybase-auth/.env
-    expose:
-      - $KEYBASE_AS_PORT
+    ports:
+      - $KEYBASE_AS_PORT:$KEYBASE_AS_PORT
     restart: 'unless-stopped'
