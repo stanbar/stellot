@@ -2,26 +2,21 @@ title Performing vote (Keybase Authentication)
 
 User->Webapp: Open voting webapp
 Webapp-->User:
+Webapp->TDS: Fetch voting metadata (token)
+TDS-->Webapp: Metadata
+Webapp-->User: Display voting metadata
 User->Webapp: Enter keybase username
 User->Webapp: Click submit
-Webapp->AS: Request one-time token (username)
-AS->AS: Generate one-time token
-AS->AS: Persist token with username
-AS->AS: Send token \nto keybase user via bot
-User->Webapp: Enter one-time token
-Webapp->TDS: Fetch voting metadata (token)
-TDS->AS: Authenticate token
-AS-->TDS: username
-TDS->TDS: Ensure username exist on list
-TDS-->Webapp: metadata
-Webapp-->User: Display voting metadata
+Webapp->AS: Request JWT token (username, requiredTeam)
+AS->Keybase: Ensure username is \nmembership of requiredTeam
+AS->AS: Generate signed JWT token
+AS->Keybase: Send JWT token \nto keybase user via bot
+User->Webapp: Enter JWT token
 User->Webapp: Select option
 User->Webapp: Click Submit
-Webapp->TDS: Initialize session (option, token)
-TDS->AS: Authenticate token
-AS-->TDS: username
-TDS->TDS: Ensure username exist on list
+TDS->TDS: Validate JWT token
 TDS->TDS: Ensure username \nhas not already been used
+Webapp->TDS: Initialize session (option, token)
 TDS->TDS: Generate random nonce
 TDS-->Webapp: Return (nonce)
 Webapp->Webapp: Create payment transaction of 1 vote token \nfrom distribution account \nto ballot-box account. \nEncode option in memo field.
