@@ -7,7 +7,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
+      - $DOCKER_VOLUMES/stellot-tds:/data/db
 
   tds:
     container_name: "stellot-tds-dev"
@@ -38,9 +38,5 @@ services:
       - ./keybase-auth/.env
     ports:
       - $KEYBASE_AS_PORT:$KEYBASE_AS_PORT
-    volumes:
-      - ./server:/server
     restart: 'unless-stopped'
 
-volumes:
-  mongodb_data_container:

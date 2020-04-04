@@ -58,9 +58,13 @@ export async function listMembers(team: string): Promise<TeamMemberDetails[] | n
   await initing;
   console.log(`fetching ${team} listTeamMembership`);
   const members = await bot.team.listTeamMemberships({ team });
-  const { readers } = members.members;
-  console.log({ readers });
-  return readers;
+  const { readers, owners, writers, admins } = members.members;
+  return [
+    ...(readers ?? []),
+    ...(owners ?? []),
+    ...(writers ?? []),
+    ...(admins ?? [])
+  ];
 }
 
 export function shutdown(): Promise<void> {
