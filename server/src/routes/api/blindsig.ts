@@ -45,9 +45,9 @@ router.post('/init', async (req, res, next) => {
         throw new HttpError('missing Authorization header with Bearer JWT', 401)
       }
       userId = await authenticateToken(authToken, voting);
-      const isUserAuthorized = isUserAuthorizedToInitSession(voting, userId);
+      const isUserAuthorized = await isUserAuthorizedToInitSession(voting, userId);
       if (!isUserAuthorized) {
-        throw new createHttpError.Unauthorized('Init session failed authorization');
+        throw new createHttpError.Unauthorized('You have already started voting session');
       }
     }
     const keychain = await getKeychain(votingId);
@@ -55,6 +55,7 @@ router.post('/init', async (req, res, next) => {
       return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
     }
     const session = createSession(userId, keychain);
+    debug('created session');
     const sessionToken = createSessionToken(userId);
     res.setHeader('SESSION-TOKEN', sessionToken);
     return res.status(200).send(session);

@@ -63,7 +63,8 @@ export async function initSessions(votingId: string, authToken?: string): Promis
     console.log('Successfully inited session');
   } else {
     console.error('Failed to init session');
-    throw new Error(await response.text());
+    const body = await response.json();
+    throw new Error(body?.errors?.message);
   }
 
   const sessionId = response.headers.get('SESSION-TOKEN');
