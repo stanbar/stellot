@@ -42,7 +42,7 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
     const errorCode = e?.response?.data?.extras?.result_codes?.transaction;
     if (errorCode === 'tx_bad_seq') {
       // Interrupted between another session, retry
-      await dispatchPerformVote(dispatch, authToken, voting, optionCode);
+      await dispatchPerformVote(dispatch, voting, optionCode, authToken);
     } else {
       dispatch({
         type: `${VOTING}/${SET_STATUS}`,
