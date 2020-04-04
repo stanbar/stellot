@@ -27,7 +27,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       <Panel header={<h2>Is the system decentralized ?</h2>} key="1" className="site-collapse-custom-panel">
         <article>
           <p>Let&apos;s start with the big picture of the system</p>
-          <img src={stellotDecentralization} alt="decentralized and centralized parts"/>
+          <img width='100%' src={stellotDecentralization} alt="decentralized and centralized parts"/>
           <p style={{ whiteSpace: 'pre-line' }}>
             {`
           Let's take a Stellar Community Funding voting as an example.
