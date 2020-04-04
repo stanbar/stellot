@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, notification, Radio, Input } from 'antd';
+import { Form, notification, Radio } from 'antd';
 import { dispatchFetchVoting, dispatchPerformVote, FETCH_VOTING, VOTING, VotingStateType } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
 import { connect } from 'dva';
@@ -9,15 +9,18 @@ import { BtnLink, BtnSubmit } from "@/components/ActionButton";
 import CastVoteModal from "@/components/CastVoteModal";
 import VotingMetadata from "@/components/VotingMetadata";
 import { Link } from "umi";
+import AuthorizationView from '@/components/AuthorizationView';
+
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
+  authToken?: string;
   status?: VoteStatus;
   loading?: boolean;
   txHash?: string;
 }
 
-const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispatch, voting }) => {
+const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, authToken, match, dispatch, voting }) => {
   const [form] = Form.useForm();
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
 
@@ -31,13 +34,13 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
   };
 
   const onFinish = (values: any) => {
-    const { authorizationToken, optionCode } = values;
+    const { optionCode } = values;
     if (!voting) {
       notification.error({
         message: 'Voting not found',
       });
     } else {
-      dispatchPerformVote(dispatch, authorizationToken, voting, optionCode)
+      dispatchPerformVote(dispatch, voting, optionCode, authToken)
     }
   };
 
@@ -46,6 +49,9 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
   }
   if (!voting) {
     return (<p>Failed to load voting</p>)
+  }
+  if (voting.authorization !== Authorization.OPEN && !authToken) {
+    return (<AuthorizationView dispatch={dispatch} voting={voting}/>)
   }
   return (
     <div>
@@ -62,14 +68,6 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
             ))}
           </Radio.Group>
         </Form.Item>
-        {voting?.authorization !== Authorization.OPEN &&
-        <Form.Item label="Authorization code" name="authorizationToken" rules={[{
-          required: true,
-          message: 'Please input your authorization code!'
-        }]}>
-          <Input style={{ maxWidth: 200 }}/>
-        </Form.Item>
-        }
         <Form.Item style={{ marginBottom: 0 }}>
           <BtnSubmit disabled={txHash} htmlType="submit">
             Submit
@@ -87,6 +85,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, match, dispa
 };
 export default connect(({ voting, loading }: { voting: VotingStateType, loading: Loading }) =>
   ({
+    authToken: voting.authToken,
     voting: voting.voting,
     status: voting.status,
     loading: loading.effects[`${VOTING}/${FETCH_VOTING}`],

@@ -4,6 +4,8 @@ import { getPublicVotings, getVotingBySlug } from '../../database/database';
 
 const router = express.Router();
 
+const debug = require('debug')('blindsig');
+
 router.get('/', async (req, res, next) => {
   try {
     const result = await getPublicVotings();
@@ -30,6 +32,7 @@ router.post('/', async (req, res, next) => {
   }
   try {
     const createVotingResponse = await createVoting(createVotingRequest);
+    debug('created Voting');
     return res.json(createVotingResponse).end();
   } catch (e) {
     next(e)

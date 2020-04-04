@@ -1,5 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { Authorization } from '@stellot/types';
+import { uuid } from 'uuidv4';
+import createHttpError from 'http-errors';
 import { getKeychain, getVotingById } from '../../database/database';
 import {
   ChallengeRequest,
@@ -9,32 +11,52 @@ import {
   proofChallenges,
   storeAndPickLuckyBatch,
 } from '../../stellar';
+import { HttpError } from '../../app';
+import { authenticateToken } from '../../authorizationServers/keybase';
+import { createSessionToken, verifyAndGetUserId } from '../../auth';
 
-const debug = require('debug')('stellar-voting:app');
+const debug = require('debug')('blindsig');
 
 const router = express.Router();
 
+function getTokenFromHeader(req: Request) {
+  if ((req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token') ||
+    (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer')) {
+    return req.headers.authorization.split(' ')[1];
+  }
+  return null;
+}
+
 router.post('/init', async (req, res, next) => {
-  const { tokenId, votingId } = req.body;
-  debug(`tokenId: ${tokenId}`);
+  const { votingId } = req.body;
   debug(`votingId: ${votingId}`);
   try {
     const voting = await getVotingById(votingId);
     if (!voting) {
       return res.status(404).send(`Voting with id: ${votingId} not found`);
     }
-    if (voting.authorization !== Authorization.OPEN) {
-      const isUserAuthorized = isUserAuthorizedToInitSession(tokenId, voting);
+    let userId: string;
+    if (voting.authorization === Authorization.OPEN) {
+      userId = uuid();
+    } else {
+      const authToken = getTokenFromHeader(req);
+      debug(`authToken: ${authToken}`);
+      if (!authToken) {
+        throw new HttpError('missing Authorization header with Bearer JWT', 401)
+      }
+      userId = await authenticateToken(authToken, voting);
+      const isUserAuthorized = isUserAuthorizedToInitSession(voting, userId);
       if (!isUserAuthorized) {
-        return res.status(405).send('Init session failed authorization');
+        throw new createHttpError.Unauthorized('Init session failed authorization');
       }
     }
     const keychain = await getKeychain(votingId);
     if (!keychain) {
       return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
     }
-    const [sessionId, session] = createSession(tokenId, keychain);
-    res.setHeader('SESSION-ID', sessionId);
+    const session = createSession(userId, keychain);
+    const sessionToken = createSessionToken(userId);
+    res.setHeader('SESSION-TOKEN', sessionToken);
     return res.status(200).send(session);
   } catch (e) {
     return next(e)
@@ -43,34 +65,32 @@ router.post('/init', async (req, res, next) => {
 
 router.post('/getChallenges', (req, res) => {
   const {
-    tokenId,
     blindedTransactionBatches,
   }: { tokenId: string; blindedTransactionBatches: ChallengeRequest } = req.body;
-  debug(`tokenId: ${tokenId}`);
-  const sessionId = req.header('SESSION-ID');
-  debug(`sessionId: ${sessionId}`);
-  if (!sessionId) {
-    res.status(405).send('SESSION-ID header not found').end();
+  const sessionToken = req.header('SESSION-TOKEN');
+  debug(`sessionToken: ${sessionToken}`);
+  if (!sessionToken) {
+    res.status(401).send('SESSION-TOKEN header not found').end();
   } else {
-    const luckyBatchIndex = storeAndPickLuckyBatch(sessionId, blindedTransactionBatches);
+    const userId = verifyAndGetUserId(sessionToken);
+    const luckyBatchIndex = storeAndPickLuckyBatch(userId, blindedTransactionBatches);
     res.status(200).send({ luckyBatchIndex });
   }
 });
 
 router.post('/proofChallenges', async (req, res, next) => {
-  const { tokenId, proofs }: { tokenId: string; proofs: Proof[] } = req.body;
-  debug(`tokenId: ${tokenId}`);
-  const sessionId = req.header('SESSION-ID');
-  debug(`sessionId: ${sessionId}`);
-  if (!sessionId) {
-    res.status(405).send('SESSION-ID header not found').end();
-  } else {
-    try {
-      const signedBatch = proofChallenges(sessionId, proofs);
-      res.status(200).send(signedBatch);
-    } catch (e) {
-      next(e);
-    }
+  const { proofs }: { tokenId: string; proofs: Proof[] } = req.body;
+  const sessionToken = req.header('SESSION-TOKEN');
+  debug(`sessionToken: ${sessionToken}`);
+  if (!sessionToken) {
+    return res.status(401).send('SESSION-TOKEN header not found').end();
+  }
+  try {
+    const userId = verifyAndGetUserId(sessionToken);
+    const signedBatch = proofChallenges(userId, proofs);
+    return res.status(200).send(signedBatch);
+  } catch (e) {
+    return next(e);
   }
 });
 

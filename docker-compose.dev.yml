@@ -1,11 +1,13 @@
-version: '3.1'
+version: '3.7'
 services:
   mongo:
     container_name: "stellot-tds-mongodb-dev"
-    image: mongo
+    image: mongo:latest
     restart: 'unless-stopped'
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
 
   tds:
     container_name: "stellot-tds-dev"
@@ -39,3 +41,6 @@ services:
     volumes:
       - ./server:/server
     restart: 'unless-stopped'
+
+volumes:
+  mongodb_data_container:

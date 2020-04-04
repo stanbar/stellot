@@ -10,7 +10,9 @@ import {
 } from 'stellar-sdk';
 import { Voting, Authorization, KeybaseAuthOptions, CreateVotingRequest, CreateVotingResponse } from '@stellot/types';
 import { setKeychain, setVoting } from './database/database';
-import * as keybase from './keybase';
+import * as keybase from './authorizationServers/keybase';
+
+const debug = require('debug')('creatingVoting');
 
 const server = new Server('https://horizon-testnet.stellar.org');
 if (!process.env.MASTER_SECRET_KEY) {
@@ -22,14 +24,18 @@ const masterKeypair = Keypair.fromSecret(masterSecretKey);
 export async function createVoting(createVotingRequest: CreateVotingRequest)
   : Promise<CreateVotingResponse> {
   const masterAccount = await server.loadAccount(masterKeypair.publicKey());
+  debug('loaded master account');
   const issuerKeypair = Keypair.random();
   await createIssuerAccount(masterAccount, issuerKeypair);
+  debug('created issuer account');
   const voteToken = createVoteToken(issuerKeypair, createVotingRequest);
+  debug('created vote token');
   const [distributionKeypair, ballotBoxKeypair] =
     await createDistributionAndBallotAccount(
       issuerKeypair,
       createVotingRequest,
       voteToken);
+  debug('created distribution and ballot account');
   const voting: Omit<Omit<Voting, 'id'>, 'slug'> = {
     title: createVotingRequest.title,
     polls: createVotingRequest.polls,
@@ -50,10 +56,13 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
     if (keybaseAuthOptions) {
       const { team } = keybaseAuthOptions;
       keybase.joinTeam(team);
+      debug('send join team request');
     }
   }
   const savedVoting = await setVoting(voting);
+  debug('saved voting');
   await setKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
+  debug('saved keychain');
   return { ...savedVoting };
 }
 
