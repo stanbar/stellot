@@ -18,7 +18,7 @@ export async function isUserAuthorizedToInitSession(voting: Voting, userId?: str
     return userId && initSessions.get(userId) === undefined; // TODO move to database
   }
 
-  return initSessions.get(voting.id) === undefined;
+  return true;
 }
 
 export interface ChallengeSession extends InitSession {

@@ -44,6 +44,10 @@ async function getUsername(authToken: string, requiredTeam?: string)
     }
   }
   // @ts-ignore
+  if (!decodedToken.sub) {
+    throw new Error('token subject field is empty')
+  }
+  // @ts-ignore
   return decodedToken.sub;
 }
 
