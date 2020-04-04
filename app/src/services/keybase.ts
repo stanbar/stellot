@@ -1,5 +1,5 @@
 export async function requestToken(username: string, requiredTeam?: string): Promise<any> {
-  const response = await fetch('/auth/keybase/requestToken', {
+  const response = await fetch(`${REACT_APP_ENV === 'production' ? '' : KEYBASE_AUTH_SERVER_URL}/auth/keybase/requestToken`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
