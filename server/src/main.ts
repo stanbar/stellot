@@ -27,11 +27,13 @@ if (!process.env.MONGODB_URI) {
 }
 if (isProduction) {
   mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => debug('connected to db'));
+    .then(() => debug('connected to db'))
+    .catch(err => console.error(err));
 } else {
   mongoose.set('debug', true);
   mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => debug('connected to db'));
+    .then(() => debug('connected to db'))
+    .catch(err => console.error(err));
 }
 
 // eslint-disable-next-line import/first

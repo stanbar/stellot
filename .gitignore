@@ -10,6 +10,8 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+jwt_rs256_priv.pem
+jwt_rs256_pub.pem
 
 # Runtime data
 pids

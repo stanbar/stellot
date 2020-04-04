@@ -6,6 +6,7 @@ import { castVote, fetchResults } from "@/services/stellar";
 import { fetchVoting } from "@/services/tokenDistributionServer";
 import { VoteStatus } from "@/types/voteStatus";
 import Result from '@/types/result';
+import * as storage from '@/storage';
 
 export const VOTING = 'voting';
 export const FETCH_VOTING = 'fetchVoting';
@@ -13,10 +14,11 @@ export const FETCH_RESULTS = 'fetchResults';
 const SET_STATUS = 'setStatus';
 const SET_VOTING = 'setVoting';
 const SET_RESULTS = 'setResults';
+const SET_AUTH_TOKEN = 'setAuthToken';
 
-export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, voting: Voting, optionCode: number) {
+export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, optionCode: number, authToken?: string) {
   try {
-    for await (const [tx, update] of performSignedTransaction(tokenId, voting, optionCode)) {
+    for await (const [tx, update] of performSignedTransaction(voting, optionCode, authToken)) {
       if (update) {
         dispatch({
           type: `${VOTING}/${SET_STATUS}`,
@@ -40,7 +42,7 @@ export async function dispatchPerformVote(dispatch: Dispatch, tokenId: string, v
     const errorCode = e?.response?.data?.extras?.result_codes?.transaction;
     if (errorCode === 'tx_bad_seq') {
       // Interrupted between another session, retry
-      await dispatchPerformVote(dispatch, tokenId, voting, optionCode);
+      await dispatchPerformVote(dispatch, authToken, voting, optionCode);
     } else {
       dispatch({
         type: `${VOTING}/${SET_STATUS}`,
@@ -60,10 +62,17 @@ export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash
   });
 }
 
+export function dispatchSetAuthToken(dispatch: Dispatch, authToken: string) {
+  dispatch({
+    type: `${VOTING}/${SET_AUTH_TOKEN}`,
+    payload: authToken,
+  })
+}
+
 export function dispatchFetchVoting(dispatch: Dispatch, votingSlug: string) {
   dispatch({
     type: `${VOTING}/${FETCH_VOTING}`,
-    votingSlug
+    votingSlug,
   })
 }
 
@@ -76,6 +85,7 @@ export function dispatchFetchResults(dispatch: Dispatch, voting: Voting) {
 
 export interface VotingStateType {
   voting?: Voting
+  authToken?: string;
   status?: VoteStatus;
   results?: Result[];
   txHash?: string;
@@ -93,21 +103,21 @@ export interface VotingModelType {
     [SET_STATUS]: Reducer,
     [SET_VOTING]: Reducer,
     [SET_RESULTS]: Reducer,
+    [SET_AUTH_TOKEN]: Reducer,
   }
 }
 
 export const VotingModel: VotingModelType = {
   namespace: VOTING,
-  state: {
-    voting: undefined,
-    status: undefined,
-  },
+  state: {},
   effects: {
     * [FETCH_VOTING]({ votingSlug }, { call, put }) {
       const voting = yield call(fetchVoting, votingSlug);
+      const cachedToken = storage.getCachedToken(voting);
       yield put({
         type: SET_VOTING,
-        payload: voting
+        payload: voting,
+        authToken: cachedToken
       })
     },
     * [FETCH_RESULTS]({ voting }, { call, put }) {
@@ -127,10 +137,17 @@ export const VotingModel: VotingModelType = {
         errorMessage,
       }
     },
-    [SET_VOTING](state: VotingStateType, { payload }): VotingStateType {
+    [SET_VOTING](state: VotingStateType, { payload, authToken }): VotingStateType {
       return {
         ...state,
         voting: payload,
+        authToken: authToken ?? state.authToken,
+      }
+    },
+    [SET_AUTH_TOKEN](state: VotingStateType, { payload }): VotingStateType {
+      return {
+        ...state,
+        authToken: payload,
       }
     },
     [SET_RESULTS](state: VotingStateType, { payload }): VotingStateType {

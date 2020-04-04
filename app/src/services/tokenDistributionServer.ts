@@ -48,13 +48,15 @@ export interface ResSession {
   P: string; // hex
 }
 
-export async function initSessions(tokenId: string, votingId: string): Promise<[string, ResSession[]]> {
+export async function initSessions(votingId: string, authToken?: string): Promise<[string, ResSession[]]> {
+  console.log({ initSession: authToken });
   const response = await fetch('/api/blindsig/init', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(authToken && { 'Authorization': `Bearer ${authToken}` })
     },
-    body: JSON.stringify({ tokenId, votingId }),
+    body: JSON.stringify({ votingId }),
   });
 
   if (response.ok) {
@@ -64,10 +66,10 @@ export async function initSessions(tokenId: string, votingId: string): Promise<[
     throw new Error(await response.text());
   }
 
-  const sessionId = response.headers.get('SESSION-ID');
+  const sessionId = response.headers.get('SESSION-TOKEN');
   if (!sessionId) {
-    console.error(`Didn't receive SESSION-ID`);
-    throw new Error(`Didn't receive SESSION-ID`);
+    console.error(`Didn't receive SESSION-TOKEN`);
+    throw new Error(`Didn't receive SESSION-TOKEN`);
   }
 
   const responseJson: Array<{
@@ -84,17 +86,17 @@ export async function initSessions(tokenId: string, votingId: string): Promise<[
 }
 
 export async function getChallenges(
-  tokenId: string,
-  sessionId: string,
-  blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>)
+  sessionToken: string,
+  blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>,
+)
   : Promise<number> {
   const response = await fetch('/api/blindsig/getChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'SESSION-ID': sessionId,
+      'SESSION-TOKEN': sessionToken,
     },
-    body: JSON.stringify({ tokenId, blindedTransactionBatches }),
+    body: JSON.stringify({ blindedTransactionBatches }),
   });
 
   if (response.ok) {
@@ -139,16 +141,16 @@ interface Proof {
   transactionsBatch: TransactionsBatch;
 }
 
-export async function proofChallenge(tokenId: string, sessionId: string, proofs: Proof[])
+export async function proofChallenge(sessionToken: string, proofs: Proof[])
   : Promise<{ id: number, sigs: Array<BN> }> {
-  console.log({ proofs: JSON.stringify({ tokenId, proofs }) });
+  console.log({ proofs: JSON.stringify({ proofs }) });
   const response = await fetch('/api/blindsig/proofChallenges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'SESSION-ID': sessionId,
+      'SESSION-TOKEN': sessionToken,
     },
-    body: JSON.stringify({ tokenId, proofs }),
+    body: JSON.stringify({ proofs }),
   });
 
   if (response.ok) {

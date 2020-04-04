@@ -44,7 +44,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(process.env.WEBAPP_DIR!, '/index.html'));
 });
 
-class HttpError extends Error {
+export class HttpError extends Error {
   status: number;
 
   constructor(message: string, status: number) {
