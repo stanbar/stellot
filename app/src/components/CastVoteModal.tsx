@@ -62,6 +62,10 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
     router.replace(`/voting/${voting.slug}/results`);
     dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined)
   };
+  const signInAgain = () => {
+    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined);
+    dispatchSetAuthToken(dispatch, undefined)
+  };
   return (
     <Modal visible={shouldShowVoteModal}
            closable={false}
@@ -77,7 +81,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
                 percent={calculateProgressPercent(status)}
                 status={calculateProgressStatus(status)}/>
       {errorMessage &&
-      <p>{errorMessage} <a onClick={() => dispatchSetAuthToken(dispatch, undefined)}>Sign in again</a></p>}
+      <p>{errorMessage} <a onClick={signInAgain}>Sign in again</a></p>}
       <p>{status}</p>
       {txHash &&
       <a href={`http://testnet.stellarchain.io/tx/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction
