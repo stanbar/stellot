@@ -42,7 +42,7 @@ const VotingMetadata: React.FC<{ voting: Voting }> = ({ voting }) => (
             [Visibility.UNLISTED]: <LinkOutlined/>,
             [Visibility.PRIVATE]: <LockOutlined/>,
           }[voting?.visibility]}
-          {capitalize(voting?.visibility)}
+          <span style={{ marginLeft: 2 }}>{capitalize(voting?.visibility)}</span>
         </Badge>
         <Badge>
           {{
@@ -51,7 +51,7 @@ const VotingMetadata: React.FC<{ voting: Voting }> = ({ voting }) => (
             [Authorization.CODE]: <KeyOutlined/>,
             [Authorization.KEYBASE]: <KeyOutlined/>,
           }[voting?.authorization]}
-          {capitalize(voting?.authorization)}
+          <span style={{ marginLeft: 2 }}>{capitalize(voting?.authorization)}</span>
         </Badge>
         <span style={{ color: '#999' }}>
           <span style={{ marginRight: 4 }}>
