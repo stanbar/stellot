@@ -34,7 +34,7 @@ We would like to target all kinds of votings including general elections, domain
 
 I believe that this project is valuable for Stellar, mainly because it proves that Stellar can be used not only for asset tokenization and payments but also as a robust e-voting system backbone.
 
-Deeper technical details are available in [this **draft** of the article](https://github.com/stasbar/stellar-voting/releases/download/0.0.1/draft_evoting_on_stellar.pdf) (should be finished in about month or two). We provide demo implementation for the proposed system under [https://voting.stasbar.com](https://voting.stasbar.com). This general-purpose voting service is great for end-users votings, but we believe that our goal is also to digitize the academic/government votings. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions.
+Deeper technical details are available in [this **draft** of the article](https://github.com/stasbar/stellar-voting/releases/download/0.0.1/draft_evoting_on_stellar.pdf) (should be finished in about month or two). We provide demo implementation for the proposed system under [https://stellot.stasbar.com](https://stellot.stasbar.com). This general-purpose voting service is great for end-users votings, but we believe that our goal is also to digitize the academic/government votings. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions.
 
 **Links**:
 - Article: https://github.com/stasbar/stellar-voting/releases/download/0.0.1/draft_evoting_on_stellar.pdf
