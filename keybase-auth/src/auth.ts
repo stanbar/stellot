@@ -17,7 +17,7 @@ const issuer = process.env.KEYBASE_AS_JWT_ISSUER;
 
 export function createJwt(username: string, requiredTeam?: string): string {
   return jwt.sign({ requiredTeam }, privateKey, {
-    expiresIn: '1 month',
+    expiresIn: '30d',
     subject: username,
     audience,
     issuer,
