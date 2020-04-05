@@ -25,7 +25,7 @@ export async function authenticateToken(authToken: string, voting: Voting)
 
 async function getUsername(authToken: string, requiredTeam?: string)
   : Promise<string> {
-  const decodedToken = jwt.verify(authToken, publicKey, { audience, issuer, algorithms: ['ES256'] });
+  const decodedToken = jwt.verify(authToken, publicKey, { audience, issuer });
 
   // @ts-ignore
   if (!decodedToken || !decodedToken.sub) {
