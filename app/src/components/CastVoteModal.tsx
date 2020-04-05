@@ -2,7 +2,7 @@ import { connect } from 'dva';
 import { ConnectProps } from "@/models/connect";
 import React from "react";
 import { Modal, Progress } from 'antd';
-import { dispatchSetStatus, VotingStateType } from "@/models/voting";
+import { dispatchSetAuthToken, dispatchSetStatus, VotingStateType } from "@/models/voting";
 import { VoteStatus } from "@/types/voteStatus";
 import router from "umi/router";
 import { Voting } from "@stellot/types";
@@ -76,7 +76,8 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
       <Progress type="circle"
                 percent={calculateProgressPercent(status)}
                 status={calculateProgressStatus(status)}/>
-      {errorMessage && <p>{errorMessage}</p>}
+      {errorMessage &&
+      <p>{errorMessage} <a onClick={() => dispatchSetAuthToken(dispatch, undefined)}>Sign in again</a></p>}
       <p>{status}</p>
       {txHash &&
       <a href={`http://testnet.stellarchain.io/tx/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction

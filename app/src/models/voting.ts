@@ -62,7 +62,7 @@ export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash
   });
 }
 
-export function dispatchSetAuthToken(dispatch: Dispatch, authToken: string) {
+export function dispatchSetAuthToken(dispatch: Dispatch, authToken?: string) {
   dispatch({
     type: `${VOTING}/${SET_AUTH_TOKEN}`,
     payload: authToken,
