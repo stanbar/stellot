@@ -9,7 +9,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
-app.use(cors());
+const whitelist = ['https://stellot.stasbar.com', 'https://voting.stasbar.com'];
+app.use(cors({ origin: whitelist }));
 app.use(logger('dev'));
 app.use(express.json({ limit: '0.5mb' }));
 app.use(express.urlencoded({ limit: '0.5mb', extended: false }));
