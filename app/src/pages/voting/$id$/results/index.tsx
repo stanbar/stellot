@@ -59,6 +59,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
+          layout="horizontal"
           data={results}
           margin={{
             top: 5, bottom: 5,
