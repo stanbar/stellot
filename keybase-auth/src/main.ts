@@ -17,7 +17,8 @@ const debug = require('debug')('stellar-voting:server');
 /**
  * Get port from environment and store in Express.
  */
-const httpPort = parseInt(process.env.PORT || '8080', 10);
+const httpPort = 8080;
+
 
 // eslint-disable-next-line import/first
 import app from './app';
