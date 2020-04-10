@@ -1,13 +1,14 @@
-version: '3.1'
+version: '3.7'
 services:
   web:
     container_name: "stellot-keybase-auth-dev"
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     env_file: ".env"
+    command: npm run start:dev
     ports:
-      - "${PORT}:${PORT}"
+      - $PORT:8080
     volumes:
       - .:/server
     restart: 'unless-stopped'
