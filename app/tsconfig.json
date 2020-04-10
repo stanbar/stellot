@@ -20,6 +20,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "paths": {
       "@/*": [
         "src/*"
