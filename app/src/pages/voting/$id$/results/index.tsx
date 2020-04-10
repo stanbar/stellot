@@ -57,17 +57,17 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       <VotingMetadata voting={voting}/>
       <h4 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h4>
 
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={100 + (results?.length || 0) * 50}>
         <BarChart
-          layout="horizontal"
+          layout="vertical"
           data={results}
           margin={{
             top: 5, bottom: 5,
           }}
         >
           <CartesianGrid strokeDasharray="3 3"/>
-          <XAxis dataKey="name"/>
-          <YAxis/>
+          <XAxis type="number"/>
+          <YAxis type="category" dataKey="name"/>
           <Tooltip/>
           <Legend/>
           <Bar dataKey="votes" fill="#8884d8"/>
