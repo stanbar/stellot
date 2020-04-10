@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from "styled-components";
 import VotingsTable from "@/components/VotingsTable";
-import { Col } from 'antd';
-import { BtnOutlined } from '@/components/ActionButton';
+import { Button, Col } from 'antd';
+import { BtnHeading, BtnOutlined } from '@/components/ActionButton';
 import { PAPER_URL } from "@/constants";
 import styles from './index.css';
+import Lottie from "@/components/Lottie";
+import shareButton from "@/assets/lottie/84-document-white-paper-outline.json"
 
 const Title = styled.h1`
 font-size: 28px;
@@ -35,7 +37,21 @@ export default function () {
           anonimity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
           verify the election results without having to trust central authority.</SubSubTitle>
 
-        <a href={PAPER_URL} target="_blank" rel="noreferrer noopener"><BtnOutlined>Whitepaper</BtnOutlined></a>
+
+        <a href={PAPER_URL} target="_blank" rel="noreferrer noopener"><BtnOutlined>
+          <Lottie
+            style={{
+              width: '1.5em',
+              height: '1.5em',
+            }}
+            options={{
+              animationData: shareButton,
+              loop: true,
+              autoplay: false,
+            }}
+          />
+          <span style={{lineHeight: '1'}}>Whitepaper</span>
+        </BtnOutlined></a>
 
       </Col>
       <TitleParagraph>Explore public votings</TitleParagraph>
