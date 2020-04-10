@@ -4,7 +4,8 @@ services:
     container_name: "stellar-voting-mongodb"
     image: mongo
     restart: 'unless-stopped'
-    env_file: ".env"
+    volumes:
+      - $DOCKER_VOLUMES/stellot-tds:/data/db
 
   web:
     container_name: "stellar-voting-authorization-server"
@@ -13,7 +14,7 @@ services:
       dockerfile: Dockerfile
     env_file: ".env"
     ports:
-      - "${PORT}:${PORT}"
+      - $PORT:8080
     volumes:
       - "${WEBAPP_DIR}:${WEBAPP_DIR}"
     restart: 'unless-stopped'
