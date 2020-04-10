@@ -8,8 +8,8 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
-    "@stellot/types": "0.0.3",
     "@ant-design/icons": "^4.0.2",
+    "@stellot/types": "0.0.3",
     "antd": "^4.0.2",
     "bn.js": "^5.1.1",
     "dva": "^2.6.0-beta.20",
@@ -26,7 +26,8 @@
     "umi": "^2.9.6",
     "umi-plugin-react": "^1.14.10",
     "umi-request": "^1.0.8",
-    "use-merge-value": "^1.0.1"
+    "use-merge-value": "^1.0.1",
+    "lottie-web": "latest"
   },
   "devDependencies": {
     "@types/bn.js": "^4.11.6",
