@@ -17,8 +17,7 @@ const debug = require('debug')('stellar-voting:server');
 /**
  * Get port from environment and store in Express.
  */
-const httpPort = parseInt(process.env.PORT || '8080', 10);
-
+const httpPort = 8080;
 
 const isProduction = process.env.NODE_ENV === 'production';
 

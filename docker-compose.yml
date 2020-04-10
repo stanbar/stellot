@@ -4,8 +4,6 @@ services:
     container_name: "stellot-tds-mongodb"
     image: mongo:latest
     restart: 'unless-stopped'
-    ports:
-      - 27017:27017
     volumes:
       - $DOCKER_VOLUMES/stellot-tds:/data/db
 
@@ -16,9 +14,9 @@ services:
       dockerfile: Dockerfile
     env_file: ./server/.env
     ports:
-      - $TDS_PORT:$TDS_PORT
+      - $TDS_PORT:8080
     volumes:
-      - "${WEBAPP_DIR}:${WEBAPP_DIR}"
+      - $WEBAPP_DIR:$WEBAPP_DIR
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
@@ -34,8 +32,8 @@ services:
     build:
       context: keybase-auth
       dockerfile: Dockerfile
-    env_file:
-      - ./keybase-auth/.env
+    env_file: ./keybase-auth/.env
     ports:
-      - $KEYBASE_AS_PORT:$KEYBASE_AS_PORT
+      - $KEYBASE_AS_PORT:8080
     restart: 'unless-stopped'
+
