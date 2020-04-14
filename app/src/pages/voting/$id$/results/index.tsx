@@ -135,15 +135,15 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       }
 
       {chart === ChartType.Pie &&
-      <ResponsiveContainer width="100%" aspect={1}>
+      <ResponsiveContainer width="100%" maxHeight={400} aspect={1}>
         <PieChart>
             <Pie
               activeIndex={activeIndex}
               activeShape={renderActiveShape}
               data={results}
               dataKey="votes"
-              innerRadius={80}
-              outerRadius={120}
+              innerRadius="50%"
+              outerRadius="80%"
               fill="#8884d8"
               onMouseEnter={(data, index) => setActiveIndex(index)}
             />
@@ -153,7 +153,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
 
 
       <Link to="/wall">
-        <BtnSubmit style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
+        <BtnSubmit type="primary" size="large" style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
           More
         </BtnSubmit>
       </Link>

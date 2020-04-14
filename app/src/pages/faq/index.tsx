@@ -74,7 +74,22 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         We considered it rather as a privacy feature than flaw.`}</p>
         </article>
       </Panel>
-      <Panel header={<h2>Does people can vote using proof of stake like on Binance with BNB?</h2>} key="4"
+      <Panel header={<h2>Who makes the validation of transactions? Is there any organization behind Stellar that can manipulate votes ?</h2>}
+             key="4"
+             className="site-collapse-custom-panel">
+        <article>
+          <p>{`
+          Stellar uses open 
+        Stellar network uses Federated Byzantine Agreement, which is decentralized version of Byzantine Agreement.
+         that allows anyone to join the network and participate in validation process.
+        In Stellar, the validator nodes are held by many organizations, we could (and will) create our own Stellar nodes to.
+        From Stellar whitepaper: "We also present the Stellar Consensus Protocol (SCP), a construction for FBA. Like all Byzantine agreement protocols, SCP makes no assumptions about the rational behavior of attackers. Unlike prior Byzantine agreement models, which presuppose a unanimously accepted membership list, SCP enjoys open membership that promotes organic network growth."
+
+        Here is a Stellar network visualizer/monitor/simulator: https://stellarbeat.io/quorum-monitor
+`}</p>
+        </article>
+      </Panel>
+      <Panel header={<h2>Does people can vote using proof of stake like on Binance with BNB?</h2>} key="5"
              className="site-collapse-custom-panel">
         <article>
           <p>{`
