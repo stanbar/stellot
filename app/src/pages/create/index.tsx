@@ -7,6 +7,7 @@ import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
 import styles from './index.css'
+import { BtnSubmit } from '@/components/ActionButton';
 
 interface CreateVotingProps extends ConnectProps {
   loading?: boolean
@@ -235,9 +236,9 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <BtnSubmit size="large" type="primary" htmlType="submit" loading={loading}>
           {loading ? "Creating..." : "Create"}
-        </Button>
+        </BtnSubmit>
       </Form.Item>
     </Form>
   );
