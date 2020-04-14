@@ -43,6 +43,22 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
     if (errorCode === 'tx_bad_seq') {
       // Interrupted between another session, retry
       await dispatchPerformVote(dispatch, voting, optionCode, authToken);
+    }
+    if (errorCode === 'tx_failed') {
+      const operationError = e?.response?.data?.extras?.result_codes?.operations[0];
+      if (operationError === 'op_line_full') {
+        dispatch({
+          type: `${VOTING}/${SET_STATUS}`,
+          payload: VoteStatus.ERROR,
+          errorMessage: 'No more vote tokens can be issued, if you believe you are eligible to vote, please contact the organizers',
+        });
+      } else {
+        dispatch({
+          type: `${VOTING}/${SET_STATUS}`,
+          payload: VoteStatus.ERROR,
+          errorMessage: e?.response?.data?.extras?.result_codes?.operations?.join(','),
+        });
+      }
     } else {
       dispatch({
         type: `${VOTING}/${SET_STATUS}`,
