@@ -5,8 +5,9 @@ import { Link } from "umi";
 import { ConnectProps } from "@/models/connect";
 import { BtnHeading } from "@/components/ActionButton";
 import { GithubOutlined } from '@ant-design/icons';
-import styles from './index.css';
 import { GITHUB_URL, PAPER_URL } from "@/constants";
+import { CORNFLOWER } from "@/shared/Colors";
+import styles from './index.css';
 
 const { Header, Footer, Content } = Layout;
 
@@ -33,7 +34,7 @@ const BasicLayout: React.FC<LayoutProps> = props => {
           </Link>
           {isWall &&
           <Link to="/create">
-            <BtnHeading className={styles.heading}>
+            <BtnHeading className={styles.heading} size="large" color={CORNFLOWER}>
               Create Voting
             </BtnHeading>
           </Link>

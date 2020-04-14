@@ -69,7 +69,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, authToken, m
           </Radio.Group>
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
-          <BtnSubmit disabled={txHash} htmlType="submit">
+          <BtnSubmit type="primary" size="large" disabled={txHash} htmlType="submit">
             Submit
           </BtnSubmit>
         </Form.Item>
