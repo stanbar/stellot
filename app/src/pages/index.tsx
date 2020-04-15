@@ -5,8 +5,8 @@ import { Col } from 'antd';
 import { BtnOutlined } from '@/components/ActionButton';
 import { PAPER_URL } from "@/constants";
 import { CORNFLOWER } from "@/shared/Colors";
-import styles from './index.css';
 import { Title } from "@/components/Title";
+import styles from './index.css';
 
 const SubTitle = styled.h2`
 font-size: 36px;
@@ -43,6 +43,37 @@ export default function () {
       </Col>
       <TitleParagraph>Explore public votings</TitleParagraph>
       <VotingsTable/>
+
+      <Col md={18} offset={3} className={styles.features} style={{ marginTop: 64 }}>
+        <h1>Privacy-first</h1>
+        <p>
+          Stellot uses blind-signature algorithm to authorize transactions without revealing its content.
+        </p>
+
+        <h1>User friendly</h1>
+        <p>
+          Stellot is designed for mass adoption in mind.
+          Users are completely abstracted from blockchain technology used underneath.
+        </p>
+
+        <h1>Trustless</h1>
+        <p>
+          Stellot keeps each ballot publicly on Stellar blockchain, thus everyone is able to calculate the voting
+          results by itself.
+          Removing the needs to trust central authority.
+        </p>
+
+        <h1>Verifiable</h1>
+        <p>
+          Users publish the vote transaction directly to the stellar blockchain, in result, they can track their vote
+          transaction during counting process.
+        </p>
+
+        <h1>Fair</h1>
+        <p>
+          In Stellot, all votes are encrypted until the end of election. No partial results are available.
+        </p>
+      </Col>
     </div>
   );
 }
