@@ -1,5 +1,6 @@
 .normal {
   margin-top: 4em;
+  margin-bottom: 74px;
 }
 
 
@@ -32,4 +33,8 @@
 .features > p {
   font-size: 18px;
   line-height: 1.67;
+}
+
+.faq {
+  text-align: left;
 }

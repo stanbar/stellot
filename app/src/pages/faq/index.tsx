@@ -26,7 +26,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0}/>}
       className={styles.whitePanel}
     >
-      <Panel header={<h2>how can a user verify that his vote is correct counted and stored in the blockchain ?</h2>}
+      <Panel header={<h2>How can a user verify that his vote is correct counted and stored in the blockchain ?</h2>}
              key="verify-vote"
       >
         <article>
@@ -56,7 +56,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
           </p>
         </article>
       </Panel>
-      <Panel header={<h2>Does people can vote using proof of stake like on Binance with BNB?</h2>}
+      <Panel header={<h2>Can people vote using proof of stake like on Binance with BNB?</h2>}
              key="proof-of-stake"
              className="site-collapse-custom-panel">
         <article>
@@ -77,35 +77,14 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       </Panel>
       <Panel header={<h2>Is the system decentralized ?</h2>} key="1" className="site-collapse-custom-panel">
         <article>
-          <p>Let&apos;s start with the big picture of the system</p>
-          <img width='100%' src={stellotDecentralization} alt="decentralized and centralized parts"/>
-          <p style={{ whiteSpace: 'pre-line' }}>
-            {`
-          Let's take a Stellar Community Funding voting as an example.
-          Galactictalk or Keybase would become Authentication Server(AS) so you can "Login with GalacticTalk/Keybase" account. CENTRALIZED
-          The Stellar organization would run the Token Distribution Server (TDS), which will be responsible for both:
-          signing transactions,
-          and authorization (keeping track of who has already voted, and who is eligible for issuing ballot). CENTRALIZED.
-          Client Webapp is just a user interface that is responsible to interact with AS, TDS, and Stellar Horizon API. DECENTRALIZED
-          Stellar Horizon API is considered DECENTRALIZED since it is just API to stellar network, it can be hosted by anyone.
-          Stellar Network is DECENTRALIZED.
-          `}</p>
           <p>
-            So yes, the government layer is centralized. We addressed this issue in section 8. Fully Decentralized
-            Blockchain Application in our paper.
-            But it is important to realize how limited the power of government is in this system. Since he (the
-            government) manages the authorization, he can block a certain users from casting vote.
-            But he can not perform votes on other user behalf since there is only the limited publicly known number of
-            created tokens (e.g. the number of galactictalk active users).
-            Yes, he can assume that only 20% of users will take part in the election, and use the 80% of unspent tokens
-            to perform vote on his behalf.
-            But it still could be mitigated by limiting the number of tokens to the number of users who are incentivized
-            to cast a vote, so the frequency would be high, therefore limiting the number of unspent tokens.
-
-            Decentralized auth is a completely different topic, but It is something I would love to continue my research
-            on. Zero-knowledge proofs might be the clue.
-
+            Right now only the crucial part of the system is decentralized, that is the storage (a.k.a. Ballot-Box) and
+            the client webapp.
+            As long as this system relies on a centralized identification provider, it inherits this property too.
+            Figure below describe the parts of the system that are considered centralized and decentralized.
           </p>
+          <img width='80%' style={{ textAlign: 'center' }} src={stellotDecentralization}
+               alt="decentralized and centralized parts"/>
         </article>
       </Panel>
       <Panel header={<h2>How is this app different from centralized apps?</h2>} key="2"
