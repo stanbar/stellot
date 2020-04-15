@@ -62,7 +62,7 @@ const BasicLayout: React.FC<LayoutProps> = props => {
           </a>
 
           <a style={{ color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href={PAPER_URL}>Paper</a>
+             href={PAPER_URL}>Whitepaper</a>
         </div>
         <div>Stellot 2020 build with ❤️to Stellar</div>
       </Footer>

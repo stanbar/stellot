@@ -7,6 +7,7 @@ import { PAPER_URL } from "@/constants";
 import { CORNFLOWER } from "@/shared/Colors";
 import { Title } from "@/components/Title";
 import styles from './index.css';
+import FAQ from "@/pages/faq";
 
 const SubTitle = styled.h2`
 font-size: 36px;
@@ -73,6 +74,9 @@ export default function () {
         <p>
           In Stellot, all votes are encrypted until the end of election. No partial results are available.
         </p>
+      </Col>
+      <Col style={{ marginTop: 64 }}>
+        <FAQ className={styles.faq}/>
       </Col>
     </div>
   );
