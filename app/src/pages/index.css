@@ -18,3 +18,18 @@
   fill: red;
 }
 
+.features {
+  text-align: center;
+  margin-bottom: 62px;
+
+}
+.features > h1 {
+  font-size: 30px;
+  margin-top: 62px;
+  font-weight: 300;
+}
+
+.features > p {
+  font-size: 18px;
+  line-height: 1.67;
+}
