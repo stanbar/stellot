@@ -1,6 +1,6 @@
-**Image header**: ![image preview](https://raw.githubusercontent.com/stasbar/stellar-voting/master/img/stellot-scf.png)
+![image preview](https://raw.githubusercontent.com/stasbar/stellar-voting/master/img/stellot-scf.png)
 
-**Project title**: Stellot
+# Stellot
 
 **Summary**: Privacy-first i-Voting platform powered by Stellar.
 
