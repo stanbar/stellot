@@ -16,7 +16,7 @@
  - 02.2020 - Create a journal article draft. ✓
  - 02.2020 - Create a proof-of-concept application. ✓
  - 03.2020 - Create a proof-of-concept service for creating general-purpose votings. ✓
- - 04.2020 - Add keybase auth via one-time codes and keybase-bot (similar how https://stellarcommunity.fund works) ✓
+ - 04.2020 - Add keybase auth via jwt and keybase-bot (similar how https://stellarcommunity.fund works). ✓
  - 04.2020 - Add basic authN & authZ methods (cookie, IP address, one-time link, one-time code, email, etc.).
  - 05.2020 - Add vote encryption (preventing partial results before the end of voting).
  - 06.2020 - Add stake-weighted votings.
