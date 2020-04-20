@@ -79,6 +79,7 @@ export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash
 }
 
 export function dispatchSetAuthToken(dispatch: Dispatch, authToken?: string) {
+  storage.setKeybaseToken(authToken)
   dispatch({
     type: `${VOTING}/${SET_AUTH_TOKEN}`,
     payload: authToken,

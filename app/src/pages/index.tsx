@@ -28,7 +28,7 @@ export default function () {
   return (
     <div className={styles.normal}>
       <Col style={{ marginBottom: 100 }}>
-        <Title>Welcome in Stellot</Title>
+        <Title>Welcome on Stellot</Title>
         <SubTitle>Voting platform backed by Stellar blockchain network</SubTitle>
         <SubSubTitle>Stellot is designed around voter privacy, ensuring that everyone can be sure about its vote
           anonymity. Inherited decentralized and permissionless Stellar blockchain properties, allows everyone to
