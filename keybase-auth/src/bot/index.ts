@@ -50,7 +50,7 @@ export async function verifyUserMembership(username: string, requiredTeamMembers
 
 export async function sendToken(username: string, token: string) {
   const channel = { name: `stellotbot,${username}`, public: false, topicType: 'chat' };
-  await bot.chat.send(channel, { body: token });
+  await bot.chat.send(channel, { body: `Hello ${username},\nwelcome to Stellot, to continue, please copy and paste the token below back to the app.\n\n${token}` });
   console.log(`successfully send code to user: ${username} `);
 }
 
