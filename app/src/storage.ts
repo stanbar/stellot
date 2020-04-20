@@ -4,8 +4,12 @@ export function getKeybaseToken(): string | null {
   return localStorage.getItem('keybase');
 }
 
-export function setKeybaseToken(authorizationToken: string) {
-  localStorage.setItem('keybase', authorizationToken);
+export function setKeybaseToken(authorizationToken?: string) {
+  if (authorizationToken) {
+    localStorage.setItem('keybase', authorizationToken);
+  } else {
+    localStorage.removeItem('keybase')
+  }
 }
 
 export function getCachedToken(voting: Voting): string | null {

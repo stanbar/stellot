@@ -20,6 +20,7 @@ import { Link } from 'umi';
 import VotingMetadata from "@/components/VotingMetadata";
 import { Switch } from 'antd';
 import { PieChartOutlined, BarChartOutlined } from '@ant-design/icons';
+import styles from './styles.less'
 
 interface VotePreviewProps extends ConnectProps {
   voting?: Voting;
@@ -108,10 +109,11 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
     <div>
       <VotingMetadata voting={voting}/>
       <Switch
+        className={styles.switch}
         onChange={checked => setChart(checked ? ChartType.Bar : ChartType.Pie)}
         style={{ float: 'right' }}
-        checkedChildren={<PieChartOutlined/>}
-        unCheckedChildren={<BarChartOutlined/>}
+        checkedChildren={<BarChartOutlined/>}
+        unCheckedChildren={<PieChartOutlined/>}
         defaultChecked
       />
       <h4 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h4>
