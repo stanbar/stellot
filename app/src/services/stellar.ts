@@ -1,5 +1,6 @@
 import {
   Account,
+  Asset,
   BASE_FEE,
   Memo,
   MemoText,
@@ -7,11 +8,10 @@ import {
   Operation,
   Server,
   Transaction,
-  TransactionBuilder,
-  Asset
+  TransactionBuilder
 } from "stellar-sdk";
 import { decodeAnswersFromMemo } from "@/crypto/utils";
-import {Voting, Option } from "@stellot/types";
+import { Option, Voting } from "@stellot/types";
 import Result from "@/types/result";
 
 const server = new Server('https://horizon-testnet.stellar.org');
@@ -73,6 +73,10 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
       }
     });
   return results.map(result => ({ name: result.option.name, votes: result.votes }));
+}
+
+export function getMyCandidate(voting: Voting, myTxMemo: string | Buffer): Option | undefined {
+  return voting.polls[0].options.find(option => option.code === decodeAnswersFromMemo(myTxMemo, 1)[0])
 }
 
 export function castVote(tx: Transaction) {
