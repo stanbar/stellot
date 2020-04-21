@@ -1,23 +1,38 @@
-import { Voting, Authorization } from "@stellot/types";
-
-export function getKeybaseToken(): string | null {
-  return localStorage.getItem('keybase');
+interface StoredVoting {
+  authorizationToken?: string,
+  myTxHash?: string,
+  myTxMemo?: string | Buffer,
 }
 
-export function setKeybaseToken(authorizationToken?: string) {
-  if (authorizationToken) {
-    localStorage.setItem('keybase', authorizationToken);
-  } else {
-    localStorage.removeItem('keybase')
+function getVoting(votingId: string): StoredVoting | undefined {
+  const jsonString = localStorage.getItem(votingId)
+  if (!jsonString) {
+    return undefined;
   }
+  return JSON.parse(jsonString);
 }
 
-export function getCachedToken(voting: Voting): string | null {
-  switch (voting.authorization) {
-    case Authorization.KEYBASE:
-      return getKeybaseToken(); // Keybase is a global token so no need to store it for each voting individually
-    default:
-      return null;
-  }
+function setVoting(votingId: string, storedVoting: StoredVoting) {
+  localStorage.setItem(votingId, JSON.stringify(storedVoting))
 }
 
+export function setAuthorizationToken(votingId: string, authorizationToken?: string) {
+  const voting = getVoting(votingId) || {};
+  voting.authorizationToken = authorizationToken;
+  setVoting(votingId, voting);
+}
+
+export function getAuthorizationToken(votingId: string): string | undefined {
+  return getVoting(votingId)?.authorizationToken
+}
+
+export function setMyTransaction(votingId: string, txHash: string, memo: Buffer | string) {
+  const voting = getVoting(votingId) || {};
+  voting.myTxHash = txHash;
+  voting.myTxMemo = memo;
+  setVoting(votingId, voting)
+}
+
+export function getMyTransaction(votingId: string): { myTxHash?: string, myTxMemo?: string | Buffer } {
+  return { ...getVoting(votingId) }
+}

@@ -6,11 +6,11 @@ import { dispatchSetAuthToken, dispatchSetStatus, VotingStateType } from "@/mode
 import { VoteStatus } from "@/types/voteStatus";
 import router from "umi/router";
 import { Voting } from "@stellot/types";
+import * as storage from "@/storage"
 
 interface CastVoteModalProps extends ConnectProps {
   voting?: Voting;
   status?: VoteStatus;
-  txHash?: string;
   errorMessage?: string;
 }
 
@@ -52,7 +52,8 @@ function calculateProgressStatus(status: VoteStatus) {
 }
 
 const CastVoteModal: React.FC<CastVoteModalProps> = props => {
-  const { dispatch, voting, status, txHash, errorMessage } = props;
+  const { dispatch, voting, status, errorMessage } = props;
+  const txHash = voting ? storage.getMyTransaction(voting.id)?.myTxHash : undefined
   if (!voting || !status) {
     return <></>
   }
@@ -60,11 +61,11 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
   const enableShowResultsBtn = status === VoteStatus.ERROR || status === VoteStatus.DONE;
   const showResults = () => {
     router.replace(`/voting/${voting.slug}/results`);
-    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined)
+    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED)
   };
   const signInAgain = () => {
-    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined);
-    dispatchSetAuthToken(dispatch, undefined)
+    dispatchSetStatus(dispatch, VoteStatus.UNDEFINED);
+    dispatchSetAuthToken(dispatch, voting.id, undefined)
   };
   return (
     <Modal visible={shouldShowVoteModal}
@@ -72,7 +73,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
            width={300}
            okText="Show results"
            onOk={showResults}
-           onCancel={() => dispatchSetStatus(dispatch, VoteStatus.UNDEFINED, undefined)}
+           onCancel={() => dispatchSetStatus(dispatch, VoteStatus.UNDEFINED)}
            okButtonProps={{ disabled: !enableShowResultsBtn }}
            cancelButtonProps={{ disabled: !enableShowResultsBtn }}
            bodyStyle={{ textAlign: 'center' }}
@@ -83,7 +84,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
       {errorMessage &&
       <p>{errorMessage} <a onClick={signInAgain}>Sign in again</a></p>}
       <p>{status}</p>
-      {txHash &&
+      {txHash && status === VoteStatus.DONE &&
       <a href={`http://testnet.stellarchain.io/tx/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction
         in explorer</a>}
     </Modal>
@@ -95,6 +96,5 @@ export default connect(({ voting }: { voting: VotingStateType }) =>
   ({
     voting: voting.voting,
     status: voting.status,
-    txHash: voting.txHash,
     errorMessage: voting.errorMessage,
   }))(CastVoteModal);
