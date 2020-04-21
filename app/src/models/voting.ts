@@ -7,6 +7,8 @@ import { fetchVoting } from "@/services/tokenDistributionServer";
 import { VoteStatus } from "@/types/voteStatus";
 import Result from '@/types/result';
 import * as storage from '@/storage';
+import { MemoType } from "stellar-base";
+import { Memo } from 'stellar-sdk';
 
 export const VOTING = 'voting';
 export const FETCH_VOTING = 'fetchVoting';
@@ -30,10 +32,10 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
           payload: VoteStatus.CASTING_VOTE,
         });
         const res = await castVote(tx);
+        storage.setMyTransaction(voting.id, res.hash, (tx.memo as Memo<MemoType.Text>).value)
         dispatch({
           type: `${VOTING}/${SET_STATUS}`,
           payload: VoteStatus.DONE,
-          txHash: res.hash,
         });
       }
     }
@@ -69,17 +71,16 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
   }
 }
 
-export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus, txHash?: string) {
+export function dispatchSetStatus(dispatch: Dispatch, status: VoteStatus) {
   dispatch({
     type: `${VOTING}/${SET_STATUS}`,
     payload: status,
-    txHash,
     errorMessage: undefined,
   });
 }
 
-export function dispatchSetAuthToken(dispatch: Dispatch, authToken?: string) {
-  storage.setKeybaseToken(authToken)
+export function dispatchSetAuthToken(dispatch: Dispatch, votingId: string, authToken?: string) {
+  storage.setAuthorizationToken(votingId, authToken)
   dispatch({
     type: `${VOTING}/${SET_AUTH_TOKEN}`,
     payload: authToken,
@@ -105,7 +106,6 @@ export interface VotingStateType {
   authToken?: string;
   status?: VoteStatus;
   results?: Result[];
-  txHash?: string;
   errorMessage?: string;
 }
 
@@ -130,7 +130,7 @@ export const VotingModel: VotingModelType = {
   effects: {
     * [FETCH_VOTING]({ votingSlug }, { call, put }) {
       const voting = yield call(fetchVoting, votingSlug);
-      const cachedToken = storage.getCachedToken(voting);
+      const cachedToken = storage.getAuthorizationToken(voting.id);
       yield put({
         type: SET_VOTING,
         payload: voting,
@@ -146,11 +146,10 @@ export const VotingModel: VotingModelType = {
     }
   },
   reducers: {
-    [SET_STATUS](state: VotingStateType, { payload, txHash, errorMessage }): VotingStateType {
+    [SET_STATUS](state: VotingStateType, { payload, errorMessage }): VotingStateType {
       return {
         ...state,
         status: payload,
-        txHash,
         errorMessage,
       }
     },
@@ -168,7 +167,6 @@ export const VotingModel: VotingModelType = {
       }
     },
     [SET_RESULTS](state: VotingStateType, { payload }): VotingStateType {
-      console.log({ setResults: payload });
       return {
         ...state,
         results: payload,

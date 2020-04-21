@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Col, Form, Input } from 'antd';
 import * as keybase from '@/services/keybase';
-import * as storage from '@/storage';
 import { Dispatch } from 'dva';
 import { dispatchSetAuthToken } from "@/models/voting";
 import styles from "@/layouts/index.css";
@@ -33,9 +32,8 @@ export default ({ dispatch, voting }: { dispatch: Dispatch, voting: Voting }) =>
   };
 
   const handleToken = async (values: any) => {
-    storage.setKeybaseToken(values.token);
     if (values?.token) {
-      dispatchSetAuthToken(dispatch, values.token);
+      dispatchSetAuthToken(dispatch, voting.id, values.token);
     }
   };
 
@@ -47,7 +45,8 @@ export default ({ dispatch, voting }: { dispatch: Dispatch, voting: Voting }) =>
          md={{ span: 16, offset: 4 }}
          xl={{ span: 14, offset: 5 }}>
       <h1>Voting requires keybase authorization</h1>
-      <p>We will send you message via <a href="https://keybase.io/stellotbot">stellotbot</a> with authentication token.</p>
+      <p>We will send you message via <a href="https://keybase.io/stellotbot">stellotbot</a> with authentication token.
+      </p>
       <Form layout="horizontal"
             form={usernameForm}
             name="username_form"
