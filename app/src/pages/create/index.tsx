@@ -1,6 +1,6 @@
-import React from 'react';
-import { Form, Button, Radio, Input, Col, Typography, Row, InputNumber, Switch, DatePicker } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
+import React, { useState } from 'react';
+import { Form, Button, Radio, Input, Col, Row, InputNumber, Switch, DatePicker } from 'antd';
+import { DownOutlined, MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
 import { CreateVotingRequest, Authorization, Visibility, KeybaseAuthOptions, EmailAuthOptions } from '@stellot/types';
 import { isNotEmpty, capitalize } from '@/utils/utils';
 import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
@@ -15,6 +15,7 @@ interface CreateVotingProps extends ConnectProps {
 
 const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   const [form] = Form.useForm();
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const onFinish = (values: any) => {
     const val = values as {
       title: string,
@@ -53,8 +54,29 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
     console.log({ createVoting });
     dispatchCreateVoting(dispatch, createVoting);
   };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 4 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 20 },
+    },
+  };
+  const formItemLayoutWithOutLabel = {
+    wrapperCol: {
+      xs: { span: 24, offset: 0 },
+      sm: { span: 20, offset: 4 },
+    },
+  };
+
   return (
-    <Form layout="vertical" form={form} name="options_form" onFinish={onFinish}
+    <Form layout="horizontal"
+          {...formItemLayout}
+          form={form}
+          name="options_form"
+          onFinish={onFinish}
           scrollToFirstError
           initialValues={{
             votesCap: 100,
@@ -82,11 +104,10 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         label="Options"
       >
         <Row>
-          <Col flex="10px" style={{ marginRight: 10 }}>
-            <Typography>1</Typography>
-          </Col>
+          <Col flex="10px" style={{ marginRight: 10, alignSelf: 'center' }}>1.</Col>
           <Col flex="auto">
             <Form.Item
+              {...formItemLayout}
               name="first"
               key="first"
               validateTrigger={['onChange', 'onBlur']}
@@ -102,14 +123,11 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
               <Input placeholder="Blue" style={{ marginRight: 32 }}/>
             </Form.Item>
           </Col>
-          <Col flex="30px" style={{ marginRight: 10 }}/>
         </Row>
       </Form.Item>
-      <Form.Item>
+      <Form.Item {...formItemLayoutWithOutLabel}>
         <Row>
-          <Col flex="10px" style={{ marginRight: 10 }}>
-            <Typography>2</Typography>
-          </Col>
+          <Col flex="10px" style={{ marginRight: 10, alignSelf: 'center' }}>2.</Col>
           <Col flex="auto">
             <Form.Item
               name="second"
@@ -127,7 +145,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
               <Input placeholder="Red" style={{ marginRight: 32 }}/>
             </Form.Item>
           </Col>
-          <Col flex="30px" style={{ marginRight: 10 }}/>
         </Row>
       </Form.Item>
       <Form.List name="options">
@@ -135,14 +152,13 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           <div>
             {fields.map((field, index) => (
               <Form.Item
+                {...formItemLayoutWithOutLabel}
                 label=""
                 required={false}
                 key={field.key}
               >
                 <Row>
-                  <Col flex="10px" style={{ marginRight: 10 }}>
-                    <Typography>{index + 3}</Typography>
-                  </Col>
+                  <Col flex="10px" style={{ marginRight: 10, alignSelf: 'center' }}>{index + 3}</Col>
                   <Col flex="auto">
                     <Form.Item
                       {...field}
@@ -159,19 +175,19 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
                       <Input placeholder="Option" style={{ marginRight: 32 }}/>
                     </Form.Item>
                   </Col>
-                  <Col flex="30px" style={{ marginRight: 10 }}>
+                  <Col flex="30px" style={{ alignSelf: 'center', textAlign: 'center' }}>
                     <MinusCircleOutlined
                       className={styles.dynamicDeleteButton}
                       onClick={() => {
                         remove(field.name);
                       }}
                     />
-
                   </Col>
+
                 </Row>
               </Form.Item>
             ))}
-            <Form.Item>
+            <Form.Item {...formItemLayoutWithOutLabel}>
               <Button
                 type="dashed"
                 onClick={() => {
@@ -227,15 +243,32 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
                  rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
         <DatePicker.RangePicker/>
       </Form.Item>
-      <Form.Item name="encrypted" label="Encrypt results until the end of voting" valuePropName="checked">
-        <Switch/>
+      {!showAdvanced &&
+      <Form.Item {...formItemLayoutWithOutLabel}>
+
+        <a
+          style={{ fontSize: 12, }}
+          onClick={() => {
+            setShowAdvanced(true);
+          }}
+        >
+          <DownOutlined/> Show advanced
+        </a>
       </Form.Item>
-      <Form.Item label="Security level (number of challenges)">
-        <Form.Item name="challenges" noStyle>
-          <InputNumber min={2} max={100}/>
+      }
+      {showAdvanced &&
+      <>
+        <Form.Item name="encrypted" label="Encrypt results until the end of voting" valuePropName="checked">
+          <Switch/>
         </Form.Item>
-      </Form.Item>
-      <Form.Item>
+        <Form.Item label="Security level (number of challenges)">
+          <Form.Item name="challenges" noStyle>
+            <InputNumber min={2} max={100}/>
+          </Form.Item>
+        </Form.Item>
+      </>
+      }
+      <Form.Item {...formItemLayoutWithOutLabel} >
         <BtnSubmit size="large" type="primary" htmlType="submit" loading={loading}>
           {loading ? "Creating..." : "Create"}
         </BtnSubmit>
