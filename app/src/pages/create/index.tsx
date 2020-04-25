@@ -57,17 +57,17 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
-      sm: { span: 4 },
+      sm: { span: 8 },
     },
     wrapperCol: {
       xs: { span: 24 },
-      sm: { span: 20 },
+      sm: { span: 16 },
     },
   };
   const formItemLayoutWithOutLabel = {
     wrapperCol: {
       xs: { span: 24, offset: 0 },
-      sm: { span: 20, offset: 4 },
+      sm: { span: 16, offset: 8 },
     },
   };
 
