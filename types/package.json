@@ -1,6 +1,6 @@
 {
   "name": "@stellot/types",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Shared types across front and backend",
   "author": "stasbar <stasbar1995@gmail.com>",
   "homepage": "http://stellot.stasbar.com",
@@ -26,6 +26,6 @@
     "url": "https://github.com/stasbar/stellar-voting/issues"
   },
   "devDependencies": {
-    "typescript": "^3.5.3"
+    "typescript": "^3.8.3"
   }
 }
