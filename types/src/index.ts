@@ -9,7 +9,8 @@ import Voting from './voting'
 
 enum Authorization {
     OPEN = 'open',
-    EMAIL = 'email',
+    EMAILS = 'emails',
+    DOMAIN = 'domain',
     CODE = 'code',
     KEYBASE = 'keybase',
 }
