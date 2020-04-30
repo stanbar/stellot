@@ -40,7 +40,7 @@
     "elliptic": "^6.5.2",
     "express": "~4.16.1",
     "fetch": "^1.1.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "minimalistic-crypto-utils": "^1.0.1",
     "morgan": "~1.9.1",
     "parcel-proxy-server": "^1.1.0",
