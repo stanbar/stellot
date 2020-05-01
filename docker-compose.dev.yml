@@ -21,12 +21,15 @@ services:
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
     links:
       - mongo
       - keybase-auth
+      - emails-auth
     depends_on:
       - mongo
       - keybase-auth
+      - emails-auth
 
   keybase-auth:
     container_name: "stellot-keybase-auth-dev"
@@ -37,5 +40,16 @@ services:
     command: npm run start:dev
     ports:
       - $KEYBASE_AS_PORT:8080
+    restart: 'unless-stopped'
+
+  emails-auth:
+    container_name: "stellot-emails-auth-dev"
+    build:
+      context: emails-auth
+      dockerfile: Dockerfile
+    env_file: ./emails-auth/.env
+    command: npm run start:dev
+    ports:
+      - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'
 
