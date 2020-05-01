@@ -1,13 +1,13 @@
 import { Authorization, Visibility } from './index';
 import Poll from './poll';
 import KeybaseAuthOptions from './keybaseAuth';
-import EmailAuthOptions from "./emailAuth";
+import EmailsAuthOptions from "./emailAuth";
 
 export default interface CreateVotingRequest {
   title: string;
   polls: Poll[]
   authorization: Authorization;
-  authorizationOptions: KeybaseAuthOptions | EmailAuthOptions | undefined;
+  authorizationOptions: KeybaseAuthOptions | EmailsAuthOptions | undefined;
   visibility: Visibility;
   votesCap: number;
   encrypted: boolean;

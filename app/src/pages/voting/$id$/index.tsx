@@ -9,7 +9,8 @@ import { BtnLink, BtnSubmit } from "@/components/ActionButton";
 import CastVoteModal from "@/components/CastVoteModal";
 import VotingMetadata from "@/components/VotingMetadata";
 import { Link } from "umi";
-import AuthorizationView from '@/components/AuthorizationView';
+import { KeybaseAuthorizationView, EmailsAuthorizationView } from '@/components/AuthorizationView';
+import * as storage from '@/storage'
 
 
 interface VotePreviewProps extends ConnectProps {
@@ -17,10 +18,9 @@ interface VotePreviewProps extends ConnectProps {
   authToken?: string;
   status?: VoteStatus;
   loading?: boolean;
-  txHash?: string;
 }
 
-const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, authToken, match, dispatch, voting }) => {
+const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, dispatch, voting }) => {
   const [form] = Form.useForm();
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
 
@@ -50,8 +50,14 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, authToken, m
   if (!voting) {
     return (<p>Failed to load voting</p>)
   }
-  if (voting.authorization !== Authorization.OPEN && !authToken) {
-    return (<AuthorizationView dispatch={dispatch} voting={voting}/>)
+
+  const txHash = storage.getMyTransaction(voting.id)
+
+  if (voting.authorization === Authorization.KEYBASE && !authToken) {
+    return (<KeybaseAuthorizationView dispatch={dispatch} voting={voting}/>)
+  }
+  if (voting.authorization === Authorization.EMAILS && !authToken) {
+    return (<EmailsAuthorizationView dispatch={dispatch} voting={voting}/>)
   }
   return (
     <div>
@@ -69,7 +75,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, txHash, authToken, m
           </Radio.Group>
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
-          <BtnSubmit type="primary" size="large" disabled={txHash} htmlType="submit">
+          <BtnSubmit type="primary" size="large" disabled={!txHash} htmlType="submit">
             Submit
           </BtnSubmit>
         </Form.Item>
@@ -89,5 +95,4 @@ export default connect(({ voting, loading }: { voting: VotingStateType, loading:
     voting: voting.voting,
     status: voting.status,
     loading: loading.effects[`${VOTING}/${FETCH_VOTING}`],
-    txHash: voting.txHash,
   }))(VotePreview);

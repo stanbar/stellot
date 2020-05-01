@@ -1,3 +1,3 @@
-export default interface EmailAuthOptions {
+export default interface EmailsAuthOptions {
     emails: string[],
 }
