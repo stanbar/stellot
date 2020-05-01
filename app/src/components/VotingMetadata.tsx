@@ -47,7 +47,8 @@ const VotingMetadata: React.FC<{ voting: Voting }> = ({ voting }) => (
         <Badge>
           {{
             [Authorization.OPEN]: <NotificationOutlined/>,
-            [Authorization.EMAIL]: <MailOutlined/>,
+            [Authorization.EMAILS]: <MailOutlined/>,
+            [Authorization.DOMAIN]: <MailOutlined/>,
             [Authorization.CODE]: <KeyOutlined/>,
             [Authorization.KEYBASE]: <KeyOutlined/>,
           }[voting?.authorization]}

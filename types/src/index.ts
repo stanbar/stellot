@@ -1,6 +1,6 @@
 import CreateVotingRequest from './createVotingRequest'
 import CreateVotingResponse from './createVotingResponse'
-import EmailAuthOptions from './emailAuth'
+import EmailsAuthOptions from './emailAuth'
 import DomainAuthOptions from './domainAuth'
 import KeybaseAuthOptions from './keybaseAuth'
 import Option from './option'
@@ -22,7 +22,7 @@ enum Visibility {
 }
 
 export {
-    CreateVotingRequest, CreateVotingResponse, EmailAuthOptions, DomainAuthOptions,
+    CreateVotingRequest, CreateVotingResponse, EmailsAuthOptions, DomainAuthOptions,
     KeybaseAuthOptions,
     Option, Poll, Voting, Authorization, Visibility,
 }

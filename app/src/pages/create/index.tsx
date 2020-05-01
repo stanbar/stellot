@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { Form, Button, Radio, Input, Col, Row, InputNumber, Switch, DatePicker } from 'antd';
-import { DownOutlined, MinusCircleOutlined, PlusOutlined } from "@ant-design/icons/lib";
-import { CreateVotingRequest, Authorization, Visibility, KeybaseAuthOptions, EmailAuthOptions } from '@stellot/types';
-import { isNotEmpty, capitalize } from '@/utils/utils';
+import { Form, Button, Radio, Input, Col, Row, InputNumber, Switch, DatePicker, Upload, message } from 'antd';
+import { DownOutlined, MinusCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons/lib";
+import {
+  CreateVotingRequest,
+  Authorization,
+  Visibility,
+  KeybaseAuthOptions,
+  EmailsAuthOptions,
+} from '@stellot/types';
+import { isNotEmpty, capitalize, isEmail } from '@/utils/utils';
 import { CREATE, CREATE_VOTING, dispatchCreateVoting } from "@/models/create";
 import { ConnectProps } from "@/models/connect";
 import { connect } from 'dva';
-import styles from './index.css'
 import { BtnSubmit } from '@/components/ActionButton';
+import { UploadFile } from 'antd/lib/upload/interface';
+import _ from 'lodash';
+import styles from './index.css'
 
 interface CreateVotingProps extends ConnectProps {
   loading?: boolean
@@ -15,8 +23,22 @@ interface CreateVotingProps extends ConnectProps {
 
 const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
   const [form] = Form.useForm();
+  const [emails, setEmails] = useState<string[]>();
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
-  const onFinish = (values: any) => {
+  const getAuthorizationOptions = async (authorization: Authorization, val: any): Promise<any> => {
+    switch (authorization) {
+      case Authorization.KEYBASE:
+        return val.authorizationOptions
+      case Authorization.EMAILS:
+        console.log(emails)
+        return { emails: await val.authorizationOptions.emails }
+      case Authorization.DOMAIN:
+        return val.authorizationOptions
+      default:
+        throw new Error(`unsupported authorization ${authorization}`)
+    }
+  }
+  const onFinish = async (values: any) => {
     const val = values as {
       title: string,
       question: string,
@@ -24,7 +46,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       second: string,
       options?: string[] | undefined,
       authorization: Authorization,
-      authorizationOptions: KeybaseAuthOptions | EmailAuthOptions | undefined,
+      authorizationOptions: KeybaseAuthOptions | EmailsAuthOptions | undefined,
       visibility: Visibility,
       votesCap: number,
       period: Array<Date>,
@@ -32,8 +54,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       challenges: number,
     };
 
-    console.log({ val });
-
+    const authorizationOptions = await getAuthorizationOptions(val.authorization, val)
     const createVoting: CreateVotingRequest = {
       title: val.title,
       polls: [{
@@ -43,7 +64,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           .map((option, index) => ({ name: option, code: index + 1 })),
       }],
       authorization: val.authorization,
-      authorizationOptions: val.authorizationOptions,
+      authorizationOptions,
       visibility: val.visibility,
       votesCap: val.votesCap,
       encrypted: val.encrypted,
@@ -70,6 +91,38 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       sm: { span: 16, offset: 8 },
     },
   };
+  const normFile = async (e: any) => {
+    if (e.file.status === 'done') {
+      const newEmails = await getEmailsList(e.file)
+      const [passed, failed] = _.partition(newEmails, isEmail)
+      const uniqueEmails = _.uniq(passed)
+      const failedMessage = `${passed.length !== uniqueEmails.length ? `${passed.length - uniqueEmails.length} were duplicated and ` : ''}${failed.length > 0 ? `following emails were malformed: ${failed.join(' ')}` : ''}`
+      message.warn(failedMessage)
+      setEmails(uniqueEmails)
+      return uniqueEmails
+    }
+    return null
+  };
+
+  function getEmailsList(file: UploadFile) {
+    return new Promise<string[]>((resolve, reject) => {
+      if (!file.originFileObj) {
+        return reject(new Error('Origin file object undefined'));
+      }
+      const reader = new FileReader();
+      reader.readAsText(file.originFileObj);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result.split(/[\n,]/).map(email => email.trim()));
+        } else {
+          reject(new Error('Can not process ArrayBuffer'));
+        }
+      };
+      reader.onerror = error => reject(error);
+      return reader;
+    });
+  }
+
 
   return (
     <Form layout="horizontal"
@@ -203,28 +256,43 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       <Form.Item name="authorization" label="Authorization method">
         <Radio.Group>
           <Radio.Button value={Authorization.OPEN}>{capitalize(Authorization.OPEN)}</Radio.Button>
-          <Radio.Button disabled value={Authorization.EMAIL}>{capitalize(Authorization.EMAIL)}</Radio.Button>
+          <Radio.Button value={Authorization.EMAILS}>{capitalize(Authorization.EMAILS)}</Radio.Button>
+          <Radio.Button disabled value={Authorization.DOMAIN}>{capitalize(Authorization.DOMAIN)}</Radio.Button>
           <Radio.Button disabled value={Authorization.CODE}>{capitalize(Authorization.CODE)}</Radio.Button>
           <Radio.Button value={Authorization.KEYBASE}>{capitalize(Authorization.KEYBASE)}</Radio.Button>
         </Radio.Group>
       </Form.Item>
       <Form.Item
         noStyle
-        shouldUpdate={(prevValues, currentValues) => prevValues.authorization !== currentValues.authorization}>
-        {({ getFieldValue }) => {
-          console.log(getFieldValue('authorization'));
-
-          return getFieldValue('authorization') === Authorization.KEYBASE ? (
-            <Form.Item name={['authorizationOptions', 'team']}
-                       label="(Optional) Team membership"
-                       rules={[{
-                         whitespace: true,
-                         message: "Please input option value or delete this field.",
-                       }]}>
-              <Input placeholder="stellar.public"/>
-            </Form.Item>
-          ) : null
-        }}
+        shouldUpdate={(prevValues, currentValues) => prevValues.authorization !== currentValues.authorization}
+      >
+        {({ getFieldValue }) => ({
+          [Authorization.KEYBASE]: (<Form.Item name={['authorizationOptions', 'team']}
+                                               label="(Optional) Team membership"
+                                               rules={[{
+                                                 whitespace: true,
+                                                 message: "Please input option value or delete this field.",
+                                               }]}>
+            <Input placeholder="stellar.public"/>
+          </Form.Item>),
+          [Authorization.EMAILS]: (<Form.Item
+            rules={[{
+              required: true,
+              message: "You need to upload the file with eligible email addresses",
+            }]}
+            name={['authorizationOptions', 'emails']}
+            label="Emails"
+            valuePropName="emails"
+            getValueFromEvent={normFile}
+            extra={emails ? `Uploaded file with ${emails.length} emails` : "Please upload file with eligible email addresses separated with new line or comma"}>
+            <Upload multiple={false} name="logo" accept=".csv, text/plain" listType="text">
+              <Button>
+                <UploadOutlined/> Click to upload
+              </Button>
+            </Upload>
+          </Form.Item>),
+          [Authorization.OPEN]: null,
+        }[getFieldValue('authorization')])}
       </Form.Item>
 
       <Form.Item name="visibility" label="Listing visibility">
@@ -234,10 +302,21 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           <Radio.Button value={Visibility.PRIVATE}>{capitalize(Visibility.PRIVATE)}</Radio.Button>
         </Radio.Group>
       </Form.Item>
-      <Form.Item label="Number of votes cap">
-        <Form.Item name="votesCap" noStyle>
-          <InputNumber min={2}/>
-        </Form.Item>
+
+      <Form.Item
+        label="Number of votes cap"
+        name="votesCap"
+        rules={[{
+          validator: (rule, value) => {
+            if (emails && (value < emails.length))
+              return Promise.reject(new Error('The value is less than total number of email addresses eligible to cast a vote'))
+            return Promise.resolve()
+          }
+        }]}
+        shouldUpdate={(prevValues, currentValues) => prevValues.votesCap !== currentValues.votesCap}
+      >
+
+        <InputNumber min={2}/>
       </Form.Item>
       <Form.Item name="period" label="Select time period"
                  rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
@@ -256,18 +335,19 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         </a>
       </Form.Item>
       }
-      {showAdvanced &&
-      <>
-        <Form.Item name="encrypted" label="Encrypt results until the end of voting" valuePropName="checked">
-          <Switch/>
+      <Form.Item
+        name="encrypted" label="Encrypt partial results" valuePropName="checked"
+        style={{ 'display': showAdvanced ? '' : 'none' }}
+      >
+        <Switch/>
+      </Form.Item>
+      <Form.Item
+        label="Security level"
+        style={{ 'display': showAdvanced ? '' : 'none' }}>
+        <Form.Item name="challenges" noStyle>
+          <InputNumber min={2} max={500}/>
         </Form.Item>
-        <Form.Item label="Security level (number of challenges)">
-          <Form.Item name="challenges" noStyle>
-            <InputNumber min={2} max={100}/>
-          </Form.Item>
-        </Form.Item>
-      </>
-      }
+      </Form.Item>
       <Form.Item {...formItemLayoutWithOutLabel} >
         <BtnSubmit size="large" type="primary" htmlType="submit" loading={loading}>
           {loading ? "Creating..." : "Create"}

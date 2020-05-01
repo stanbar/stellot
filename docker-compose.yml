@@ -17,15 +17,19 @@ services:
       - $TDS_PORT:8080
     volumes:
       - $WEBAPP_DIR:$WEBAPP_DIR
+      - ./server:/server
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
     links:
       - mongo
       - keybase-auth
+      - emails-auth
     depends_on:
       - mongo
       - keybase-auth
+      - emails-auth
 
   keybase-auth:
     container_name: "stellot-keybase-auth"
@@ -33,7 +37,21 @@ services:
       context: keybase-auth
       dockerfile: Dockerfile
     env_file: ./keybase-auth/.env
+    volumes:
+      - ./keybase-auth:/server
     ports:
       - $KEYBASE_AS_PORT:8080
+    restart: 'unless-stopped'
+
+  emails-auth:
+    container_name: "stellot-emails-auth"
+    build:
+      context: emails-auth
+      dockerfile: Dockerfile
+    env_file: ./emails-auth/.env
+    volumes:
+      - ./emails-auth:/server
+    ports:
+      - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'
 
