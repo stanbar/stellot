@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/stasbar/stellar-voting#readme",
   "dependencies": {
-    "@types/jsonwebtoken": "^8.3.8",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
@@ -54,6 +53,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^8.3.8",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.6",
     "@types/debug": "^4.1.5",
