@@ -1,5 +1,5 @@
 // import { Networks, Transaction } from 'stellar-sdk'
-import { ChallengeSession, Proof } from './stellar';
+import { ChallengeSession, Proof } from './sessions';
 
 /*
 const ballotAccountId = process.env.BALLOT_BOX_PUBLIC_KEY;

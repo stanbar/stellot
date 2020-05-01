@@ -10,9 +10,10 @@ import {
   Proof,
   proofChallenges,
   storeAndPickLuckyBatch,
-} from '../../stellar';
+} from '../../sessions';
 import { HttpError } from '../../app';
-import { authenticateToken } from '../../authorizationServers/keybase';
+import * as keybase from '../../authorizationServers/keybase';
+import * as emails from '../../authorizationServers/emails';
 import { createSessionToken, verifyAndGetUserId } from '../../auth';
 
 const debug = require('debug')('blindsig');
@@ -44,7 +45,17 @@ router.post('/init', async (req, res, next) => {
       if (!authToken) {
         throw new HttpError('missing Authorization header with Bearer JWT', 401)
       }
-      userId = await authenticateToken(authToken, voting);
+
+      switch (voting.authorization) {
+        case Authorization.KEYBASE:
+          userId = await keybase.authenticateToken(authToken, voting);
+          break;
+        case Authorization.EMAILS:
+          userId = await emails.authenticateToken(authToken, voting);
+          break;
+        default:
+          throw new createHttpError.NotImplemented('Authorization method not implemented yet');
+      }
       const isUserAuthorized = await isUserAuthorizedToInitSession(voting, userId);
       if (!isUserAuthorized) {
         throw new createHttpError.Unauthorized('You have already started voting session');
