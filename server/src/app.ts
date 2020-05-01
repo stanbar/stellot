@@ -10,6 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
+app.use('trust proxy', () => true)
 app.use(logger('dev'));
 app.use(express.json({ limit: '0.5mb' }));
 app.use(express.urlencoded({ limit: '0.5mb', extended: false }));
@@ -22,6 +23,12 @@ if (!isProduction) {
   app.use(errorhandler());
 }
 app.get('/health', (req, res) => res.sendStatus(200).end());
+app.get('/myIp', (req, res) => {
+  const { ip, ips } = req
+  const { remoteAddress } = req.connection
+  console.log({ ip, ips, remoteAddress })
+  res.send({ ip, ips, remoteAddress: req.connection.remoteAddress })
+});
 app.use(router);
 
 // Mock of Authorization Provider
