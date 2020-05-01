@@ -14,10 +14,12 @@ interface InitSession {
 const initSessions: Map<string, Array<InitSession>> = new Map();
 
 export async function isUserAuthorizedToInitSession(voting: Voting, userId?: string) {
-  if (voting.authorization === Authorization.KEYBASE) {
-    return userId && initSessions.get(userId) === undefined; // TODO move to database
+  switch (voting.authorization) {
+    case Authorization.KEYBASE:
+      return userId && initSessions.get(userId) === undefined; // TODO move to database
+    case Authorization.EMAILS:
+      return userId && initSessions.get(userId) === undefined; // TODO move to database
   }
-
   return true;
 }
 

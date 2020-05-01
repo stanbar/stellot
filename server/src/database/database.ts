@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { Keypair } from 'stellar-sdk';
 import { Authorization, Visibility, Voting } from '@stellot/types';
-import { KEYBASE_AUTH_OPTIONS, KEYCHAIN, VOTING } from './models';
+import { KEYBASE_AUTH_OPTIONS, EMAILS_AUTH_OPTIONS, KEYCHAIN, VOTING } from './models';
 import Keychain from '../types/keychain'
 
 const debug = require('debug')('dao');
@@ -15,6 +15,7 @@ export function setIssued(voting: Voting, userId: string) {
 const VotingSchema = mongoose.model(VOTING);
 const KeychainSchema = mongoose.model(KEYCHAIN);
 const KeybaseAuthOptionsSchema = mongoose.model(KEYBASE_AUTH_OPTIONS);
+const EmailsAuthOptionsSchema = mongoose.model(EMAILS_AUTH_OPTIONS);
 
 export async function getVotingById(votingId: string): Promise<Voting | undefined> {
   const votingDoc = await VotingSchema.findById(votingId);
@@ -47,6 +48,8 @@ async function getAuthorizationOptions(voting: Omit<Voting, 'authorizationOption
   switch (voting.authorization) {
     case Authorization.KEYBASE:
       return (await KeybaseAuthOptionsSchema.findOne({ voting: voting.id }))?.toJSON();
+    case Authorization.EMAILS:
+      return (await EmailsAuthOptionsSchema.findOne({ voting: voting.id }))?.toJSON();
     default:
       return null;
   }
@@ -65,6 +68,10 @@ export async function setVoting(voting: Omit<Omit<Voting, 'id'>, 'slug'>): Promi
     if (voting.authorization === Authorization.KEYBASE) {
       const authKeybaseOptions =
         new KeybaseAuthOptionsSchema({ voting: saved.id, ...voting.authorizationOptions });
+      await authKeybaseOptions.save();
+    } else if (voting.authorization === Authorization.EMAILS) {
+      const authKeybaseOptions =
+        new EmailsAuthOptionsSchema({ voting: saved.id, ...voting.authorizationOptions });
       await authKeybaseOptions.save();
     }
   }
