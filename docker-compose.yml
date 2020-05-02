@@ -3,7 +3,6 @@ services:
   nginx:
     container_name: "stellot-nginx"
     build: ./nginx
-    image: nginx
     restart: 'unless-stopped'
     volumes:
       - $WEBAPP_DIR:/usr/share/nginx/html:ro
