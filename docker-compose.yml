@@ -19,9 +19,9 @@ services:
   tds:
     container_name: "stellot-tds"
     build:
-      context: server
+      context: tds
       dockerfile: Dockerfile
-    env_file: ./server/.env
+    env_file: ./tds/.env
     ports:
       - $TDS_PORT:8080
     restart: 'unless-stopped'

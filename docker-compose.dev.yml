@@ -19,14 +19,14 @@ services:
   tds:
     container_name: "stellot-tds-dev"
     build:
-      context: server
+      context: tds
       dockerfile: Dockerfile
-    env_file: ./server/.env
+    env_file: ./tds/.env
     command: npm run start:dev
     ports:
       - $TDS_PORT:8080
     volumes:
-      - ./server:/server
+      - ./tds:/server
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
