@@ -35,7 +35,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       case Authorization.DOMAIN:
         return val.authorizationOptions
       default:
-        throw new Error(`unsupported authorization ${authorization}`)
+        return undefined;
     }
   }
   const onFinish = async (values: any) => {
