@@ -24,8 +24,6 @@ services:
     env_file: ./server/.env
     ports:
       - $TDS_PORT:8080
-    volumes:
-      - $WEBAPP_DIR:$WEBAPP_DIR
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
