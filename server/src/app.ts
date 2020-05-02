@@ -26,8 +26,10 @@ app.get('/health', (req, res) => res.sendStatus(200).end());
 app.get('/myIp', (req, res) => {
   const { ip, ips } = req
   const { remoteAddress } = req.connection
-  console.log({ ip, ips, remoteAddress })
-  res.send({ ip, ips, remoteAddress: req.connection.remoteAddress })
+  const forwarded = req.headers['X-Forwarded-For'] || req.connection.remoteAddress;
+  const cloudFlareIp = req.headers['cf-connecting-ip'] || req.connection.remoteAddress;
+  console.log({ ip, ips, remoteAddress, forwarded, cloudFlareIp })
+  res.send({ ip, ips, remoteAddress: req.connection.remoteAddress, forwarded, cloudFlareIp })
 });
 app.use(router);
 
