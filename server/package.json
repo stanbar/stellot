@@ -75,7 +75,7 @@
     "@types/node": "^12.12.37",
     "@types/node-fetch": "^2.5.7",
     "@types/slug": "^0.9.1",
-    "@types/supertest": "^2.0.8",
+    "@types/supertest": "^2.0.9",
     "@umijs/fabric": "^1.1.10",
     "check-prettier": "^1.0.3",
     "eslint": "^6.1.0",
