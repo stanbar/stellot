@@ -126,24 +126,24 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
 
   return (
     <Form layout="horizontal"
-          {...formItemLayout}
-          form={form}
-          name="options_form"
-          onFinish={onFinish}
-          scrollToFirstError
-          initialValues={{
-            votesCap: 100,
-            authorization: Authorization.OPEN,
-            visibility: Visibility.PUBLIC,
-            encrypted: false,
-            challenges: 100,
-          }}>
+      {...formItemLayout}
+      form={form}
+      name="options_form"
+      onFinish={onFinish}
+      scrollToFirstError
+      initialValues={{
+        votesCap: 100,
+        authorization: Authorization.OPEN,
+        visibility: Visibility.PUBLIC,
+        encrypted: false,
+        challenges: 100,
+      }}>
       <Form.Item name="title" label="Title" rules={[{
         required: true,
         whitespace: true,
         message: "Please input option value or delete this field.",
       }]}>
-        <Input placeholder="Favourite colour"/>
+        <Input placeholder="Favourite colour" />
       </Form.Item>
 
       <Form.Item name="question" label="Question" rules={[{
@@ -151,7 +151,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         whitespace: true,
         message: "Please input option value or delete this field.",
       }]}>
-        <Input placeholder="What is your favourite colour ?"/>
+        <Input placeholder="What is your favourite colour ?" />
       </Form.Item>
       <Form.Item
         label="Options"
@@ -173,7 +173,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
               ]}
               noStyle
             >
-              <Input placeholder="Blue" style={{ marginRight: 32 }}/>
+              <Input placeholder="Blue" style={{ marginRight: 32 }} />
             </Form.Item>
           </Col>
         </Row>
@@ -195,7 +195,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
               ]}
               noStyle
             >
-              <Input placeholder="Red" style={{ marginRight: 32 }}/>
+              <Input placeholder="Red" style={{ marginRight: 32 }} />
             </Form.Item>
           </Col>
         </Row>
@@ -225,7 +225,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
                       ]}
                       noStyle
                     >
-                      <Input placeholder="Option" style={{ marginRight: 32 }}/>
+                      <Input placeholder="Option" style={{ marginRight: 32 }} />
                     </Form.Item>
                   </Col>
                   <Col flex="30px" style={{ alignSelf: 'center', textAlign: 'center' }}>
@@ -247,7 +247,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
                   add();
                 }}
               >
-                <PlusOutlined/> Add an option
+                <PlusOutlined /> Add an option
               </Button>
             </Form.Item>
           </div>
@@ -268,12 +268,12 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       >
         {({ getFieldValue }) => ({
           [Authorization.KEYBASE]: (<Form.Item name={['authorizationOptions', 'team']}
-                                               label="(Optional) Team membership"
-                                               rules={[{
-                                                 whitespace: true,
-                                                 message: "Please input option value or delete this field.",
-                                               }]}>
-            <Input placeholder="stellar.public"/>
+            label="(Optional) Team membership"
+            rules={[{
+              whitespace: true,
+              message: "Please input option value or delete this field.",
+            }]}>
+            <Input placeholder="stellar.public" />
           </Form.Item>),
           [Authorization.EMAILS]: (<Form.Item
             rules={[{
@@ -285,9 +285,14 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
             valuePropName="emails"
             getValueFromEvent={normFile}
             extra={emails ? `Uploaded file with ${emails.length} emails` : "Please upload file with eligible email addresses separated with new line or comma"}>
-            <Upload multiple={false} name="logo" accept=".csv, text/plain" listType="text">
+            <Upload multiple={false} name="logo" accept=".csv, text/plain" listType="text"
+              customRequest={({ file, onSuccess }) => {
+                setTimeout(() => {
+                  onSuccess({}, file);
+                }, 0)
+              }}>
               <Button>
-                <UploadOutlined/> Click to upload
+                <UploadOutlined /> Click to upload
               </Button>
             </Upload>
           </Form.Item>),
@@ -316,36 +321,36 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         shouldUpdate={(prevValues, currentValues) => prevValues.votesCap !== currentValues.votesCap}
       >
 
-        <InputNumber min={2}/>
+        <InputNumber min={2} />
       </Form.Item>
       <Form.Item name="period" label="Select time period"
-                 rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
-        <DatePicker.RangePicker/>
+        rules={[{ type: 'array', required: true, message: 'Please select time!' }]}>
+        <DatePicker.RangePicker />
       </Form.Item>
       {!showAdvanced &&
-      <Form.Item {...formItemLayoutWithOutLabel}>
+        <Form.Item {...formItemLayoutWithOutLabel}>
 
-        <a
-          style={{ fontSize: 12, }}
-          onClick={() => {
-            setShowAdvanced(true);
-          }}
-        >
-          <DownOutlined/> Show advanced
+          <a
+            style={{ fontSize: 12, }}
+            onClick={() => {
+              setShowAdvanced(true);
+            }}
+          >
+            <DownOutlined /> Show advanced
         </a>
-      </Form.Item>
+        </Form.Item>
       }
       <Form.Item
         name="encrypted" label="Encrypt partial results" valuePropName="checked"
         style={{ 'display': showAdvanced ? '' : 'none' }}
       >
-        <Switch/>
+        <Switch />
       </Form.Item>
       <Form.Item
         label="Security level"
         style={{ 'display': showAdvanced ? '' : 'none' }}>
         <Form.Item name="challenges" noStyle>
-          <InputNumber min={2} max={500}/>
+          <InputNumber min={2} max={500} />
         </Form.Item>
       </Form.Item>
       <Form.Item {...formItemLayoutWithOutLabel} >
