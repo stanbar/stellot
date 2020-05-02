@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.1.0",
-    "@stellot/types": "^0.0.7",
+    "@stellot/types": "^0.0.8",
     "antd": "^4.2.0",
     "bn.js": "^5.1.1",
     "dva": "^2.6.0-beta.20",

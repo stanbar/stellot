@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/stasbar/stellar-voting#readme",
   "dependencies": {
-    "@stellot/types": "^0.0.7",
+    "@stellot/types": "^0.0.8",
     "bn.js": "^5.1.1",
     "cookie-parser": "^1.4.5",
     "debug": "~2.6.9",
