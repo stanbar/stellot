@@ -11,6 +11,8 @@ enum Authorization {
     OPEN = 'open',
     EMAILS = 'emails',
     DOMAIN = 'domain',
+    IP = 'ip',
+    COOKIE = 'cookie',
     CODE = 'code',
     KEYBASE = 'keybase',
 }
