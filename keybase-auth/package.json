@@ -1,7 +1,7 @@
 {
   "name": "stellot-keybase-auth",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "src/main.js",
   "scripts": {
     "lint": "npm run lint:js && npm run lint:prettier",
     "lint:fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
