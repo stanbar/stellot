@@ -18,6 +18,7 @@ services:
       - $TDS_PORT:8080
     volumes:
       - $WEBAPP_DIR:$WEBAPP_DIR
+      - ./server:/server
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
