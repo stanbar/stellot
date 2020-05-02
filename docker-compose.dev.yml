@@ -49,6 +49,8 @@ services:
       dockerfile: Dockerfile
     env_file: ./emails-auth/.env
     command: npm run start:dev
+    volumes:
+      - ./emails-auth:/server
     ports:
       - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'

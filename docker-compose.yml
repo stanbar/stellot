@@ -17,7 +17,6 @@ services:
       - $TDS_PORT:8080
     volumes:
       - $WEBAPP_DIR:$WEBAPP_DIR
-      - ./server:/server
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
@@ -37,8 +36,6 @@ services:
       context: keybase-auth
       dockerfile: Dockerfile
     env_file: ./keybase-auth/.env
-    volumes:
-      - ./keybase-auth:/server
     ports:
       - $KEYBASE_AS_PORT:8080
     restart: 'unless-stopped'
@@ -49,8 +46,6 @@ services:
       context: emails-auth
       dockerfile: Dockerfile
     env_file: ./emails-auth/.env
-    volumes:
-      - ./emails-auth:/server
     ports:
       - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'
