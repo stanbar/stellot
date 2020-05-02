@@ -4,11 +4,6 @@ import slug from 'slug';
 import { Authorization, Visibility } from '@stellot/types';
 import { VOTING } from '.';
 
-console.log([Authorization.OPEN,
-  Authorization.EMAILS,
-  Authorization.DOMAIN,
-  Authorization.CODE,
-  Authorization.KEYBASE])
 const VotingSchema = new mongoose.Schema({
   slug: { type: String, lowercase: true, unique: true, required: true },
   title: { type: String, required: true },
