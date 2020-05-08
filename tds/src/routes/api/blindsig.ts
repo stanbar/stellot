@@ -28,7 +28,7 @@ function getTokenFromHeader(req: Request) {
   return null;
 }
 
-async function handleExternalAuth(req: Request, voting: Voting): string {
+async function handleExternalAuth(req: Request, voting: Voting): Promise<string> {
   const authToken = getTokenFromHeader(req);
   debug(`authToken: ${authToken}`);
   if (!authToken) {
