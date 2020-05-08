@@ -21,6 +21,8 @@ const VotingSchema = new mongoose.Schema({
       Authorization.EMAILS,
       Authorization.DOMAIN,
       Authorization.CODE,
+      Authorization.IP,
+      Authorization.COOKIE,
       Authorization.KEYBASE],
     required: true,
   },

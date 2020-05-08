@@ -11,14 +11,19 @@ interface InitSession {
   signerSession: SignerSession;
 }
 
-const initSessions: Map<string, Array<InitSession>> = new Map();
+// Voting.id -> UserId -> InitSession[]
+// TODO move to database
+const initSessions: Map<string, Map<string, Array<InitSession>>> = new Map();
 
 export async function isUserAuthorizedToInitSession(voting: Voting, userId?: string) {
+  // TODO move to database
   switch (voting.authorization) {
     case Authorization.KEYBASE:
-      return userId && initSessions.get(userId) === undefined; // TODO move to database
+      return userId && initSessions.get(voting.id)?.get(userId) === undefined;
     case Authorization.EMAILS:
-      return userId && initSessions.get(userId) === undefined; // TODO move to database
+      return userId && initSessions.get(voting.id)?.get(userId) === undefined;
+    case Authorization.IP:
+      return userId && initSessions.get(voting.id)?.get(userId) === undefined;
   }
   return true;
 }
@@ -29,7 +34,8 @@ export interface ChallengeSession extends InitSession {
   lucky: boolean;
 }
 
-const challengeSessions: Map<string, Array<ChallengeSession>> = new Map();
+// TODO move to database
+const challengeSessions: Map<string, Map<string, ChallengeSession[]>> = new Map();
 const cutAndChooseCount = 100;
 
 export interface InitResponse {
@@ -38,7 +44,8 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(userId: string, keychain: Keychain): InitResponse[] {
+export function createSession(voting: Voting, userId: string, keychain: Keychain)
+  : InitResponse[] {
   const distributionKeypair = Keypair.fromSecret(keychain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
@@ -53,7 +60,9 @@ export function createSession(userId: string, keychain: Keychain): InitResponse[
     };
     userSessions[i] = { id: i, signerSession };
   }
-  initSessions.set(userId, userSessions);
+  const votingSessions: Map<string, InitSession[]> = initSessions.get(voting.id) || new Map()
+  votingSessions.set(userId, userSessions)
+  initSessions.set(voting.id, votingSessions)
   // should we key session by uuid or username or jwt maybe ?
   return response;
 }
@@ -61,9 +70,10 @@ export function createSession(userId: string, keychain: Keychain): InitResponse[
 export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>
 
 export function storeAndPickLuckyBatch(
+  votingId: string,
   userId: string,
   blindedTransactionBatches: ChallengeRequest): number {
-  const userSessions = initSessions.get(userId);
+  const userSessions = initSessions.get(votingId)?.get(userId);
   if (!userSessions) {
     throw new Error('Could not find corresponding user session')
   }
@@ -78,7 +88,11 @@ export function storeAndPickLuckyBatch(
       lucky: i === luckyBatchId,
     };
   }
-  challengeSessions.set(userId, session);
+
+  const votingSessions: Map<string, ChallengeSession[]>
+    = challengeSessions.get(votingId) || new Map()
+  votingSessions.set(userId, session)
+  challengeSessions.set(votingId, votingSessions)
   // TODO save number of attempts preventing DoS
   return luckyBatchId;
 }
@@ -109,8 +123,8 @@ export interface Proof {
   transactionsBatch: TransactionsBatch;
 }
 
-export function proofChallenges(tokenId: string, proofs: Proof[]) {
-  const challengeSession = challengeSessions.get(tokenId);
+export function proofChallenges(votingId: string, userId: string, proofs: Proof[]) {
+  const challengeSession = challengeSessions.get(votingId)?.get(userId);
   if (!challengeSession) {
     throw new Error('Could not find corresponding challenge session')
   }
