@@ -78,10 +78,8 @@ router.post('/init', async (req, res, next) => {
     if (!keychain) {
       return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
     }
-    // TODO test
     const session = createSession(voting, userId, keychain);
     debug('created session');
-    // TODO test
     const sessionToken = createSessionToken(voting, userId);
     res.setHeader('SESSION-TOKEN', sessionToken);
     return res.status(200).send(session);
@@ -100,15 +98,12 @@ router.post('/getChallenges', (req, res) => {
     res.status(401).send('SESSION-TOKEN header not found').end();
   } else {
     const { userId, votingId } = verifyAndGetUserId(sessionToken);
-    // TODO test
     if (!userId) {
       throw new HttpError('Provided JWT does not contain userId field', 405)
     }
-    // TODO test
     if (!votingId) {
       throw new HttpError('Provided JWT does not contain votingId field', 405)
     }
-    // TODO test
     const luckyBatchIndex = storeAndPickLuckyBatch(votingId, userId, blindedTransactionBatches);
     res.status(200).send({ luckyBatchIndex });
   }
@@ -122,17 +117,13 @@ router.post('/proofChallenges', async (req, res, next) => {
     return res.status(401).send('SESSION-TOKEN header not found').end();
   }
   try {
-    // TODO test
     const { userId, votingId } = verifyAndGetUserId(sessionToken);
-    // TODO test
     if (!userId) {
       throw new HttpError('Provided JWT does not contain userId field', 405)
     }
-    // TODO test
     if (!votingId) {
       throw new HttpError('Provided JWT does not contain votingId field', 405)
     }
-    // TODO test
     const signedBatch = proofChallenges(votingId, userId, proofs);
     return res.status(200).send(signedBatch);
   } catch (e) {
