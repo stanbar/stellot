@@ -85,7 +85,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
       <p>{errorMessage} <a onClick={signInAgain}>Sign in again</a></p>}
       <p>{status}</p>
       {txHash && status === VoteStatus.DONE &&
-      <a href={`http://testnet.stellarchain.io/tx/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction
+      <a href={`https://testnet.lumenscan.io/txns/${txHash}`} target="_blank" rel="noreferrer noopener">Show transaction
         in explorer</a>}
     </Modal>
   )
