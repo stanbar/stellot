@@ -1,10 +1,12 @@
 import { Effect, Dispatch } from "dva";
+import { Reducer } from 'redux';
 import { createVoting } from '@/services/tokenDistributionServer';
 import { Voting, CreateVotingRequest } from "@stellot/types";
-import router from 'umi/router';
 
 export const CREATE = 'create';
 export const CREATE_VOTING = 'createVoting';
+export const CANCEL_SUCCESS_CREATION = 'cancelSuccessCreation';
+export const SHOW_SUCCESS_CREATION = 'showSuccessCreation';
 
 export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: CreateVotingRequest) {
   dispatch({
@@ -13,9 +15,15 @@ export function dispatchCreateVoting(dispatch: Dispatch, createVotingRequest: Cr
   })
 }
 
+export function dispatchCancelSuccessCreationModel(dispatch: Dispatch) {
+  dispatch({
+    type: `${CREATE}/${CANCEL_SUCCESS_CREATION}`,
+  })
+}
+
 export interface CreateStateType {
-  createdVoting?: Voting;
-  loading?: boolean;
+  showSuccessCreation?: boolean;
+  voting?: Voting;
 }
 
 export interface CreateModelType {
@@ -23,6 +31,10 @@ export interface CreateModelType {
   state: CreateStateType;
   effects: {
     [CREATE_VOTING]: Effect
+  },
+  reducers: {
+    [SHOW_SUCCESS_CREATION]: Reducer,
+    [CANCEL_SUCCESS_CREATION]: Reducer,
   }
 }
 
@@ -30,9 +42,26 @@ export const CreateModel: CreateModelType = {
   namespace: CREATE,
   state: {},
   effects: {
-    * [CREATE_VOTING]({ createVotingRequest }, { call }) {
+    *[CREATE_VOTING]({ createVotingRequest }, { call, put }) {
       const voting = yield call(createVoting, createVotingRequest);
-      router.replace(`/voting/${voting.slug}`);
+      console.log("voiing created", voting)
+      yield put({ type: SHOW_SUCCESS_CREATION, voting })
+    }
+  },
+  reducers: {
+    [SHOW_SUCCESS_CREATION](state: CreateStateType, { voting }): CreateStateType {
+      return {
+        ...state,
+        showSuccessCreation: true,
+        voting,
+      }
+    },
+    [CANCEL_SUCCESS_CREATION](state: CreateStateType): CreateStateType {
+      return {
+        ...state,
+        showSuccessCreation: false,
+        voting: undefined,
+      }
     }
   },
 };

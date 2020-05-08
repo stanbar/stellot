@@ -5,4 +5,5 @@ export const dva = {
       console.error(err.message);
     },
   },
+  plugins: [REACT_APP_ENV === 'development' ? require('dva-logger')() : {}],
 };
