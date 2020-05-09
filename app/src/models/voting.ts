@@ -1,4 +1,4 @@
-import { Voting } from "@stellot/types";
+import { Voting, Authorization } from "@stellot/types";
 import { Reducer } from 'redux';
 import { Effect, Dispatch } from "dva";
 import { performSignedTransaction } from "@/services/voting";
@@ -20,6 +20,9 @@ const SET_AUTH_TOKEN = 'setAuthToken';
 
 export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, optionCode: number, authToken?: string) {
   try {
+    if (voting.authorization === Authorization.COOKIE && storage.didAlreadyVotedIn(voting.id)) {
+      throw new Error('You have already voted in this ballot')
+    }
     for await (const [tx, update] of performSignedTransaction(voting, optionCode, authToken)) {
       if (update) {
         dispatch({
@@ -33,6 +36,7 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
         });
         const res = await castVote(tx);
         storage.setMyTransaction(voting.id, res.hash, (tx.memo as Memo<MemoType.Text>).value)
+        storage.setAlreadyVotedIn(voting.id)
         dispatch({
           type: `${VOTING}/${SET_STATUS}`,
           payload: VoteStatus.DONE,
@@ -128,7 +132,7 @@ export const VotingModel: VotingModelType = {
   namespace: VOTING,
   state: {},
   effects: {
-    * [FETCH_VOTING]({ votingSlug }, { call, put }) {
+    *[FETCH_VOTING]({ votingSlug }, { call, put }) {
       const voting = yield call(fetchVoting, votingSlug);
       const cachedToken = storage.getAuthorizationToken(voting.id);
       yield put({
@@ -137,7 +141,7 @@ export const VotingModel: VotingModelType = {
         authToken: cachedToken
       })
     },
-    * [FETCH_RESULTS]({ voting }, { call, put }) {
+    *[FETCH_RESULTS]({ voting }, { call, put }) {
       const results = yield call(fetchResults, voting);
       yield put({
         type: SET_RESULTS,
