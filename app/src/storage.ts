@@ -1,7 +1,10 @@
+import { Voting } from '@stellot/types';
+
 interface StoredVoting {
   authorizationToken?: string,
   myTxHash?: string,
   myTxMemo?: string | Buffer,
+  voted?: boolean;
 }
 
 function getVoting(votingId: string): StoredVoting | undefined {
@@ -35,4 +38,14 @@ export function setMyTransaction(votingId: string, txHash: string, memo: Buffer 
 
 export function getMyTransaction(votingId: string): { myTxHash?: string, myTxMemo?: string | Buffer } {
   return { ...getVoting(votingId) }
+}
+
+export function didAlreadyVotedIn(votingId: string): boolean {
+  return getVoting(votingId)?.voted ?? false
+}
+
+export function setAlreadyVotedIn(votingId: string) {
+  const voting = getVoting(votingId) || {};
+  voting.voted = true;
+  setVoting(votingId, voting)
 }
