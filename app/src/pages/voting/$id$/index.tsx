@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, notification, Radio } from 'antd';
 import { dispatchFetchVoting, dispatchPerformVote, FETCH_VOTING, VOTING, VotingStateType } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
@@ -11,6 +11,7 @@ import VotingMetadata from "@/components/VotingMetadata";
 import { Link } from "umi";
 import { KeybaseAuthorizationView, EmailsAuthorizationView } from '@/components/AuthorizationView';
 import * as storage from '@/storage'
+import _ from 'lodash'
 
 
 interface VotePreviewProps extends ConnectProps {
@@ -23,8 +24,10 @@ interface VotePreviewProps extends ConnectProps {
 const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, dispatch, voting }) => {
   const [form] = Form.useForm();
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
+  const [sorted, setSorted] = useState(voting?.polls[0].options)
 
   useEffect(() => dispatchFetchVoting(dispatch, votingSlug), [votingSlug]);
+  useEffect(() => { if (voting) { setSorted(_.shuffle(voting.polls[0].options)) } }, [voting])
 
   const radioStyle = {
     display: 'block',
@@ -54,14 +57,14 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, di
   const txHash = storage.getMyTransaction(voting.id)
 
   if (voting.authorization === Authorization.KEYBASE && !authToken) {
-    return (<KeybaseAuthorizationView dispatch={dispatch} voting={voting}/>)
+    return (<KeybaseAuthorizationView dispatch={dispatch} voting={voting} />)
   }
   if (voting.authorization === Authorization.EMAILS && !authToken) {
-    return (<EmailsAuthorizationView dispatch={dispatch} voting={voting}/>)
+    return (<EmailsAuthorizationView dispatch={dispatch} voting={voting} />)
   }
   return (
     <div>
-      <VotingMetadata voting={voting}/>
+      <VotingMetadata voting={voting} />
       <h4>{voting?.polls[0].question}</h4>
       <Form layout="vertical" name="vote_form" onFinish={onFinish} form={form}>
         <Form.Item name="optionCode" rules={[{
@@ -69,7 +72,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, di
           message: 'Please select your option!'
         }]}>
           <Radio.Group buttonStyle="solid" size="large">
-            {voting.polls[0].options?.map(option => (
+            {sorted.map(option => (
               <Radio.Button style={radioStyle} key={option.code} value={option.code}>{option.name}</Radio.Button>
             ))}
           </Radio.Group>
@@ -85,7 +88,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, di
           Show results
         </BtnLink>
       </Link>
-      <CastVoteModal/>
+      <CastVoteModal />
     </div>
   );
 };
