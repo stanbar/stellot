@@ -1,6 +1,6 @@
 {
   "name": "@stellot/types",
-  "version": "0.0.8",
+  "version": "1.0.9",
   "description": "Shared types across front and backend",
   "author": "stasbar <stasbar1995@gmail.com>",
   "homepage": "http://stellot.stasbar.com",
