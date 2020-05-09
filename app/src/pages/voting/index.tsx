@@ -1,13 +1,14 @@
 import React from 'react';
+import { TitleParagraph } from '..';
+import VotingsTable from '@/components/VotingsTable';
 
 interface VotesProps {
 }
 
 const Votes: React.FC<VotesProps> = () => (
   <div>
-    <p>
-      Public Votes
-    </p>
+      <TitleParagraph>Explore public votings</TitleParagraph>
+      <VotingsTable/>
   </div>
 );
 
