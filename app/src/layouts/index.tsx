@@ -28,26 +28,30 @@ const BasicLayout: React.FC<LayoutProps> = props => {
   return (
     <Layout className={styles.normal}>
       <Header className={styles.header}>
-        <Col xs={{ span: 22, offset: 1 }}>
+        <Col
+          xs={{ span: 22, offset: 1 }}
+          sm={{ span: 20, offset: 2 }}
+          md={{ span: 16, offset: 4 }}
+          xl={{ span: 14, offset: 5 }}>
           <Link to="/" className={styles.logo}>
-            <Logo large={false}/>
+            <Logo large={false} />
           </Link>
           {isWall &&
-          <Link to="/create">
-            <BtnHeading className={styles.heading} size="large" color={CORNFLOWER}>
-              Create Voting
+            <Link to="/create">
+              <BtnHeading size="large" color={CORNFLOWER}>
+                Create Voting
             </BtnHeading>
-          </Link>
+            </Link>
           }
         </Col>
       </Header>
       <Content>
         <Col className={styles.content}
-             style={{ marginTop: isWall ? '4em' : '2em' }}
-             xs={{ span: 22, offset: 1 }}
-             sm={{ span: 20, offset: 2 }}
-             md={{ span: 16, offset: 4 }}
-             xl={{ span: 14, offset: 5 }}>
+          style={{ marginTop: isWall ? '4em' : '2em' }}
+          xs={{ span: 22, offset: 1 }}
+          sm={{ span: 20, offset: 2 }}
+          md={{ span: 16, offset: 4 }}
+          xl={{ span: 14, offset: 5 }}>
           {props.children}
         </Col>
       </Content>
@@ -57,14 +61,14 @@ const BasicLayout: React.FC<LayoutProps> = props => {
             style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}>FAQ</span></Link>
 
           <a style={{ marginRight: 40, color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href={GITHUB_URL}>
-            <GithubOutlined/>
+            href={GITHUB_URL}>
+            <GithubOutlined />
           </a>
 
           <a style={{ color: '#000000a6', textDecoration: 'none', outline: 0 }}
-             href={PAPER_URL}>Whitepaper</a>
+            href={PAPER_URL}>Whitepaper</a>
         </div>
-        <div>Stellot 2020 build with ❤️to Stellar</div>
+        <div>2020 - All right reserved &copy;</div>
       </Footer>
     </Layout>
   )
