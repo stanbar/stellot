@@ -1,5 +1,3 @@
-import { Voting } from '@stellot/types';
-
 interface StoredVoting {
   authorizationToken?: string,
   myTxHash?: string,
