@@ -258,12 +258,12 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         <Form.Item name="authorization" label="Authorization method">
           <Radio.Group>
             <Radio.Button value={Authorization.OPEN}>{capitalize(Authorization.OPEN)}</Radio.Button>
+            <Radio.Button value={Authorization.COOKIE}>{capitalize(Authorization.COOKIE)}</Radio.Button>
+            <Radio.Button value={Authorization.IP}>{Authorization.IP.toUpperCase()}</Radio.Button>
             <Radio.Button value={Authorization.EMAILS}>{capitalize(Authorization.EMAILS)}</Radio.Button>
+            <Radio.Button value={Authorization.KEYBASE}>{capitalize(Authorization.KEYBASE)}</Radio.Button>
             <Radio.Button disabled value={Authorization.DOMAIN}>{capitalize(Authorization.DOMAIN)}</Radio.Button>
             <Radio.Button disabled value={Authorization.CODE}>{capitalize(Authorization.CODE)}</Radio.Button>
-            <Radio.Button value={Authorization.IP}>{Authorization.IP.toUpperCase()}</Radio.Button>
-            <Radio.Button value={Authorization.COOKIE}>{capitalize(Authorization.COOKIE)}</Radio.Button>
-            <Radio.Button value={Authorization.KEYBASE}>{capitalize(Authorization.KEYBASE)}</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item
