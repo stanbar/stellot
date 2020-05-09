@@ -18,6 +18,7 @@ import {
 import { createTransaction, getAccountSequenceNumber } from "@/services/stellar";
 import { Voting, Option } from "@stellot/types";
 import { VoteStatus } from "@/types/voteStatus";
+import _ from 'lodash';
 
 interface Session {
   id: number;
@@ -106,10 +107,7 @@ async function createRandomBatchOfTransaction(
   voting: Voting, optionCode: number)
   : Promise<TransactionsBatch> {
   const distributionKeypair = Keypair.fromPublicKey(voting.distributionAccountId);
-  const shuffledCandidates: Option[] = voting.polls[0].options
-    .map(option => ({ sort: Math.random(), value: option }))
-    .sort((a: any, b: any) => a.sort - b.sort)
-    .map(a => a.value);
+  const shuffledCandidates: Option[] = _.shuffle(voting.polls[0].options)
 
   return shuffledCandidates.map(candidate => {
     const memo = Memo.text(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('ascii'));

@@ -13,6 +13,7 @@ import {
 import { decodeAnswersFromMemo } from "@/crypto/utils";
 import { Option, Voting } from "@stellot/types";
 import Result from "@/types/result";
+import _ from 'lodash';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -72,7 +73,7 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
         console.log(`Detected valid vote on candidateCode: ${candidateCode}`)
       }
     });
-  return results.map(result => ({ name: result.option.name, votes: result.votes }));
+  return _.shuffle(results.map(result => ({ name: result.option.name, votes: result.votes })));
 }
 
 export function getMyCandidate(voting: Voting, myTxMemo: string | Buffer): Option | undefined {
