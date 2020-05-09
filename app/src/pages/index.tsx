@@ -76,7 +76,7 @@ export default function () {
         </p>
       </Col>
       <Col style={{ marginTop: 64 }}>
-        <FAQ className={styles.faq}/>
+        <FAQ />
       </Col>
     </div>
   );
