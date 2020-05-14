@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 
 app.set('trust proxy', true)
-app.use(logger('dev'));
+app.use(logger('dev', { skip: (req) => req.url === '/health' }));
 app.use(express.json({ limit: '0.5mb' }));
 app.use(express.urlencoded({ limit: '0.5mb', extended: false }));
 app.use(cookieParser());
@@ -19,10 +19,8 @@ if (!isProduction) {
 app.get('/health', (req, res) => res.sendStatus(200).end());
 app.get('/myIp', (req, res) => {
   const { ip, ips } = req
-  const { remoteAddress } = req.connection
   const forwarded = req.headers['X-Forwarded-For'];
   const cloudFlareIp = req.headers['cf-connecting-ip'];
-  console.log({ ip, ips, remoteAddress, forwarded, cloudFlareIp })
   res.send({ ip, ips, remoteAddress: req.connection.remoteAddress, forwarded, cloudFlareIp })
 });
 app.use(router);
@@ -46,8 +44,8 @@ app.use((req, res, next) => {
 
 
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-// development will print stacktrace
-// production error handler no stacktraces leaked to user
+  // development will print stacktrace
+  // production error handler no stacktraces leaked to user
   if (!isProduction) {
     console.log(err.stack);
   }
