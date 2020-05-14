@@ -12,6 +12,7 @@ import { Link } from "umi";
 import { KeybaseAuthorizationView, EmailsAuthorizationView } from '@/components/AuthorizationView';
 import * as storage from '@/storage'
 import _ from 'lodash'
+import * as ipfs from '@/ipfs'
 
 
 interface VotePreviewProps extends ConnectProps {
@@ -27,6 +28,11 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, di
   const [sorted, setSorted] = useState(voting?.polls[0].options)
 
   useEffect(() => dispatchFetchVoting(dispatch, votingSlug), [votingSlug]);
+  useEffect(() => {
+    if (voting) {
+      ipfs.getVoting(voting?.ipfsCid).then(voting => console.log({ votingFromIpfs: voting }))
+    }
+  }, [voting])
   useEffect(() => { if (voting) { setSorted(_.shuffle(voting.polls[0].options)) } }, [voting])
 
   const radioStyle = {
