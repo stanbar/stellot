@@ -11,7 +11,7 @@ const app = express();
 
 const whitelist = ['https://stellot.com', 'https://stellot.stasbar.com', 'https://voting.stasbar.com', 'http://localhost'];
 app.use(cors({ origin: whitelist }));
-app.use(logger('dev'));
+app.use(logger('dev', { skip: (req) => req.url === '/health' }));
 app.use(express.json({ limit: '0.5mb' }));
 app.use(express.urlencoded({ limit: '0.5mb', extended: false }));
 app.use(cookieParser());
