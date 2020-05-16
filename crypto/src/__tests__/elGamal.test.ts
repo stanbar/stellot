@@ -73,7 +73,7 @@ describe('elGamal', () => {
 
             const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
             const decrypted = decrypter.decrypt(cipher)
-            expect(randomMemoAscii).toEqual(new Buffer(decrypted.toByteArray()).toString('ascii'))
+            expect(randomMemoAscii).toBe(toBuffer(decrypted).toString('ascii'))
         })
     });
 
@@ -92,7 +92,7 @@ describe('elGamal', () => {
 
             const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
             const decrypted = decrypter.decrypt(cipher)
-            expect(randomMemoAscii).toEqual(new Buffer(decrypted.toByteArray()).toString('ascii'))
+            expect(randomMemoAscii).toEqual(toBuffer(decrypted).toString('ascii'))
         })
     });
     it('should encrypt and decrypt hello world 128bit elgamal', () => {
@@ -109,6 +109,7 @@ describe('elGamal', () => {
 
         const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
         const decrypted = decrypter.decrypt(cipher)
-        expect(helloWorld).toEqual(new Buffer(decrypted.toByteArray()).toString())
+        expect(helloWorldBuffer).toEqual(toBuffer(decrypted))
+        expect(helloWorld).toEqual(toBuffer(decrypted).toString())
     });
 })

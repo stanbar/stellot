@@ -1,6 +1,6 @@
 {
   "name": "@stellot/crypto",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "asn1.js": "^5.3.0",
+    "bn.js": "^5.1.1",
     "elliptic": "^6.5.2",
     "es6-error": "^4.1.1",
     "jsbn": "^1.1.0"
