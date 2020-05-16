@@ -10,6 +10,9 @@ import {
     EncryptedValue,
     DecryptedValue
 } from './elGamal'
+import {
+    toBuffer,
+} from './elGamal/utils'
 
 export {
     createEncryptionKeypair,
@@ -21,5 +24,6 @@ export {
     EncryptionElGamal,
     DecryptionElGamal,
     EncryptedValue,
-    DecryptedValue
+    DecryptedValue,
+    toBuffer
 }
