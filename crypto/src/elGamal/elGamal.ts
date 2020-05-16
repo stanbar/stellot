@@ -44,7 +44,7 @@ export class EncryptionElGamal {
    * closed range `[1, p-2]`.
    * @returns {EncryptedValue}
    */
-  encrypt(m: Buffer | string, k?: BigInt | string | number) {
+  encrypt(m: Buffer, k?: BigInt | string | number) {
     const tmpKey = k ? Utils.parseBigInt(k) : Utils.getRandomBigInt(
       BigInt.ONE,
       this.p.subtract(BigInt.ONE)
