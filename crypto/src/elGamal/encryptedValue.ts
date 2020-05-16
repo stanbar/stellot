@@ -8,10 +8,16 @@ export default class EncryptedValue {
 
     readonly b: BigInt
 
+
+    /**
+     * 
+     * @param a hex encoding
+     * @param b hex encoding 
+     */
     constructor(a: string | number | BigInt, b: string | number | BigInt) {
         switch (typeof a) {
             case 'string':
-                this.a = new BigInt(new Buffer(a).toString('hex'), 16);
+                this.a = new BigInt(a, 16);
                 break;
             case 'number':
                 this.a = new BigInt(`${a}`);
@@ -21,7 +27,7 @@ export default class EncryptedValue {
         }
         switch (typeof b) {
             case 'string':
-                this.b = new BigInt(new Buffer(b).toString('hex'), 16);
+                this.b = new BigInt(b, 16);
                 break;
             case 'number':
                 this.b = new BigInt(`${b}`);
