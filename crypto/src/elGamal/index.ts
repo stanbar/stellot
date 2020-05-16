@@ -1,11 +1,15 @@
 //@ts-ignore
 import asn from 'asn1.js'
-import Elgamal from './elGamal'
+import ElGamal, { DecryptionElGamal, EncryptionElGamal } from './elGamal'
 import { BigInteger as BigInt } from 'jsbn';
+import EncryptedValue from './encryptedValue'
+import DecryptedValue from './decryptedValue'
 import BN from 'bn.js'
 
-export async function createEncryptionKeypair(): Promise<{ publicKey: Buffer, privateKey: Buffer }> {
-    const { p, g, y, x } = await Elgamal.generateAsync()
+export { ElGamal, EncryptionElGamal, DecryptionElGamal, DecryptedValue, EncryptedValue }
+
+export function createEncryptionKeypair(primeBits = 2048): { publicKey: Buffer, privateKey: Buffer } {
+    const { p, g, y, x } = ElGamal.generate(primeBits)
     const privateKey = encodePrivateKey(p, g, y, x)
     const publicKey = encodePublicKey(p, g, y)
     return { privateKey, publicKey }
