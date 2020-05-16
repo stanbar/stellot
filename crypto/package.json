@@ -1,21 +1,19 @@
 {
   "name": "@stellot/crypto",
-  "version": "1.0.2",
+  "version": "1.0.15",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
   "license": "ISC",
-  "main": "lib/index.js",
+  "main": "dist/lib/index.js",
+  "typings": "dist/types/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepublish": "tsc",
+    "prepublish": "npm run build && npm test",
     "test": "jest"
   },
-  "directories": {
-    "lib": "lib"
-  },
   "files": [
-    "lib"
+    "dist"
   ],
   "repository": {
     "type": "git",
@@ -25,9 +23,7 @@
     "url": "https://github.com/stasbar/stellar-voting/issues"
   },
   "dependencies": {
-    "@types/bluebird": "^3.5.31",
     "asn1.js": "^5.3.0",
-    "bluebird": "^3.7.2",
     "elliptic": "^6.5.2",
     "es6-error": "^4.1.1",
     "jsbn": "^1.1.0"
@@ -40,8 +36,8 @@
     "@types/node": "^12.12.37",
     "jest": "^24.9.0",
     "ts-jest": "^24.3.0",
-    "ts-node": "^8.9.1",
-    "typescript": "^3.8.3"
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.2"
   },
   "keywords": [
     "stellot",

@@ -1,5 +1,25 @@
-import { createEncryptionKeypair, encodePublicKey, encodePrivateKey, decodePrivateKey, decodePublicKey } from './elGamal'
+import {
+    createEncryptionKeypair,
+    encodePublicKey,
+    encodePrivateKey,
+    decodePrivateKey,
+    decodePublicKey,
+    ElGamal,
+    EncryptionElGamal,
+    DecryptionElGamal,
+    EncryptedValue,
+    DecryptedValue
+} from './elGamal'
 
 export {
-    createEncryptionKeypair, encodePublicKey, encodePrivateKey, decodePrivateKey, decodePublicKey
+    createEncryptionKeypair,
+    encodePublicKey,
+    encodePrivateKey,
+    decodePrivateKey,
+    decodePublicKey,
+    ElGamal,
+    EncryptionElGamal,
+    DecryptionElGamal,
+    EncryptedValue,
+    DecryptedValue
 }

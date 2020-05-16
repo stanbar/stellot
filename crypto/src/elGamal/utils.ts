@@ -1,8 +1,5 @@
-import Promise from 'bluebird';
-import crypto from 'crypto';
+import { rand } from 'elliptic'
 import { BigInteger as BigInt } from 'jsbn';
-
-Promise.promisifyAll(crypto);
 
 export const BIG_TWO = new BigInt('2');
 
@@ -20,10 +17,10 @@ function trimBigInt(bi: BigInt, bits: number) {
  * Returns a random BigInt with the given amount of bits.
  * @param  bits Number of bits in the output.
  */
-export async function getRandomNbitBigIntAsync(bits: number) {
+export function getRandomNbitBigInt(bits: number) {
     // Generate random bytes with the length of the range
     //@ts-ignore
-    const buf = await crypto.randomBytesAsync(Math.ceil(bits / 8));
+    const buf = rand(Math.ceil(bits / 8));
     const bi = new BigInt(buf.toString('hex'), 16);
 
     // Trim the result and then ensure that the highest bit is set
@@ -35,14 +32,14 @@ export async function getRandomNbitBigIntAsync(bits: number) {
  * @param  min Minimum value (included).
  * @param  max Maximum value (excluded).
  */
-export async function getRandomBigIntAsync(min: BigInt, max: BigInt) {
+export function getRandomBigInt(min: BigInt, max: BigInt) {
     const range = max.subtract(min).subtract(BigInt.ONE);
 
     let bi;
     do {
         // Generate random bytes with the length of the range
         //@ts-ignore
-        const buf = await crypto.randomBytesAsync(Math.ceil(range.bitLength() / 8));
+        const buf = rand(Math.ceil(range.bitLength() / 8));
 
         // Offset the result by the minimum value
         bi = new BigInt(buf.toString('hex'), 16).add(min);
@@ -56,9 +53,9 @@ export async function getRandomBigIntAsync(min: BigInt, max: BigInt) {
  * Returns a random prime BigInt value.
  * @param  bits Number of bits in the output.
  */
-export async function getBigPrimeAsync(bits: number) {
+export function getBigPrime(bits: number) {
     // Generate a random odd number with the given length
-    let bi = (await getRandomNbitBigIntAsync(bits)).or(BigInt.ONE);
+    let bi = (getRandomNbitBigInt(bits)).or(BigInt.ONE);
 
     //@ts-ignore
     while (!bi.isProbablePrime()) {

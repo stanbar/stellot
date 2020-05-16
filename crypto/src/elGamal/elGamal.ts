@@ -44,11 +44,12 @@ export class EncryptionElGamal {
    * closed range `[1, p-2]`.
    * @returns {EncryptedValue}
    */
-  async encryptAsync(m: string | BigInt | number, k?: BigInt | string | number) {
-    const tmpKey = k ? Utils.parseBigInt(k) : await Utils.getRandomBigIntAsync(
+  encrypt(m: Buffer | string, k?: BigInt | string | number) {
+    const tmpKey = k ? Utils.parseBigInt(k) : Utils.getRandomBigInt(
       BigInt.ONE,
       this.p.subtract(BigInt.ONE)
     );
+
     const mBi = new DecryptedValue(m).bi;
     const p = this.p;
 
@@ -84,12 +85,12 @@ export class DecryptionElGamal extends EncryptionElGamal {
    * @throws {MissingPrivateKeyError}
    * @returns {DecryptedValue}
    */
-  async decryptAsync(m: EncryptedValue) {
+  decrypt(m: EncryptedValue): BigInt {
     // TODO: Use a custom error object
     if (!this.x) throw new Errors.MissingPrivateKeyError();
 
     const p = this.p;
-    const r = await Utils.getRandomBigIntAsync(
+    const r = Utils.getRandomBigInt(
       Utils.BIG_TWO,
       this.p.subtract(BigInt.ONE)
     );
@@ -98,19 +99,17 @@ export class DecryptionElGamal extends EncryptionElGamal {
     const ax = aBlind.modPow(this.x, p);
 
     const plaintextBlind = ax.modInverse(p).multiply(m.b).remainder(p);
-    const plaintext = this.y.modPow(r, p).multiply(plaintextBlind).remainder(p);
-
-    return new DecryptedValue(plaintext);
+    return this.y.modPow(r, p).multiply(plaintextBlind).remainder(p)
   }
 }
 
 
 export default class ElGamal {
-  static async generateAsync(primeBits = 2048) {
+  static generate(primeBits = 2048) {
     let q;
     let p;
     do {
-      q = await Utils.getBigPrimeAsync(primeBits - 1);
+      q = Utils.getBigPrime(primeBits - 1);
       p = q.shiftLeft(1).add(BigInt.ONE);
       // @ts-ignore
     } while (!p.isProbablePrime()); // Ensure that p is a prime
@@ -118,7 +117,7 @@ export default class ElGamal {
     let g;
     do {
       // Avoid g=2 because of Bleichenbacher's attack
-      g = await Utils.getRandomBigIntAsync(new BigInt('3'), p);
+      g = Utils.getRandomBigInt(new BigInt('3'), p);
     } while (
       g.modPowInt(2, p).equals(BigInt.ONE) ||
       g.modPow(q, p).equals(BigInt.ONE) ||
@@ -129,7 +128,7 @@ export default class ElGamal {
     );
 
     // Generate private key
-    const x = await Utils.getRandomBigIntAsync(
+    const x = Utils.getRandomBigInt(
       Utils.BIG_TWO,
       p.subtract(BigInt.ONE)
     );
