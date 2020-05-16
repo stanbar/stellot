@@ -1,5 +1,6 @@
 import { rand } from 'elliptic'
 import { BigInteger as BigInt } from 'jsbn';
+import BN from 'bn.js'
 
 export const BIG_TWO = new BigInt('2');
 
@@ -80,5 +81,5 @@ export function parseBigInt(obj: BigInt | string | number): BigInt {
  * @param  bigInt BigInt to be parsed.
  */
 export function toBuffer(bigInt: BigInt): Buffer {
-    return new Buffer(bigInt.toByteArray().slice(1))
+    return new BN(Buffer.from(bigInt.toByteArray())).toBuffer()
 }
