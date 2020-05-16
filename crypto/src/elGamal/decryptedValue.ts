@@ -9,11 +9,8 @@ export default class DecryptedValue {
    */
   bi: BigInt;
 
-  constructor(m: string | number | Buffer | bigint) {
+  constructor(m: number | Buffer | bigint) {
     switch (typeof m) {
-      case 'string':
-        this.bi = new BigInt(new Buffer(m).toString('hex'), 16);
-        break;
       case 'number':
         this.bi = new BigInt(`${m}`);
         break;

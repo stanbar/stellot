@@ -1,6 +1,7 @@
 import { createEncryptionKeypair, decodePublicKey, decodePrivateKey, ElGamal, DecryptionElGamal, EncryptionElGamal } from '../'
 import { rand } from 'elliptic'
 import { toBuffer } from '../elGamal/utils'
+import { DecryptedValue } from '../elGamal'
 
 describe('elGamal', () => {
     it('should return base64 priv and public keys', () => {
@@ -47,10 +48,9 @@ describe('elGamal', () => {
 
             const randomMemo: Buffer = Buffer.from(rand(keySizeBytes));
             randomMemo.writeUInt8(1, 0);
-            const randomMemoAscii = randomMemo.toString('ascii')
 
             const encrypter = ElGamal.fromPublicKey(pub.p.toString(), pub.g.toString(), pub.y.toString())
-            const cipher = encrypter.encrypt(randomMemoAscii)
+            const cipher = encrypter.encrypt(randomMemo)
 
             expect(cipher.a.bitLength()).toBeLessThanOrEqual(keySizeBytes * 8)
             expect(cipher.b.bitLength()).toBeLessThanOrEqual(keySizeBytes * 8)
@@ -66,14 +66,13 @@ describe('elGamal', () => {
 
             const randomMemo: Buffer = Buffer.from(rand(16));
             randomMemo.writeUInt8(1, 0);
-            const randomMemoAscii = randomMemo.toString('ascii')
 
             const encrypter = ElGamal.fromPublicKey(pub.p.toString(), pub.g.toString(), pub.y.toString())
-            const cipher = encrypter.encrypt(randomMemoAscii)
+            const cipher = encrypter.encrypt(randomMemo)
 
             const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
             const decrypted = decrypter.decrypt(cipher)
-            expect(randomMemoAscii).toBe(toBuffer(decrypted).toString('ascii'))
+            expect(randomMemo.toString()).toBe(toBuffer(decrypted).toString())
         })
     });
 
@@ -85,14 +84,13 @@ describe('elGamal', () => {
 
             const randomMemo: Buffer = Buffer.from(rand(16));
             randomMemo.writeUInt8(1, 0);
-            const randomMemoAscii = randomMemo.toString('ascii')
 
             const encrypter = ElGamal.fromPublicKey(pub.p.toString(), pub.g.toString(), pub.y.toString())
-            const cipher = encrypter.encrypt(randomMemoAscii)
+            const cipher = encrypter.encrypt(randomMemo)
 
             const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
             const decrypted = decrypter.decrypt(cipher)
-            expect(randomMemoAscii).toEqual(toBuffer(decrypted).toString('ascii'))
+            expect(randomMemo.toString()).toEqual(toBuffer(decrypted).toString())
         })
     });
     it('should encrypt and decrypt hello world 128bit elgamal', () => {
@@ -102,10 +100,9 @@ describe('elGamal', () => {
 
         const helloWorld = 'Hello World!'
         const helloWorldBuffer: Buffer = Buffer.from(helloWorld);
-        const helloWroldAscii = helloWorldBuffer.toString('ascii')
 
         const encrypter = ElGamal.fromPublicKey(pub.p.toString(), pub.g.toString(), pub.y.toString())
-        const cipher = encrypter.encrypt(helloWroldAscii)
+        const cipher = encrypter.encrypt(helloWorldBuffer)
 
         const decrypter: DecryptionElGamal = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
         const decrypted = decrypter.decrypt(cipher)
