@@ -74,3 +74,11 @@ export function parseBigInt(obj: BigInt | string | number): BigInt {
 
     return obj instanceof Object ? obj : new BigInt(`${obj}`);
 }
+
+/**
+ * Convert BigInt to Buffer removing first sign byte
+ * @param  bigInt BigInt to be parsed.
+ */
+export function toBuffer(bigInt: BigInt): Buffer {
+    return new Buffer(bigInt.toByteArray().slice(1))
+}
