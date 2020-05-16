@@ -10,9 +10,12 @@ import {
     EncryptedValue,
     DecryptedValue
 } from './elGamal'
+
 import {
     toBuffer,
 } from './elGamal/utils'
+
+import { VoterSession, SignerSession, EdDSA, ed25519 } from './blindSignature'
 
 export {
     createEncryptionKeypair,
@@ -25,5 +28,9 @@ export {
     DecryptionElGamal,
     EncryptedValue,
     DecryptedValue,
-    toBuffer
+    toBuffer,
+    VoterSession,
+    SignerSession,
+    EdDSA,
+    ed25519
 }
