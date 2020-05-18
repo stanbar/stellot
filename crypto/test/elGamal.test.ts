@@ -6,7 +6,7 @@ import {
     ElGamal,
     DecryptionElGamal,
 } from '../src'
-import { rand } from 'elliptic'
+import rand from 'randombytes'
 import { toBuffer } from '../src/elGamal/utils'
 
 test('should return base64 priv and public keys', (t) => {

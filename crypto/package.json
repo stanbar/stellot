@@ -1,6 +1,6 @@
 {
   "name": "@stellot/crypto",
-  "version": "2.0.2",
+  "version": "2.0.5",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
@@ -36,18 +36,19 @@
     "bn.js": "^5.1.1",
     "elliptic": "^6.5.2",
     "es6-error": "^4.1.1",
-    "jsbn": "^1.1.0"
+    "jsbn": "^1.1.0",
+    "randombytes": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^13.13.0",
     "@types/bn.js": "^4.11.6",
     "@types/elgamal": "^0.3.0",
     "@types/elliptic": "^6.4.12",
+    "@types/node": "^13.13.0",
     "ava": "^3.7.0",
     "ava-ts": "^0.25.2",
     "gh-pages": "^2.2.0",
+    "ts-node": "^8.10.1",
     "typedoc": "^0.17.4",
-    "ts-node": "^8.8.2",
     "typescript": "^3.9.2"
   },
   "keywords": [
