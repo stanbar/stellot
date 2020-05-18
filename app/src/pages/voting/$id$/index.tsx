@@ -29,7 +29,7 @@ const VotePreview: React.FC<VotePreviewProps> = ({ loading, authToken, match, di
 
   useEffect(() => dispatchFetchVoting(dispatch, votingSlug), [votingSlug]);
   useEffect(() => {
-    if (voting) {
+    if (voting && voting.ipfsCid) {
       ipfs.getVoting(voting?.ipfsCid).then(voting => console.log({ votingFromIpfs: voting }))
     }
   }, [voting])
