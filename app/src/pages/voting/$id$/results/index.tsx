@@ -87,8 +87,8 @@ const renderActiveShape = (props: any) => {
         outerRadius={outerRadius + 10}
         fill={fill}
       />
-      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none"/>
-      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none"/>
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
       <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">{payload.name}</text>
     </g>
   );
@@ -117,102 +117,102 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
   }, [voting]);
 
   if (loading) {
-    return (<><p>Loading voting metadata...</p><Skeleton active/></>)
+    return (<><p>Loading voting metadata...</p><Skeleton active /></>)
   }
   if (loadingResults) {
-    return (<><p>Loading results from stellar blockchain...</p><Skeleton active/></>)
+    return (<><p>Loading results from stellar blockchain...</p><Skeleton active /></>)
   }
   if (!voting) {
     return (<p>Failed to load voting</p>)
   }
   return (
     <div>
-      <VotingMetadata voting={voting}/>
+      <VotingMetadata voting={voting} />
       <div style={{ float: 'right' }}>
         <Switch
           className={styles.switch}
           onChange={checked => setChart(checked ? ChartType.Bar : ChartType.Pie)}
-          checkedChildren={<BarChartOutlined/>}
-          unCheckedChildren={<PieChartOutlined/>}
+          checkedChildren={<BarChartOutlined />}
+          unCheckedChildren={<PieChartOutlined />}
           defaultChecked
         />
       </div>
       <h3 style={{ marginBottom: 24 }}>{voting?.polls[0].question}</h3>
 
       {chart === ChartType.Bar &&
-      <ResponsiveContainer width="100%" height={100 + (results?.length || 0) * 50}>
-        <BarChart
-          layout="vertical"
-          data={results}
-          margin={{
-            top: 5, bottom: 5,
-          }}
-        >
-          <XAxis type="number"/>
-          <YAxis type="category" dataKey="name"/>
-          <Tooltip/>
-          <Legend/>
-          <Bar dataKey="votes" fill="#8884d8"/>
-        </BarChart>
-      </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={100 + (results?.length || 0) * 50}>
+          <BarChart
+            layout="vertical"
+            data={results}
+            margin={{
+              top: 5, bottom: 5,
+            }}
+          >
+            <XAxis type="number" />
+            <YAxis type="category" dataKey="name" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="votes" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
       }
 
       {chart === ChartType.Pie &&
-      <ResponsiveContainer width="100%" maxHeight={400} aspect={1}>
-        <PieChart>
-          <Pie
-            activeIndex={activeIndex}
-            activeShape={renderActiveShape}
-            data={results}
-            dataKey="votes"
-            innerRadius="50%"
-            outerRadius="80%"
-            fill="#8884d8"
-            onMouseEnter={(data, index) => setActiveIndex(index)}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+        <ResponsiveContainer width="100%" maxHeight={400} aspect={1}>
+          <PieChart>
+            <Pie
+              activeIndex={activeIndex}
+              activeShape={renderActiveShape}
+              data={results}
+              dataKey="votes"
+              innerRadius="50%"
+              outerRadius="80%"
+              fill="#8884d8"
+              onMouseEnter={(data, index) => setActiveIndex(index)}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       }
 
 
       {myTxHash && myTxMemo &&
-      <Button type="link" onClick={() => setShowMyVote(!showMyVote)}>
-        <span style={{ marginLeft: 2 }}>{showMyVote ? <UpOutlined/> : <DownOutlined/>}My vote</span>
-      </Button>
+        <Button type="link" onClick={() => setShowMyVote(!showMyVote)}>
+          <span style={{ marginLeft: 2 }}>{showMyVote ? <UpOutlined /> : <DownOutlined />}My vote</span>
+        </Button>
       }
       <a rel="noopener noreferrer" target="_blank"
-         href={`https://testnet.lumenscan.io/account/${voting.distributionAccountId}`}>
-        <Button type="link" icon={<AuditOutlined/>}>
+        href={`https://testnet.lumenscan.io/account/${voting.distributionAccountId}`}>
+        <Button type="link" icon={<AuditOutlined />}>
           <span style={{ marginLeft: 2 }}>Distribution account</span>
         </Button>
       </a>
 
       <a rel="noopener noreferrer" target="_blank"
-         href={`https://testnet.lumenscan.io/account/${voting.ballotBoxAccountId}`}>
-        <Button type="link" icon={<BallotBoxIcon/>}>
+        href={`https://testnet.lumenscan.io/account/${voting.ballotBoxAccountId}`}>
+        <Button type="link" icon={<BallotBoxIcon />}>
           <span style={{ marginLeft: 2 }}>Ballot-box account</span>
         </Button>
       </a>
       {showMyVote && myTxHash && myTxMemo &&
-      <>
+        <>
 
-        <Card
-          title={<AntTooltip title="Copy to clipboard">
-            <h2 style={{ cursor: 'pointer' }} onClick={() => copyTextToClipboard(myTxHash)}
+          <Card
+            title={<AntTooltip title="Copy to clipboard">
+              <h2 style={{ cursor: 'pointer' }} onClick={() => copyTextToClipboard(myTxHash)}
                 className={styles.myVoteCardTitle}>{myTxHash}</h2>
-          </AntTooltip>}
-          extra={[<AntTooltip
-            title="This information is stored in your browser only, if you clear it, you will be unable to track your vote. Store the vote identifier in safe place."><QuestionCircleOutlined/></AntTooltip>]}
-          actions={[
-            <a rel="noopener noreferrer" target="_blank" href={`https://testnet.lumenscan.io/txns/${myTxHash}`}>
-              Show in blockchain</a>
-          ]} style={{ maxWidth: 350 }}>
+            </AntTooltip>}
+            extra={[<AntTooltip
+              title="This information is stored in your browser only, if you clear it, you will be unable to track your vote. Store the vote identifier in safe place."><QuestionCircleOutlined /></AntTooltip>]}
+            actions={[
+              <a rel="noopener noreferrer" target="_blank" href={`https://testnet.lumenscan.io/txns/${myTxHash}`}>
+                Show in blockchain</a>
+            ]} style={{ maxWidth: 350 }}>
 
-          <p className={styles.option}>
-            Option: <EncryptedDecrypted voting={voting} myTxMemo={myTxMemo.toString()}/>
-          </p>
-        </Card>
-      </>
+            <p className={styles.option}>
+              Option: <EncryptedDecrypted voting={voting} myTxMemo={myTxMemo.toString()} />
+            </p>
+          </Card>
+        </>
       }
 
       <div style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>

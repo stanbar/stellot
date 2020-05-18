@@ -3,7 +3,7 @@ import { Reducer } from 'redux';
 import { Effect, Dispatch } from "dva";
 import { performSignedTransaction } from "@/services/voting";
 import { castVote, fetchResults } from "@/services/stellar";
-import { fetchVoting } from "@/services/tokenDistributionServer";
+import { fetchVoting } from "@/services/tds";
 import { VoteStatus } from "@/types/voteStatus";
 import Result from '@/types/result';
 import * as storage from '@/storage';

@@ -1,6 +1,6 @@
 import { Effect, Dispatch } from "dva";
 import { Reducer } from 'redux';
-import { createVoting } from '@/services/tokenDistributionServer';
+import { createVoting } from '@/services/tds';
 import { Voting, CreateVotingRequest } from "@stellot/types";
 
 export const CREATE = 'create';
