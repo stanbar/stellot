@@ -1,9 +1,9 @@
 {
   "name": "@stellot/types",
-  "version": "1.0.9",
+  "version": "1.1.9",
   "description": "Shared types across front and backend",
   "author": "stasbar <stasbar1995@gmail.com>",
-  "homepage": "http://stellot.stasbar.com",
+  "homepage": "https://stellot.com",
   "license": "ISC",
   "main": "lib/index.js",
   "scripts": {
