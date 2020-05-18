@@ -1,21 +1,28 @@
 {
   "name": "@stellot/crypto",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
   "license": "ISC",
-  "main": "dist/lib/index.js",
-  "typings": "dist/types/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "prepublish": "npm run build && npm test",
-    "test": "jest",
-    "test:watch": "jest --watch"
-  },
+  "main": "lib/commonjs/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/index.d.ts",
   "files": [
-    "dist"
+    "lib"
   ],
+  "scripts": {
+    "clean": "rm -rf lib && rm -rf temp",
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:esm": "npx tsc -p tsconfig.json -m es6 --outDir lib/esm",
+    "build:cjs": "npx tsc -p tsconfig.json -m commonjs --outDir lib/commonjs",
+    "build:types": "npx tsc -p config/tsconfig.types.json",
+    "build:docs": "npx typedoc --options config/typedoc.json --tsconfig tsconfig.json",
+    "prepublish": "npm run build && npm test",
+    "publish:docs": "npx gh-pages -m 'Updates' -d docs",
+    "test": "npx ava-ts",
+    "test:watch": "npx ava-ts --watch --color"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stasbar/stellar-voting.git"
@@ -24,6 +31,7 @@
     "url": "https://github.com/stasbar/stellar-voting/issues"
   },
   "dependencies": {
+    "@futuretense/secret-memo": "^1.0.0",
     "asn1.js": "^5.3.0",
     "bn.js": "^5.1.1",
     "elliptic": "^6.5.2",
@@ -31,14 +39,15 @@
     "jsbn": "^1.1.0"
   },
   "devDependencies": {
+    "@types/node": "^13.13.0",
     "@types/bn.js": "^4.11.6",
     "@types/elgamal": "^0.3.0",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^24.9.1",
-    "@types/node": "^12.12.37",
-    "jest": "^24.9.0",
-    "ts-jest": "^24.3.0",
-    "tslib": "^2.0.0",
+    "ava": "^3.7.0",
+    "ava-ts": "^0.25.2",
+    "gh-pages": "^2.2.0",
+    "typedoc": "^0.17.4",
+    "ts-node": "^8.8.2",
     "typescript": "^3.9.2"
   },
   "keywords": [

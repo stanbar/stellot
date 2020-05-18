@@ -16,6 +16,7 @@ import {
 } from './elGamal/utils'
 
 import { VoterSession, SignerSession, EdDSA, ed25519 } from './blindSignature'
+import { encodeMemo, decodeMemo, decodeTransactionMemo } from '@futuretense/secret-memo';
 
 export {
     createEncryptionKeypair,
@@ -29,8 +30,6 @@ export {
     EncryptedValue,
     DecryptedValue,
     toBuffer,
-    VoterSession,
-    SignerSession,
-    EdDSA,
-    ed25519
+    VoterSession, SignerSession, EdDSA, ed25519,
+    encodeMemo, decodeMemo, decodeTransactionMemo
 }

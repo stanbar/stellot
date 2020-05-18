@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "removeComments": true,
+      "stripInternal": true,
+      "declaration": true,
+      "declarationDir": "../lib",
+      "emitDeclarationOnly": true,
+      "sourceMap": false,
+      "target": "es2017",
+      "esModuleInterop": true,
+      "lib": [
+        "es6"
+      ]
+    },
+    "include": [
+      "../src/**/*.ts"
+    ],
+    "exclude": [
+      "../node_modules"
+    ]
+  }
