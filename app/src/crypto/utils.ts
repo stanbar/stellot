@@ -1,47 +1,77 @@
-import { rand } from 'elliptic'
+import rand from 'randombytes'
 import BN from 'bn.js'
+import { EncryptionElGamal, DecryptionElGamal, EncryptedValue, toBuffer } from '@stellot/crypto';
 
 export function getRandomInt(max: number) {
   return Math.floor(Math.random() * Math.floor(max))
-}
-
-export function randomScalar() {
-  return new BN(randomBytes(32))
-}
-
-export function randomBytes(bytes: number) {
-  return rand(bytes)
 }
 
 export function encodeMemo(candidateCode: number): Buffer {
   if (candidateCode === 0) {
     throw new Error('Code 0 will be skipped by ascii encoding, please start enumeration with code 1')
   }
-  const randomMemo: Buffer = Buffer.from(rand(28));
+  const randomMemo: Buffer = new Buffer(rand(16));
   // Write answer 0
   randomMemo.writeUInt8(candidateCode, 0);
   return randomMemo
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function encryptMemo(memo: Buffer, _publicKey: Buffer): Buffer {
-  // TODO implement later
-  return memo
-}
-
-export function decodeAnswersFromMemo(memo: Buffer | string, answerCount: number)
-  : Array<number> {
+export function decodeMemo(memo: Buffer | string, answerCount: number): number[] {
   if (typeof memo === 'string') {
     // eslint-disable-next-line no-param-reassign
-    memo = Buffer.from(memo, 'ascii');
+    memo = Buffer.from(memo, 'hex');
   }
   const answers = new Array<number>(answerCount);
   for (let i = 0; i < answerCount; i += 1) {
     answers[i] = memo.readUInt8(i)
   }
-  return answers;
+  return answers
 }
 
+export function padMemoWithNonce(memo: Buffer) {
+  if (memo.length != 16) {
+    throw new Error('Only 16 bytes memos should be padded')
+  }
+  return Buffer.concat([memo, rand(16)])
+
+}
+
+export function encryptMemo(memo: Buffer, encryptor: EncryptionElGamal): Buffer {
+  const { a, b } = encryptor.encrypt(memo)
+  const aBuff = toBuffer(a)
+  const bBuff = toBuffer(b)
+
+  if (aBuff.length > 16) {
+    throw new Error(`a.Length ${aBuff.length} is longer than 16bytes`)
+  }
+  if (bBuff.length > 16) {
+    throw new Error(`b.Length ${bBuff.length} is longer than 16bytes`)
+  }
+
+  const aBuffer = new Buffer(16).fill(aBuff)
+  const bBuffer = new Buffer(16).fill(bBuff)
+
+  // Create empty buffer filled with 0
+  const cipherText = Buffer.alloc(32)
+  // Write part a to the [0-15] offset bytes
+  for (let i = 0; i < 16; i += 1) {
+    cipherText.writeUInt8(aBuffer.readUInt8(i), i)
+  }
+  // Write part b to the [16-31] offset bytes
+  for (let i = 16; i < 32; i += 1) {
+    cipherText.writeUInt8(bBuffer.readUInt8(i - 16), i)
+  }
+  return cipherText
+}
+
+export function decryptMemo(cipherText: Buffer, decryptor: DecryptionElGamal): Buffer {
+  const aBuffer = new BN(cipherText.slice(0, 16))
+  const bBuffer = new BN(cipherText.slice(16, 32))
+
+  const encryptedValue = new EncryptedValue(aBuffer.toString('hex'), bBuffer.toString('hex'))
+  const decryptedBigInt = decryptor.decrypt(encryptedValue)
+  return new Buffer(decryptedBigInt.toByteArray())
+}
 
 const base64abc = (() => {
   const abc = [];
