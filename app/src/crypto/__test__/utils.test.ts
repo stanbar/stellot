@@ -1,8 +1,9 @@
 import { getRandomInt, encodeMemo, encryptMemo, decryptMemo } from '../utils'
 import { ElGamal, createEncryptionKeypair, decodePrivateKey, decodePublicKey, DecryptionElGamal, toBuffer, EncryptedValue } from '@stellot/crypto'
-import { rand } from 'elliptic'
+import rand from 'randombytes'
 import BN from 'bn.js'
 import { BigInteger as BigInt } from 'jsbn';
+
 
 describe('test utils', () => {
     it('test rng', () => {
@@ -14,6 +15,11 @@ describe('test utils', () => {
         expect(encodeMemo(100).readUInt8(0)).toEqual(100)
         expect(encodeMemo(254).readUInt8(0)).toEqual(254)
         expect(encodeMemo(255).readUInt8(0)).toEqual(255)
+    })
+    it('toBuffer on browser', () => {
+        const bigInt = new BigInt('123456789')
+        const buffer = toBuffer(bigInt)
+        expect(buffer).not.toBeNull()
     })
     it('test encrypt', () => {
         Array.from({ length: 20 }, () => {
@@ -37,7 +43,6 @@ describe('test utils', () => {
         const bn = new BN('123456789')
         expect(bigInt.toString()).toEqual(bn.toString())
         expect(bigInt.toString()).toEqual(new BN(bigInt.toString()).toString())
-
     })
     it('jsbn and bn.js bytes transitivity', () => {
         const randomBytes = rand(16)
