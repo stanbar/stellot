@@ -22,7 +22,6 @@ test('should return base64 priv and public keys', (t) => {
 
 test('should decode the same prime and generator key properties', (t) => {
     const { privateKey, publicKey } = createEncryptionKeypair()
-    const derPriv = Buffer.from(privateKey).toString('base64')
     const pub = decodePublicKey(publicKey)
     const priv = decodePrivateKey(privateKey)
     t.deepEqual(pub.g, priv.g)
