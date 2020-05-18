@@ -7,7 +7,7 @@ module.exports = {
   testRegex: '.*\\.test\\.(j|t)sx?$',
   testPathIgnorePatterns: ['lib/', 'node_modules/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   rootDir: 'src',
   globals: {
     'ts-jest': {
