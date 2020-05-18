@@ -1,4 +1,5 @@
-import './ipfs'
+import './ipfs' // init ipfs node
+
 export const dva = {
   config: {
     onError(err: ErrorEvent) {
