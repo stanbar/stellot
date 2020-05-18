@@ -1,0 +1,12 @@
+{
+    "mode": "file",
+    "name": "crypto",
+    "out": "docs",
+    "hideGenerator": true,
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeExternals": true,
+    "includes": "src",
+    "includeDeclarations": false
+  }
