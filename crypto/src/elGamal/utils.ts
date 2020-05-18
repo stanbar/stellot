@@ -44,8 +44,10 @@ export function getRandomBigInt(min: BigInt, max: BigInt) {
 
         // Offset the result by the minimum value
         bi = new BigInt(buf.toString('hex'), 16).add(min);
+        console.log('add min to', bi.toString())
     } while (bi.compareTo(max) >= 0);
 
+        console.log('done', bi.toString())
     // Return the result which satisfies the given range
     return bi;
 }

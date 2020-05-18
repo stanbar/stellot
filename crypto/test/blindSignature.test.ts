@@ -1,6 +1,7 @@
 import test from 'ava'
 
-import { rand, eddsa } from 'elliptic'
+import { eddsa } from 'elliptic'
+import rand from 'randombytes'
 import SignerSession from '../src/blindSignature/SignerSession'
 import VoterSession from '../src/blindSignature/VoterSession'
 
