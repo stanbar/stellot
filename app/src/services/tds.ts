@@ -2,8 +2,10 @@ import { Voting, CreateVotingRequest, CreateVotingResponse } from '@stellot/type
 import BN from "bn.js";
 import { Memo, Transaction } from "stellar-sdk";
 
+const BASE_URL = REACT_APP_ENV === 'production' ? TDS_SERVER_URL : '' 
+
 export async function fetchVotes(): Promise<Voting[]> {
-  const res = await fetch('/api/voting');
+  const res = await fetch(`${BASE_URL}/api/voting`);
   if (!res.ok) {
     throw new Error(await res.text())
   }
@@ -12,7 +14,7 @@ export async function fetchVotes(): Promise<Voting[]> {
 
 export async function fetchVoting(votingSlug: string): Promise<Voting> {
   console.log({ fetchVoting: votingSlug });
-  const res = await fetch(`/api/voting/${votingSlug}`, {
+  const res = await fetch(`${BASE_URL}/api/voting/${votingSlug}`, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -25,7 +27,7 @@ export async function fetchVoting(votingSlug: string): Promise<Voting> {
 
 export async function createVoting(createVotingRequest: CreateVotingRequest)
   : Promise<CreateVotingResponse> {
-  const response = await fetch('/api/voting', {
+  const response = await fetch(`${BASE_URL}/api/voting`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -50,7 +52,7 @@ export interface ResSession {
 
 export async function initSessions(votingId: string, authToken?: string): Promise<[string, ResSession[]]> {
   console.log({ initSession: authToken });
-  const response = await fetch('/api/blindsig/init', {
+  const response = await fetch(`${BASE_URL}/api/blindsig/init`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -91,7 +93,7 @@ export async function getChallenges(
   blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>,
 )
   : Promise<number> {
-  const response = await fetch('/api/blindsig/getChallenges', {
+  const response = await fetch(`${BASE_URL}/api/blindsig/getChallenges`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -145,7 +147,7 @@ interface Proof {
 export async function proofChallenge(sessionToken: string, proofs: Proof[])
   : Promise<{ id: number, sigs: Array<BN> }> {
   console.log({ proofs: JSON.stringify({ proofs }) });
-  const response = await fetch('/api/blindsig/proofChallenges', {
+  const response = await fetch(`${BASE_URL}/api/blindsig/proofChallenges`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

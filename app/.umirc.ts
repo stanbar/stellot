@@ -1,12 +1,13 @@
 import { IConfig } from 'umi-types';
 // ref: https://umijs.org/config/
-const { REACT_APP_ENV, KEYBASE_AUTH_SERVER_URL, EMAILS_AUTH_SERVER_URL } = process.env;
+const { REACT_APP_ENV, KEYBASE_AUTH_SERVER_URL, EMAILS_AUTH_SERVER_URL, TDS_SERVER_URL } = process.env;
 const config: IConfig = {
     treeShaking: true,
     define: {
       REACT_APP_ENV: REACT_APP_ENV || false,
       KEYBASE_AUTH_SERVER_URL: KEYBASE_AUTH_SERVER_URL || false,
       EMAILS_AUTH_SERVER_URL: EMAILS_AUTH_SERVER_URL || false,
+      TDS_SERVER_URL: TDS_SERVER_URL || false,
     },
     plugins: [
       // ref: https://umijs.org/plugin/umi-plugin-react.html
