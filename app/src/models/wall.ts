@@ -1,7 +1,7 @@
 import { Voting } from "@stellot/types";
 import { Reducer } from 'redux';
 import { Effect, Dispatch } from "dva";
-import { fetchVotes } from '@/services/tokenDistributionServer';
+import { fetchVotes } from '@/services/tds';
 
 const WALL = 'wall';
 const SET_VOTES = 'setVotes';
