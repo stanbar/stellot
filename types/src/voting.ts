@@ -17,9 +17,9 @@ export default interface Voting {
     authorization: Authorization;
     authorizationOptions: KeybaseAuthOptions | undefined;
     visibility: Visibility;
-    encrypted: boolean;
     encryption: Encryption | undefined;
     votesCap: number;
     startDate: Date;
     endDate: Date;
+    ipfsCid: string;
 }
