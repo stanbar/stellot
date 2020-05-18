@@ -1,4 +1,4 @@
-import { rand } from 'elliptic'
+import rand from 'randombytes'
 import { BigInteger as BigInt } from 'jsbn';
 import BN from 'bn.js'
 
@@ -44,10 +44,8 @@ export function getRandomBigInt(min: BigInt, max: BigInt) {
 
         // Offset the result by the minimum value
         bi = new BigInt(buf.toString('hex'), 16).add(min);
-        console.log('add min to', bi.toString())
     } while (bi.compareTo(max) >= 0);
 
-        console.log('done', bi.toString())
     // Return the result which satisfies the given range
     return bi;
 }
@@ -83,5 +81,5 @@ export function parseBigInt(obj: BigInt | string | number): BigInt {
  * @param  bigInt BigInt to be parsed.
  */
 export function toBuffer(bigInt: BigInt): Buffer {
-    return new BN(Buffer.from(bigInt.toByteArray())).toBuffer()
+    return new BN(Buffer.from(bigInt.toByteArray())).toArrayLike(Buffer)
 }

@@ -1,6 +1,6 @@
 {
   "name": "@stellot/crypto",
-  "version": "2.0.5",
+  "version": "2.0.8",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
@@ -18,7 +18,7 @@
     "build:cjs": "npx tsc -p tsconfig.json -m commonjs --outDir lib/commonjs",
     "build:types": "npx tsc -p config/tsconfig.types.json",
     "build:docs": "npx typedoc --options config/typedoc.json --tsconfig tsconfig.json",
-    "prepublish": "npm run build && npm test",
+    "prepublish": "npm run clean && npm run build && npm test",
     "publish:docs": "npx gh-pages -m 'Updates' -d docs",
     "test": "npx ava-ts",
     "test:watch": "npx ava-ts --watch --color"

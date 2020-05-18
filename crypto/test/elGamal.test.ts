@@ -11,17 +11,18 @@ import { toBuffer } from '../src/elGamal/utils'
 
 test('should return base64 priv and public keys', (t) => {
     const { privateKey, publicKey } = createEncryptionKeypair()
-    const privKeyAscii = privateKey.toString('ascii')
+    const privKeyAscii = privateKey.toString('hex')
     const privBase64 = privateKey.toString('base64')
-    t.deepEqual(privKeyAscii, new Buffer(privBase64, 'base64').toString('ascii'))
+    t.deepEqual(privKeyAscii, new Buffer(privBase64, 'base64').toString('hex'))
 
-    const pubKeyAscii = publicKey.toString('ascii')
+    const pubKeyAscii = publicKey.toString('hex')
     const pubBase64 = publicKey.toString('base64')
-    t.deepEqual(pubKeyAscii, new Buffer(pubBase64, 'base64').toString('ascii'))
+    t.deepEqual(pubKeyAscii, new Buffer(pubBase64, 'base64').toString('hex'))
 })
 
 test('should decode the same prime and generator key properties', (t) => {
     const { privateKey, publicKey } = createEncryptionKeypair()
+    const derPriv = Buffer.from(privateKey).toString('base64')
     const pub = decodePublicKey(publicKey)
     const priv = decodePrivateKey(privateKey)
     t.deepEqual(pub.g, priv.g)
