@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-import { Voting, KeybaseAuthOptions } from '@stellot/types';
+import { KeybaseAuthOptions } from '@stellot/types';
 
 if (!process.env.KEYBASE_AS_JWT_PUB_KEY) {
   throw new Error('KEYBASE_AS_JWT_PUB_KEY must be set')
@@ -18,13 +18,11 @@ const publicKey = fs.readFileSync(path.join(process.cwd(), process.env.KEYBASE_A
 const audience = process.env.KEYBASE_AS_JWT_AUDIENCE;
 const issuer = process.env.KEYBASE_AS_JWT_ISSUER;
 
-export async function authenticateToken(authToken: string, voting: Voting)
-  : Promise<string> {
-  return getUsername(authToken, (voting.authorizationOptions as KeybaseAuthOptions)?.team);
+export function authorizeAndAuthenticateToken(authToken: string, options: KeybaseAuthOptions): string {
+  return getUsername(authToken, options.team);
 }
 
-async function getUsername(authToken: string, requiredTeam?: string)
-  : Promise<string> {
+function getUsername(authToken: string, requiredTeam?: string): string {
   const decodedToken = jwt.verify(authToken, publicKey, { audience, issuer });
 
   // @ts-ignore
