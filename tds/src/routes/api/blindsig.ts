@@ -1,8 +1,7 @@
 import express, { Request } from 'express';
-import { Authorization, Voting } from '@stellot/types';
+import { Authorization, Voting, KeybaseAuthOptions, EmailsAuthOptions } from '@stellot/types';
 import { uuid } from 'uuidv4';
 import createHttpError from 'http-errors';
-import { getKeychain, getVotingById } from '../../database/database';
 import {
   ChallengeRequest,
   createSession,
@@ -15,6 +14,9 @@ import { HttpError } from '../../app';
 import * as keybase from '../../authorizationServers/keybase';
 import * as emails from '../../authorizationServers/emails';
 import { createSessionToken, verifyAndGetUserId } from '../../auth';
+import { getAuthorizationOptions } from '../../database/authorizationOptions';
+import { getVotingById } from '../../database/voting';
+import { getKeychain } from '../../database/keychain';
 
 const debug = require('debug')('blindsig');
 
@@ -36,12 +38,13 @@ async function handleExternalAuth(req: Request, voting: Voting): Promise<string>
   }
 
   let userId
+  const options = await getAuthorizationOptions(voting)
   switch (voting.authorization) {
     case Authorization.KEYBASE:
-      userId = await keybase.authenticateToken(authToken, voting);
+      userId = keybase.authorizeAndAuthenticateToken(authToken, options as KeybaseAuthOptions);
       break;
     case Authorization.EMAILS:
-      userId = await emails.authenticateToken(authToken, voting);
+      userId = emails.authorizeAndAuthenticateToken(authToken, options as EmailsAuthOptions);
       break;
     default:
       throw new createHttpError.NotImplemented('Authorization method not implemented yet');

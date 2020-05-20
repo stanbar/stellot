@@ -12,18 +12,18 @@ const VotingSchema = new mongoose.Schema({
     options: { type: [{ name: String, code: Number }], required: true },
   }],
   votesCap: { type: Number, required: true },
-  encrypted: { type: Boolean, required: true },
+  encryption: { type: { encryptionKey: String, encryptedUntil: String, decryptionKey: String }, required: false },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   authorization: {
     type: String,
     enum: [Authorization.OPEN,
-      Authorization.EMAILS,
-      Authorization.DOMAIN,
-      Authorization.CODE,
-      Authorization.IP,
-      Authorization.COOKIE,
-      Authorization.KEYBASE],
+    Authorization.EMAILS,
+    Authorization.DOMAIN,
+    Authorization.CODE,
+    Authorization.IP,
+    Authorization.COOKIE,
+    Authorization.KEYBASE],
     required: true,
   },
   visibility: {
@@ -35,6 +35,7 @@ const VotingSchema = new mongoose.Schema({
   issueAccountId: { type: String, required: true },
   distributionAccountId: { type: String, required: true },
   ballotBoxAccountId: { type: String, required: true },
+  ipfsCid: { type: String, required: false },
 }, { timestamps: true });
 
 VotingSchema.plugin(uniqueValidator, { message: 'is already taken' });
@@ -45,6 +46,10 @@ VotingSchema.set('toJSON', {
 
 VotingSchema.set('toObject', {
   virtuals: true,
+  transform: function (doc, ret) {
+    ret.id = ret._id
+    delete ret._id
+  }
 });
 
 VotingSchema.pre('validate', function (next) {

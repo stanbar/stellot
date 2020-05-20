@@ -1,6 +1,6 @@
 import express from 'express';
 import { createVoting } from '../../createVoting';
-import { getPublicVotings, getVotingBySlug } from '../../database/database';
+import { getPublicVotings, getVotingBySlug } from '../../database/voting';
 
 const router = express.Router();
 

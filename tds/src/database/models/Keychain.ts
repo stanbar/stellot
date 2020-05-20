@@ -6,6 +6,7 @@ const KeychainSchema = new mongoose.Schema({
   distribution: { type: String, required: true },
   issuer: { type: String, required: true },
   ballotBox: { type: String, required: true },
+  decryption: { type: String, required: false },
 });
 
 export default model(KEYCHAIN, KeychainSchema);
