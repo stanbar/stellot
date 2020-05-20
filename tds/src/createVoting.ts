@@ -9,8 +9,12 @@ import {
   TransactionBuilder,
 } from 'stellar-sdk';
 import { Voting, Authorization, KeybaseAuthOptions, CreateVotingRequest, CreateVotingResponse } from '@stellot/types';
-import { setKeychain, setVoting } from './database/database';
+import * as database from './database/voting';
+import { saveKeychain } from './database/keychain';
 import * as keybase from './authorizationServers/keybase';
+import { saveAuthorizationOptions } from './database/authorizationOptions';
+import * as ipfs from './ipfs'
+import { createEncryptionKeypair } from '@stellot/crypto';
 
 const debug = require('debug')('creatingVoting');
 
@@ -22,7 +26,7 @@ const masterSecretKey = process.env.MASTER_SECRET_KEY;
 const masterKeypair = Keypair.fromSecret(masterSecretKey);
 
 export async function createVoting(createVotingRequest: CreateVotingRequest)
-  : Promise<CreateVotingResponse> {
+  : Promise<Omit<CreateVotingResponse, 'ipfsCid'>> {
   const masterAccount = await server.loadAccount(masterKeypair.publicKey());
   debug('loaded master account');
   const issuerKeypair = Keypair.random();
@@ -36,7 +40,18 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
       createVotingRequest,
       voteToken);
   debug('created distribution and ballot account');
-  const voting: Omit<Omit<Voting, 'id'>, 'slug'> = {
+
+  let encryptionKey
+  let decryptionKey
+  if (createVotingRequest.encrypted) {
+    const encryptionKeys = await createEncryptionKeypair(128)
+    encryptionKey = encryptionKeys.publicKey.toString('base64')
+    decryptionKey = encryptionKeys.privateKey.toString('base64')
+
+    debug('generated encryption keypair');
+  }
+
+  const voting: Omit<Omit<Omit<Omit<Voting, 'id'>, 'slug'>, 'authorizationOptions'>, 'ipfsCid'> = {
     title: createVotingRequest.title,
     polls: createVotingRequest.polls,
     issueAccountId: issuerKeypair.publicKey(),
@@ -44,26 +59,44 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
     distributionAccountId: distributionKeypair.publicKey(),
     ballotBoxAccountId: ballotBoxKeypair.publicKey(),
     authorization: createVotingRequest.authorization,
-    authorizationOptions: createVotingRequest.authorizationOptions,
     visibility: createVotingRequest.visibility,
     votesCap: createVotingRequest.votesCap,
-    encrypted: createVotingRequest.encrypted,
+    encryption: encryptionKey === undefined ? undefined : {
+      encryptionKey,
+      encryptedUntil: createVotingRequest.encryptedUntil ?? createVotingRequest.endDate
+    },
     startDate: createVotingRequest.startDate,
     endDate: createVotingRequest.endDate,
   };
-  if (voting.authorization === Authorization.KEYBASE) {
-    const keybaseAuthOptions = voting.authorizationOptions as KeybaseAuthOptions | undefined;
-    if (keybaseAuthOptions) {
-      const { team } = keybaseAuthOptions;
-      keybase.joinTeam(team);
-      debug('send join team request');
-    }
-  }
-  const savedVoting = await setVoting(voting);
-  debug('saved voting');
-  await setKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair);
+
+  const savedVoting = await database.saveVoting(voting)
+    .then(savedVoting => {
+      debug('saved voting');
+      if (voting.authorization === Authorization.KEYBASE) {
+        if (createVotingRequest.authorizationOptions as KeybaseAuthOptions | undefined) {
+          const { team } = createVotingRequest.authorizationOptions as KeybaseAuthOptions;
+          keybase.joinTeam(team);
+          debug('send join team request');
+          return { ...savedVoting, authorizationOptions: { team } }
+        }
+      }
+      return { ...savedVoting, authorizationOptions: undefined }
+    })
+    .then(async (savedVoting) => {
+      const cid = await ipfs.putVoting(savedVoting)
+      debug(`uploaded voting to ipfs with cid ${cid}`);
+      return { savedVoting, cid };
+    }).then(({ savedVoting, cid }) => {
+      return database.updateIpfsCid(savedVoting, cid)
+    })
+
+  await saveAuthorizationOptions(savedVoting, createVotingRequest.authorizationOptions);
+  debug('saved authorizationOptions');
+  await saveKeychain(savedVoting.id, issuerKeypair, distributionKeypair, ballotBoxKeypair, decryptionKey);
   debug('saved keychain');
-  return { ...savedVoting };
+
+  // TODO reverse changes if someone throws error
+  return savedVoting
 }
 
 async function createIssuerAccount(masterAccount: AccountResponse, issuerKeypair: Keypair) {
