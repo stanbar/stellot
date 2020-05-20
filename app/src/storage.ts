@@ -1,7 +1,7 @@
 interface StoredVoting {
   authorizationToken?: string,
   myTxHash?: string,
-  myTxMemo?: string | Buffer,
+  myTxMemo?: Buffer,
   voted?: boolean;
 }
 
@@ -10,7 +10,9 @@ function getVoting(votingId: string): StoredVoting | undefined {
   if (!jsonString) {
     return undefined;
   }
-  return JSON.parse(jsonString);
+  const parsed = JSON.parse(jsonString);
+  parsed.myTxMemo = Buffer.from(parsed.myTxMemo)
+  return parsed
 }
 
 function setVoting(votingId: string, storedVoting: StoredVoting) {
@@ -27,14 +29,14 @@ export function getAuthorizationToken(votingId: string): string | undefined {
   return getVoting(votingId)?.authorizationToken
 }
 
-export function setMyTransaction(votingId: string, txHash: string, memo: Buffer | string) {
+export function setMyTransaction(votingId: string, txHash: string, memo: Buffer) {
   const voting = getVoting(votingId) || {};
   voting.myTxHash = txHash;
   voting.myTxMemo = memo;
   setVoting(votingId, voting)
 }
 
-export function getMyTransaction(votingId: string): { myTxHash?: string, myTxMemo?: string | Buffer } {
+export function getMyTransaction(votingId: string): { myTxHash?: string, myTxMemo?: Buffer } {
   return { ...getVoting(votingId) }
 }
 
