@@ -32,6 +32,7 @@ import * as storage from "@/storage"
 import EncryptedDecrypted from "@/components/EncryptedDecrypted";
 import { copyTextToClipboard } from "@/utils/utils";
 import styles from './styles.less'
+import moment from 'moment';
 
 
 interface VotePreviewProps extends ConnectProps {
@@ -125,6 +126,22 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
   if (!voting) {
     return (<p>Failed to load voting</p>)
   }
+  if (voting.encryption && !voting.encryption.decryptionKey) {
+    return (
+      <div>
+        <VotingMetadata voting={voting} />
+        <p>Results are encrypted until {moment(voting.encryption.encryptedUntil).format('lll')} ({moment(voting.encryption.encryptedUntil).toNow()})</p>
+        <div style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
+          <Link to="/wall">
+            <BtnSubmit type="primary" size="large">
+              More
+          </BtnSubmit>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <VotingMetadata voting={voting} />
