@@ -3,7 +3,6 @@ import {
   Asset,
   BASE_FEE,
   Memo,
-  MemoText,
   Networks,
   Operation,
   Server,
@@ -87,8 +86,17 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
   return _.shuffle(results.map(result => ({ name: result.option.name, votes: result.votes })));
 }
 
-export function getMyCandidate(voting: Voting, myTxMemo: string | Buffer): Option | undefined {
-  return voting.polls[0].options.find(option => option.code === decodeMemo(myTxMemo, 1)[0])
+export function getMyCandidate(voting: Voting, memoBuffer: Buffer): Option | undefined {
+
+  let decryptor
+  if (voting.encryption && voting.encryption.decryptionKey) {
+    const privateKey = decodePrivateKey(Buffer.from(voting.encryption.decryptionKey, 'base64'))
+    decryptor = ElGamal.fromPrivateKey(privateKey.p.toString(), privateKey.g.toString(), privateKey.y.toString(), privateKey.x.toString())
+  }
+
+  const candidateCode: Array<number> = decodeMemo(decryptor ? decryptMemo(memoBuffer, decryptor) : memoBuffer, 1); // TODO dont hardcore one answer
+
+  return voting.polls[0].options.find(option => option.code === candidateCode[0])
 }
 
 export function castVote(tx: Transaction) {
