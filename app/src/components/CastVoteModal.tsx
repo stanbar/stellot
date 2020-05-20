@@ -4,7 +4,7 @@ import React from "react";
 import { Modal, Progress } from 'antd';
 import { dispatchSetAuthToken, dispatchSetStatus, VotingStateType } from "@/models/voting";
 import { VoteStatus } from "@/types/voteStatus";
-import router from "umi/router";
+import { history } from "umi";
 import { Voting } from "@stellot/types";
 import * as storage from "@/storage"
 
@@ -60,7 +60,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = props => {
   const shouldShowVoteModal = status !== VoteStatus.UNDEFINED && status !== undefined;
   const enableShowResultsBtn = status === VoteStatus.ERROR || status === VoteStatus.DONE;
   const showResults = () => {
-    router.replace(`/voting/${voting.slug}/results`);
+    history.replace(`/voting/${voting.slug}/results`);
     dispatchSetStatus(dispatch, VoteStatus.UNDEFINED)
   };
   const signInAgain = () => {

@@ -1,5 +1,4 @@
-import { Effect, Dispatch } from "dva";
-import { Reducer } from 'redux';
+import { Effect, Reducer, Dispatch } from "umi";
 import { createVoting } from '@/services/tds';
 import { Voting, CreateVotingRequest } from "@stellot/types";
 

@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Form, notification, Radio } from 'antd';
 import { dispatchFetchVoting, dispatchPerformVote, FETCH_VOTING, VOTING, VotingStateType } from "@/models/voting";
 import { ConnectProps, Loading } from "@/models/connect";
-import { connect } from 'dva';
+import { connect, Link } from 'umi';
 import { Voting, Authorization } from "@stellot/types";
 import { VoteStatus } from '@/types/voteStatus';
 import { BtnLink, BtnSubmit } from "@/components/ActionButton";
 import CastVoteModal from "@/components/CastVoteModal";
 import VotingMetadata from "@/components/VotingMetadata";
-import { Link } from "umi";
 import { KeybaseAuthorizationView, EmailsAuthorizationView } from '@/components/AuthorizationView';
 import * as storage from '@/storage'
 import _ from 'lodash'

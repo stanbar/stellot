@@ -4,5 +4,6 @@ module.exports = {
     REACT_APP_ENV: true,
     KEYBASE_AUTH_SERVER_URL: true,
     EMAILS_AUTH_SERVER_URL: true,
+    TDS_SERVER_URL: true,
   },
 };

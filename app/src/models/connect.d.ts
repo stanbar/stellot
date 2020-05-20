@@ -1,6 +1,5 @@
 import { AnyAction } from 'redux';
-import { Route, RouterTypes } from 'umi';
-import { Dispatch } from "dva";
+import { Route, RouterTypes, Dispatch, IRouteComponentProps } from 'umi';
 
 export interface Loading {
   effects: { [key: string]: boolean | undefined };
@@ -9,6 +8,6 @@ export interface Loading {
 /**
  * @type T: Params matched in dynamic routing
  */
-export interface ConnectProps<T = {}> extends Partial<RouterTypes<Route, T>> {
+export interface ConnectProps<T = {}> extends IRouteComponentProps {
   dispatch: Dispatch<AnyAction>;
 }

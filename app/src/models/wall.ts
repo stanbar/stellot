@@ -1,6 +1,5 @@
 import { Voting } from "@stellot/types";
-import { Reducer } from 'redux';
-import { Effect, Dispatch } from "dva";
+import { Effect, Dispatch, Reducer } from "umi";
 import { fetchVotes } from '@/services/tds';
 
 const WALL = 'wall';
