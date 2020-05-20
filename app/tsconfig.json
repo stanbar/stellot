@@ -6,6 +6,7 @@
       "esnext",
       "dom"
     ],
+    "resolveJsonModule": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "jsx": "react",
@@ -20,24 +21,23 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@@/*": [
+        "src/.umi/*"
       ]
     },
-    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules",
     "build",
     "dist",
     "scripts",
-    "acceptance-tests",
+    "src/.umi/*",
     "webpack",
-    "jest",
-    "src/setupTests.ts",
-    "tslint:latest",
-    "tslint-config-prettier"
+    "jest"
   ]
 }

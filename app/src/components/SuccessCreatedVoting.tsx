@@ -2,7 +2,7 @@ import { connect } from 'dva';
 import { ConnectProps } from "@/models/connect";
 import React, { useState } from "react";
 import { Modal, Input, Button } from 'antd';
-import router from "umi/router";
+import { history } from "umi";
 import { Voting } from "@stellot/types";
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { dispatchCancelSuccessCreationModel, CreateStateType } from '@/models/create';
@@ -21,7 +21,7 @@ const SuccessCreatedVotingModal: React.FC<SuccessCreatedVotingModalProps> = prop
         return <></>
     }
     const showVoting = () => {
-        router.replace(`/voting/${voting.slug}`);
+        history.replace(`/voting/${voting.slug}`);
         dispatchCancelSuccessCreationModel(dispatch)
     };
     console.log({ location: window.location })

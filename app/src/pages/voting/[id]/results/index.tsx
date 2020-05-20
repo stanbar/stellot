@@ -31,7 +31,7 @@ import { BallotBoxIcon } from '@/assets/BallotBoxIcon';
 import * as storage from "@/storage"
 import EncryptedDecrypted from "@/components/EncryptedDecrypted";
 import { copyTextToClipboard } from "@/utils/utils";
-import styles from './styles.less'
+import styles from './styles.css'
 import moment from 'moment';
 
 
@@ -226,7 +226,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
             ]} style={{ maxWidth: 350 }}>
 
             <p className={styles.option}>
-              Option: <EncryptedDecrypted voting={voting} myTxMemo={myTxMemo.toString()} />
+              Option: <EncryptedDecrypted voting={voting} myTxMemo={myTxMemo} />
             </p>
           </Card>
         </>

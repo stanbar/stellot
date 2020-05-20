@@ -19,7 +19,7 @@ import { VoteStatus } from "@/types/voteStatus";
 import _ from 'lodash';
 import { ElGamal, decodePublicKey, EncryptionElGamal } from '@stellot/crypto'
 
-import { encodeMemo as encryptAndEncodeMemo, decodeMemo, decodeTransactionMemo, VoterSession } from '@stellot/crypto';
+import { VoterSession } from '@stellot/crypto';
 
 interface Session {
   id: number;

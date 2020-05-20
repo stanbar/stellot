@@ -1,6 +1,5 @@
 import { Voting, Authorization } from "@stellot/types";
-import { Reducer } from 'redux';
-import { Effect, Dispatch } from "dva";
+import { Effect, Dispatch, Reducer } from "umi";
 import { performSignedTransaction } from "@/services/voting";
 import { castVote, fetchResults } from "@/services/stellar";
 import { fetchVoting } from "@/services/tds";
@@ -35,7 +34,7 @@ export async function dispatchPerformVote(dispatch: Dispatch, voting: Voting, op
           payload: VoteStatus.CASTING_VOTE,
         });
         const res = await castVote(tx);
-        storage.setMyTransaction(voting.id, res.hash, (tx.memo as Memo<MemoType.Text>).value)
+        storage.setMyTransaction(voting.id, res.hash, (tx.memo as Memo<MemoType.Hash>).value)
         storage.setAlreadyVotedIn(voting.id)
         dispatch({
           type: `${VOTING}/${SET_STATUS}`,
