@@ -225,7 +225,7 @@ async function createRandomBatchOfTransaction(
     .map(a => a.value);
 
   return shuffledCandidates.map(candidate => {
-    const memo = Memo.text(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('ascii'));
+    const memo = Memo.hash(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('hex'));
     const account = new Account(distributionAccountId, seqNumber);
     return new TransactionInBatch(
       candidate.code,

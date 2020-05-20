@@ -1,12 +1,10 @@
 import {
   Account,
-  Keypair,
   Memo,
   Transaction,
 } from 'stellar-sdk';
 import BN from 'bn.js'
-import { encodeMemo, encryptMemo } from '@/crypto/utils';
-import { VoterSession } from '@/crypto';
+import { encodeMemo, encryptMemo, bytesToBase64, padMemoWithNonce } from '@/crypto/utils';
 import {
   getChallenges,
   initSessions,
@@ -14,11 +12,14 @@ import {
   TransactionInBatch,
   TransactionsBatch,
   ResSession
-} from "@/services/tokenDistributionServer";
+} from "@/services/tds";
 import { createTransaction, getAccountSequenceNumber } from "@/services/stellar";
 import { Voting, Option } from "@stellot/types";
 import { VoteStatus } from "@/types/voteStatus";
 import _ from 'lodash';
+import { ElGamal, decodePublicKey, EncryptionElGamal } from '@stellot/crypto'
+
+import { encodeMemo as encryptAndEncodeMemo, decodeMemo, decodeTransactionMemo, VoterSession } from '@stellot/crypto';
 
 interface Session {
   id: number;
@@ -97,7 +98,7 @@ export async function* performSignedTransaction(voting: Voting, optionCode: numb
   yield [undefined, VoteStatus.CALCULATING_SIGNATURE];
   const signature = voterSession.signature(signedLuckyBatch.sigs[myCandidateTxIndex]);
   const tx = transactionsBatch[myCandidateTxIndex].transaction;
-  tx.addSignature(voting.distributionAccountId, signature);
+  tx.addSignature(voting.distributionAccountId, bytesToBase64(signature));
   yield [tx, undefined];
 }
 
@@ -106,11 +107,23 @@ async function createRandomBatchOfTransaction(
   seqNumber: string,
   voting: Voting, optionCode: number)
   : Promise<TransactionsBatch> {
-  const distributionKeypair = Keypair.fromPublicKey(voting.distributionAccountId);
   const shuffledCandidates: Option[] = _.shuffle(voting.polls[0].options)
 
+  if (voting.encryption && !voting.encryption.encryptionKey) {
+    throw new Error('encryption was specified but encryption-key is undefined')
+  }
+  let encryptor: EncryptionElGamal | undefined = undefined
+
+  if (voting.encryption) {
+    const encryptionKeyBuffer = new Buffer(voting.encryption.encryptionKey, 'base64')
+    const publicKey = decodePublicKey(encryptionKeyBuffer)
+    encryptor = ElGamal.fromPublicKey(publicKey.p.toString(), publicKey.g.toString(), publicKey.y.toString())
+  }
+
   return shuffledCandidates.map(candidate => {
-    const memo = Memo.text(encryptMemo(encodeMemo(candidate.code), distributionKeypair.rawPublicKey()).toString('ascii'));
+    const encodedMemo = encodeMemo(candidate.code)
+    const textMemo = encryptor ? encryptMemo(encodedMemo, encryptor) : padMemoWithNonce(encodedMemo);
+    const memo = Memo.hash(textMemo.toString('hex'));
     const account = new Account(voting.distributionAccountId, seqNumber);
     return new TransactionInBatch(
       candidate.code,

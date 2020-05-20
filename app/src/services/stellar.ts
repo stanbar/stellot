@@ -8,12 +8,14 @@ import {
   Operation,
   Server,
   Transaction,
-  TransactionBuilder
+  TransactionBuilder,
+  MemoHash
 } from "stellar-sdk";
-import { decodeAnswersFromMemo } from "@/crypto/utils";
+import { decodeMemo, decryptMemo } from "@/crypto/utils";
 import { Option, Voting } from "@stellot/types";
 import Result from "@/types/result";
 import _ from 'lodash';
+import { decodePrivateKey, ElGamal, DecryptionElGamal } from '@stellot/crypto';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -61,10 +63,19 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
     votes: 0,
   }));
 
+  let decryptor: DecryptionElGamal | undefined = undefined
+
+  if (voting.encryption && voting.encryption.decryptionKey) {
+    const privateKey = decodePrivateKey(Buffer.from(voting.encryption.decryptionKey, 'base64'))
+    decryptor = ElGamal.fromPrivateKey(privateKey.p.toString(), privateKey.g.toString(), privateKey.y.toString(), privateKey.x.toString())
+  }
+
+  console.log({ numberOfTxs: transactions.length })
   transactions
-    .filter(tx => tx.memo_type === MemoText && tx.memo)
+    .filter(tx => tx.memo_type === MemoHash && tx.memo)
     .forEach(tx => {
-      const candidateCode: Array<number> = decodeAnswersFromMemo(tx.memo!, 1); // TODO dont hardcore one answer
+      const memoBuffer = new Buffer(tx.memo!, 'base64')
+      const candidateCode: Array<number> = decodeMemo(decryptor ? decryptMemo(memoBuffer, decryptor) : memoBuffer, 1); // TODO dont hardcore one answer
       const result = results.find(it => it.option.code === candidateCode[0]);
       if (result === undefined) {
         console.log(`Detected invalid vote on candidateCode: ${candidateCode}`)
@@ -77,7 +88,7 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
 }
 
 export function getMyCandidate(voting: Voting, myTxMemo: string | Buffer): Option | undefined {
-  return voting.polls[0].options.find(option => option.code === decodeAnswersFromMemo(myTxMemo, 1)[0])
+  return voting.polls[0].options.find(option => option.code === decodeMemo(myTxMemo, 1)[0])
 }
 
 export function castVote(tx: Transaction) {

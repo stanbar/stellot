@@ -33,7 +33,7 @@ export function decodeAnswersFromMemo(memo: Buffer | string, answerCount: number
   : Array<number> {
   if (typeof memo === 'string') {
     // eslint-disable-next-line no-param-reassign
-    memo = Buffer.from(memo, 'ascii');
+    memo = Buffer.from(memo, 'hex');
   }
   const answers = new Array<number>(answerCount);
   for (let i = 0; i < answerCount; i += 1) {
