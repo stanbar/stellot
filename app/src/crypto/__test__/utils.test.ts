@@ -46,6 +46,7 @@ describe('test utils', () => {
     })
     it('jsbn and bn.js bytes transitivity', () => {
         const randomBytes = rand(16)
+        // @ts-ignore
         const bigInt = new BigInt(randomBytes)
         const bn = new BN(randomBytes)
         const bigIntBuffer = new Buffer(bigInt.toByteArray());
@@ -58,7 +59,9 @@ describe('test utils', () => {
         Array.from({ length: 50 }, () => {
             const a = rand(16)
             const b = rand(16)
+            // @ts-ignore
             const aBigInt = new BigInt(a)
+            // @ts-ignore
             const bBigInt = new BigInt(b)
             const aBuffer = new Buffer(16).fill(toBuffer(aBigInt))
             const bBuffer = new Buffer(16).fill(toBuffer(bBigInt))
