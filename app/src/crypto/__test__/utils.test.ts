@@ -1,4 +1,4 @@
-import { getRandomInt, encodeMemo, encryptMemo, decryptMemo } from '../utils'
+import { getRandomInt, encodeMemo, encryptMemo, decryptMemo, decodeMemo } from '../utils'
 import { ElGamal, createEncryptionKeypair, decodePrivateKey, decodePublicKey, DecryptionElGamal, toBuffer, EncryptedValue } from '@stellot/crypto'
 import rand from 'randombytes'
 import BN from 'bn.js'
@@ -55,7 +55,6 @@ describe('test utils', () => {
 
     })
     it('test encryptmemo rewrite', () => {
-
         Array.from({ length: 50 }, () => {
             const a = rand(16)
             const b = rand(16)
@@ -138,8 +137,10 @@ describe('test utils', () => {
 
             const decryptor = ElGamal.fromPrivateKey(priv.p.toString(), priv.g.toString(), priv.y.toString(), priv.x.toString())
             const decryptedMemo = decryptMemo(cipherText, decryptor)
+            const decoded = decodeMemo(decryptedMemo, 1)[0]
 
             expect(memo).toEqual(decryptedMemo)
+            expect(myOption).toEqual(decoded)
         })
     })
 })
