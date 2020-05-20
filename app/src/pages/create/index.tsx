@@ -17,6 +17,7 @@ import SuccessCreatedVotingModal from '@/components/SuccessCreatedVoting';
 import { UploadFile } from 'antd/lib/upload/interface';
 import _ from 'lodash';
 import styles from './index.css'
+import moment from 'moment';
 
 interface CreateVotingProps extends ConnectProps {
   loading?: boolean
@@ -52,6 +53,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       votesCap: number,
       period: Array<Date>,
       encrypted: boolean,
+      encryptedUntil: Date | undefined,
       challenges: number,
     };
 
@@ -69,6 +71,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       visibility: val.visibility,
       votesCap: val.votesCap,
       encrypted: val.encrypted,
+      encryptedUntil: val.encryptedUntil,
       challenges: val.challenges,
       startDate: val.period[0],
       endDate: val.period[1],
@@ -349,6 +352,19 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           style={{ 'display': showAdvanced ? '' : 'none' }}
         >
           <Switch />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) => prevValues.encrypted !== currentValues.encrypted || prevValues.peroid !== currentValues.peroid }
+        >
+          {({ getFieldValue }) => (
+            getFieldValue('encrypted') ?
+              <Form.Item name="encryptedUntil" label="Encrypt until"
+                rules={[{ type: 'object', required: false, message: 'Please select time!' }]}>
+                <DatePicker showTime defaultValue={(getFieldValue('period') || [null, moment()])[1]} />
+              </Form.Item> : null
+          )}
         </Form.Item>
         <Form.Item
           label="Security level"
