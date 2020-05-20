@@ -1,7 +1,7 @@
 import { Keypair, Memo, Transaction } from 'stellar-sdk'
 import BN from 'bn.js';
 import { Voting, Authorization } from '@stellot/types';
-import { ed25519, SignerSession, VoterSession } from './blindsig';
+import { ed25519, SignerSession, VoterSession } from '@stellot/crypto';
 import { getRandomInt } from './utils';
 import { validateProof } from './validators';
 import Keychain from './types/keychain';
