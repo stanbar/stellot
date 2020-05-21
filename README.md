@@ -21,7 +21,7 @@
 - 05.2020 - Add vote encryption (preventing partial results before the end of voting).
 - 06.2020 - Add multi-select voting.
 - 06.2020 - Add stake-weighted votings.
-- 07.2020 - Store voting meta-data on IPFS content-addressable network.
+- 07.2020 - Store voting meta-data on IPFS content-addressable network. ✓
 - 07.2020 - Finish service for creating general-purpose votings.
 - 07.2020 - Solve the scalability problems.
 - 08.2020 - Publish a journal article.
