@@ -9,6 +9,17 @@ services:
     ports:
       - $NGINX_PORT:80
     
+  ipfs-node:
+    container_name: "stellot-ipfs-node"
+    image: ipfs/go-ipfs
+    volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
+      - $DOCKER_VOLUMES/stellot-ipfs/data:/data/ipfs
+      - $DOCKER_VOLUMES/stellot-ipfs/staging:/export
+    ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
+      - $IPFS_SWARM_PORT:4001
+      - $IPFS_WEB_GATEWAY:8080
+      - $IPFS_SWARM_WEBSOCKET:8081
+
   mongo:
     container_name: "stellot-tds-mongodb"
     image: mongo:latest
@@ -28,14 +39,17 @@ services:
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
       - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
+      - IPFS_NODE_URL=http://ipfs-node:5001
     links:
       - mongo
       - keybase-auth
       - emails-auth
+      - ipfs-node
     depends_on:
       - mongo
       - keybase-auth
       - emails-auth
+      - ipfs-node
 
   keybase-auth:
     container_name: "stellot-keybase-auth"
