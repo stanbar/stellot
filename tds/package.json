@@ -70,6 +70,7 @@
   "devDependencies": {
     "@types/bn.js": "^4.11.6",
     "@types/cookie-parser": "^1.4.2",
+    "@types/cors": "^2.8.6",
     "@types/debug": "^4.1.5",
     "@types/dotenv": "^6.1.1",
     "@types/elliptic": "^6.4.12",
