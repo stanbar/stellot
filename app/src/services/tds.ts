@@ -2,7 +2,7 @@ import { Voting, CreateVotingRequest, CreateVotingResponse } from '@stellot/type
 import BN from "bn.js";
 import { Memo, Transaction } from "stellar-sdk";
 
-const BASE_URL = REACT_APP_ENV === 'production' ? TDS_SERVER_URL : '' 
+const BASE_URL = REACT_APP_ENV === 'production' ? TDS_SERVER_URL : ''
 
 export async function fetchVotes(): Promise<Voting[]> {
   const res = await fetch(`${BASE_URL}/api/voting`);
@@ -69,6 +69,10 @@ export async function initSessions(votingId: string, authToken?: string): Promis
     throw new Error(body?.errors?.message);
   }
 
+  console.log('headers')
+  response.headers.forEach(header => console.log(header))
+  console.log({ 'SESSION-TOKEN': response.headers.get('SESSION-TOKEN') })
+  console.log({ 'session-token': response.headers.get('session-token') })
   const sessionId = response.headers.get('SESSION-TOKEN') || response.headers.get('session-token');
   if (!sessionId) {
     console.error(`Didn't receive SESSION-TOKEN`);
