@@ -68,11 +68,7 @@ export async function initSessions(votingId: string, authToken?: string): Promis
     const body = await response.json();
     throw new Error(body?.errors?.message);
   }
-
-  console.log('headers')
-  response.headers.forEach(header => console.log(header))
   console.log({ 'SESSION-TOKEN': response.headers.get('SESSION-TOKEN') })
-  console.log({ 'session-token': response.headers.get('session-token') })
   const sessionId = response.headers.get('SESSION-TOKEN') || response.headers.get('session-token');
   if (!sessionId) {
     console.error(`Didn't receive SESSION-TOKEN`);
