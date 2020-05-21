@@ -69,7 +69,7 @@ export async function initSessions(votingId: string, authToken?: string): Promis
     throw new Error(body?.errors?.message);
   }
 
-  const sessionId = response.headers.get('SESSION-TOKEN');
+  const sessionId = response.headers.get('SESSION-TOKEN') || response.headers.get('session-token');
   if (!sessionId) {
     console.error(`Didn't receive SESSION-TOKEN`);
     throw new Error(`Didn't receive SESSION-TOKEN`);
