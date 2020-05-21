@@ -11,6 +11,9 @@ function getVoting(votingId: string): StoredVoting | undefined {
     return undefined;
   }
   const parsed = JSON.parse(jsonString);
+  if(!parsed.myTxMemo){
+    return parsed
+  }
   parsed.myTxMemo = Buffer.from(parsed.myTxMemo)
   return parsed
 }

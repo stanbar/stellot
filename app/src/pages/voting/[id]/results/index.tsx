@@ -130,7 +130,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
     return (
       <div>
         <VotingMetadata voting={voting} />
-        <p>Results are encrypted until {moment(voting.encryption.encryptedUntil).format('lll')} ({moment(voting.encryption.encryptedUntil).toNow()})</p>
+        <p>Results are encrypted until {moment(voting.encryption.encryptedUntil).format('lll')} ({moment(voting.encryption.encryptedUntil).fromNow()})</p>
         <div style={{ float: 'right', marginBottom: 24, marginTop: 12 }}>
           <Link to="/wall">
             <BtnSubmit type="primary" size="large">
