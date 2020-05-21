@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
-const whitelist = ['https://stellot.com', 'https://stellot.stasbar.com', 'https://voting.stasbar.com', 'http://localhost'];
+const whitelist = ['https://stellot.com', 'http://gh.stellot.com', 'https://stellot.stasbar.com', 'https://voting.stasbar.com', 'http://localhost'];
 app.use(cors({ origin: whitelist }));
 app.use(logger('dev', { skip: (req) => req.url === '/health' }));
 app.use(express.json({ limit: '0.5mb' }));
@@ -40,8 +40,8 @@ app.use((req, res, next) => {
 
 
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-// development will print stacktrace
-// production error handler no stacktraces leaked to user
+  // development will print stacktrace
+  // production error handler no stacktraces leaked to user
   if (!isProduction) {
     console.log(err.stack);
   }

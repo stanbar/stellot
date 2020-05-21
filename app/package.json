@@ -7,7 +7,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint:es": "eslint --ext .js src mock tests",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "publish:docs": "npx gh-pages -m 'Updates' -d ../docs"
   },
   "dependencies": {
     "@ant-design/icons": "^4.1.0",
@@ -54,6 +55,7 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.20.0",
+    "gh-pages": "^2.2.0",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
     "lint-staged": "^10.2.4",
