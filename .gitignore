@@ -4,6 +4,7 @@ node_modules
 **/lib
 .cache
 .idea
+.vscode
 # Logs
 logs
 *.log

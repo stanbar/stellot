@@ -47,7 +47,7 @@
     "@types/recharts": "^1.8.10",
     "@types/styled-components": "^5.1.0",
     "@umijs/fabric": "^2.0.8",
-    "@umijs/preset-react": "^1.5.2",
+    "@umijs/preset-react": "^1.5.3",
     "babel-plugin-styled-components": "^1.10.7",
     "eslint": "^6.8.0",
     "eslint-config-umi": "^1.6.0",
@@ -64,7 +64,7 @@
     "stylelint": "^13.5.0",
     "ts-jest": "^26.0.0",
     "typescript": "^3.9.3",
-    "umi": "^3.1.2",
+    "umi": "^3.2.2",
     "webpack": "^4.43.0"
   },
   "lint-staged": {
