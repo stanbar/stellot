@@ -2,11 +2,6 @@
   background-color: #6c72f9;
 }
 
-/* @font-face {
-  font-family: 'Cipher';
-  src: local('Cipher'), url('../../../../assets/fonts/Cipher.otf');
-} */
-
 .option {
   text-overflow: ellipsis;
   white-space: nowrap;
