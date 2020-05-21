@@ -5,7 +5,8 @@ import { Voting } from '@stellot/types';
 const nodePromise = IPFS.create({ repo: String(Math.random() + Date.now()) })
 
 nodePromise.then(async (ipfs: any) => {
-    const res = await ipfs.bootstrap.add(REACT_APP_ENV == 'development' ? '/ip4/127.0.0.1/tcp/4001/p2p/QmbtFamEGrMsfr7hKHWZyaVk9atxn9yhAnkMk3K6Cd3Dmk' : '/dnsaddr/ipfs.stellot.com/ipfs/QmdkTEjyKgdsx6kLLdVcd3hEcCFzYsBsy1QmxiXNoe95iE')
+    const res = await ipfs.bootstrap.add(REACT_APP_ENV == 'development' ? '/ip4/127.0.0.1/tcp/4001/p2p/QmbtFamEGrMsfr7hKHWZyaVk9atxn9yhAnkMk3K6Cd3Dmk' 
+    : '/ip4/80.238.125.248/tcp/4001/p2p/QmdkTEjyKgdsx6kLLdVcd3hEcCFzYsBsy1QmxiXNoe95iE')
     console.log('bootstrap', res)
 }).catch(console.error)
 
