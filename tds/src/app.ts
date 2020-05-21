@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 
 const whitelist = ['https://stellot.com', 'https://gh.stellot.com', 'http://gh.stellot.com', 'https://stellot.stasbar.com', 'https://voting.stasbar.com', 'http://localhost'];
-app.use(cors({ origin: whitelist }));
+app.use(cors({ origin: whitelist, allowedHeaders: ['SESSION-TOKEN'] }));
 app.set('trust proxy', true)
 app.use(logger('dev', { skip: (req) => req.url === '/health' }));
 app.use(express.json({ limit: '0.5mb' }));
