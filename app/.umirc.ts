@@ -10,7 +10,7 @@ export default defineConfig({
   },
   antd: {},
   dva: {},
-  // dynamicImport: { loading: '@/components/LoadingPage/index', },
+  dynamicImport: { loading: '@/components/LoadingPage/index', },
   title: 'Stellot - Voting platform powered by Stellar blockchain',
   locale: {
     default: 'en-US',
