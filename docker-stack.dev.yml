@@ -1,0 +1,80 @@
+version: '3.7'
+services:
+  ipfs-node:
+    container_name: "stellot-ipfs-node-dev"
+    image: ipfs/go-ipfs
+    volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
+      - $DOCKER_VOLUMES/stellot-ipfs-dev/data:/data/ipfs
+      - $DOCKER_VOLUMES/stellot-ipfs-dev/staging:/export
+    ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
+      - $IPFS_SWARM_PORT:4001
+      - $IPFS_WEB_GATEWAY:8080
+      - $IPFS_SWARM_WEBSOCKET:8081
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==swarm-do-1"
+    network: stellot-overlay
+
+  mongo:
+    container_name: "stellot-tds-mongodb-dev"
+    image: mongo:latest
+    restart: 'unless-stopped'
+    volumes:
+      - $DOCKER_VOLUMES/stellot-tds-dev:/data/db
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==swarm-do-1"
+    network: stellot-overlay
+
+  tds:
+    container_name: "stellot-tds-dev"
+    image: stasbar/stellot-tds
+    env_file: ./tds/.env
+    command: npm run start:dev
+    ports:
+      - $TDS_PORT:8080
+    restart: 'unless-stopped'
+    environment:
+      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
+      - IPFS_NODE_URL=http://ipfs-node:5001
+    links:
+      - mongo
+      - keybase-auth
+      - emails-auth
+      - ipfs-node
+    depends_on:
+      - mongo
+      - keybase-auth
+      - emails-auth
+      - ipfs-node
+    network: stellot-overlay
+
+  keybase-auth:
+    container_name: "stellot-keybase-auth-dev"
+    image: stasbar/keybase-auth
+    env_file: ./keybase-auth/.env
+    command: npm run start:dev
+    ports:
+      - $KEYBASE_AS_PORT:8080
+    restart: 'unless-stopped'
+    network: stellot-overlay
+
+  emails-auth:
+    container_name: "stellot-emails-auth-dev"
+    image: stasbar/emails-auth
+    env_file: ./emails-auth/.env
+    command: npm run start:dev
+    ports:
+      - $EMAILS_AS_PORT:8080
+    restart: 'unless-stopped'
+    network: stellot-overlay
+
+networks:
+  stellot-overlay:
+      external: true
+      name: stellot-overlay
+volumes:
+  mongo-data-dev
