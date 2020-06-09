@@ -3,6 +3,8 @@ services:
   ipfs-node:
     container_name: "stellot-ipfs-node-dev"
     image: ipfs/go-ipfs
+    networks: 
+      - stellot-overlay
     volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
       - $DOCKER_VOLUMES/stellot-ipfs-dev/data:/data/ipfs
       - $DOCKER_VOLUMES/stellot-ipfs-dev/staging:/export
@@ -14,19 +16,19 @@ services:
       placement:
         constraints:
           - "node.hostname==swarm-do-1"
-    network: stellot-overlay
 
   mongo:
     container_name: "stellot-tds-mongodb-dev"
     image: mongo:latest
     restart: 'unless-stopped'
+    networks: 
+      - stellot-overlay
     volumes:
       - $DOCKER_VOLUMES/stellot-tds-dev:/data/db
     deploy:
       placement:
         constraints:
           - "node.hostname==swarm-do-1"
-    network: stellot-overlay
 
   tds:
     container_name: "stellot-tds-dev"
@@ -36,6 +38,8 @@ services:
     ports:
       - $TDS_PORT:8080
     restart: 'unless-stopped'
+    networks: 
+      - stellot-overlay
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
       - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
@@ -50,31 +54,31 @@ services:
       - keybase-auth
       - emails-auth
       - ipfs-node
-    network: stellot-overlay
 
   keybase-auth:
     container_name: "stellot-keybase-auth-dev"
     image: stasbar/keybase-auth
     env_file: ./keybase-auth/.env
     command: npm run start:dev
+    networks: 
+      - stellot-overlay
     ports:
       - $KEYBASE_AS_PORT:8080
     restart: 'unless-stopped'
-    network: stellot-overlay
 
   emails-auth:
     container_name: "stellot-emails-auth-dev"
     image: stasbar/emails-auth
     env_file: ./emails-auth/.env
     command: npm run start:dev
+    networks: 
+      - stellot-overlay
     ports:
       - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'
-    network: stellot-overlay
 
 networks:
   stellot-overlay:
-      external: true
-      name: stellot-overlay
-volumes:
-  mongo-data-dev
+    external: true
+    name: stellot-overlay
+
