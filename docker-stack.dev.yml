@@ -1,14 +1,14 @@
-version: '3.7'
+version: "3.7"
 services:
   ipfs-node:
     container_name: "stellot-ipfs-node-dev"
     image: ipfs/go-ipfs
-    networks: 
+    networks:
       - stellot-overlay
     volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
       - $DOCKER_VOLUMES/stellot-ipfs-dev/data:/data/ipfs
       - $DOCKER_VOLUMES/stellot-ipfs-dev/staging:/export
-    ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
+    ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74
       - $IPFS_SWARM_PORT:4001
       - $IPFS_WEB_GATEWAY:8080
       - $IPFS_SWARM_WEBSOCKET:8081
@@ -20,8 +20,8 @@ services:
   mongo:
     container_name: "stellot-tds-mongodb-dev"
     image: mongo:latest
-    restart: 'unless-stopped'
-    networks: 
+    restart: "unless-stopped"
+    networks:
       - stellot-overlay
     volumes:
       - $DOCKER_VOLUMES/stellot-tds-dev:/data/db
@@ -32,13 +32,13 @@ services:
 
   tds:
     container_name: "stellot-tds-dev"
-    image: stasbar/stellot-tds
+    image: stasbar/tds
     env_file: ./tds/.env
     command: npm run start:dev
     ports:
       - $TDS_PORT:8080
-    restart: 'unless-stopped'
-    networks: 
+    restart: "unless-stopped"
+    networks:
       - stellot-overlay
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
@@ -60,25 +60,24 @@ services:
     image: stasbar/keybase-auth
     env_file: ./keybase-auth/.env
     command: npm run start:dev
-    networks: 
+    networks:
       - stellot-overlay
     ports:
       - $KEYBASE_AS_PORT:8080
-    restart: 'unless-stopped'
+    restart: "unless-stopped"
 
   emails-auth:
     container_name: "stellot-emails-auth-dev"
     image: stasbar/emails-auth
     env_file: ./emails-auth/.env
     command: npm run start:dev
-    networks: 
+    networks:
       - stellot-overlay
     ports:
       - $EMAILS_AS_PORT:8080
-    restart: 'unless-stopped'
+    restart: "unless-stopped"
 
 networks:
   stellot-overlay:
     external: true
     name: stellot-overlay
-
