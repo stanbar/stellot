@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM node:12-slim
 
 # Create app directory
 WORKDIR /server
