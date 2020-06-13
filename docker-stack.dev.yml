@@ -54,6 +54,10 @@ services:
       - keybase-auth
       - emails-auth
       - ipfs-node
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==rpi4"
 
   keybase-auth:
     container_name: "stellot-keybase-auth-dev"
