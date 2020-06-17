@@ -29,9 +29,7 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
   : Promise<CreateVotingResponse> {
   const response = await fetch(`${BASE_URL}/api/voting`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json', },
     body: JSON.stringify({ createVotingRequest }),
   });
 
