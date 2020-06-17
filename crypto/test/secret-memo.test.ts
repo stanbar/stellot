@@ -9,8 +9,19 @@ test('encrypt and decrypt using secret-memo', async (t) => {
     const sender = Keypair.random()
     const senderAccount = new Account(sender.publicKey(), '0');
 
-    const memo = Memo.id('1234566');
-    const secret = await encodeMemo(senderAccount.sequenceNumber(), sender, encryptionKeys.publicKey(), memo);
-    const decryptedMemoPromise = await decodeMemo(senderAccount.sequenceNumber() + 1, encryptionKeys, sender.publicKey(), secret);
-    t.deepEqual(decryptedMemoPromise, memo)
+    await (async () => {
+        const memo = Memo.id('1234566');
+        const secret = await encodeMemo(senderAccount.sequenceNumber(), sender, encryptionKeys.publicKey(), memo);
+        const decryptedMemoPromise = await decodeMemo(senderAccount.sequenceNumber() + 1, encryptionKeys, sender.publicKey(), secret);
+        console.log({ memo, decryptedMemoPromise })
+        t.deepEqual(decryptedMemoPromise, memo)
+    })()
+
+    await (async () => {
+        const memo = Memo.text('hello world');
+        const secret = await encodeMemo(senderAccount.sequenceNumber(), sender, encryptionKeys.publicKey(), memo);
+        const decryptedMemoPromise = await decodeMemo(senderAccount.sequenceNumber() + 1, encryptionKeys, sender.publicKey(), secret);
+        console.log({ memo: memo.value?.toString(), decryptedMemoPromise: decryptedMemoPromise.value?.toString() })
+        t.deepEqual(decryptedMemoPromise.value?.toString(), memo.value?.toString())
+    })()
 })
