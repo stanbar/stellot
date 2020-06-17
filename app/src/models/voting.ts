@@ -6,8 +6,7 @@ import { fetchVoting } from "@/services/tds";
 import { VoteStatus } from "@/types/voteStatus";
 import Result from '@/types/result';
 import * as storage from '@/storage';
-import { MemoType } from "stellar-base";
-import { Memo } from 'stellar-sdk';
+import { MemoType } from 'stellar-sdk';
 
 export const VOTING = 'voting';
 export const FETCH_VOTING = 'fetchVoting';

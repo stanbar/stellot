@@ -28,6 +28,19 @@ export function decodeMemo(memo: Buffer | string, answerCount: number): number[]
   return answers
 }
 
+export function decodeAnswersFromMemo(memo: Buffer | string, answerCount: number)
+  : Array<number> {
+  if (typeof memo === 'string') {
+    // eslint-disable-next-line no-param-reassign
+    memo = Buffer.from(memo, 'hex');
+  }
+  const answers = new Array<number>(answerCount);
+  for (let i = 0; i < answerCount; i += 1) {
+    answers[i] = memo.readUInt8(i)
+  }
+  return answers;
+}
+
 export function padMemoWithNonce(memo: Buffer) {
   if (memo.length != 16) {
     throw new Error('Only 16 bytes memos should be padded')
