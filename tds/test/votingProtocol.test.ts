@@ -1,6 +1,6 @@
 import test, { ExecutionContext } from 'ava'
 import { Keypair, TransactionBuilder, Server, Networks, Operation, BASE_FEE, Asset, Memo, Transaction, MemoType } from 'stellar-sdk'
-import { createIssuerAccount, createVoteToken, createDistributionAndBallotAccount } from '../src/stellar'
+import { createIssuerAccount, createVoteToken, createDistributionAndBallotAccount, createChannelAccounts } from '../src/stellar'
 import { randomBytes } from 'crypto';
 import { encodeMemo as encryptMemo } from '../src/secretMemo'
 import { encodeMemo } from '../src/utils'
@@ -37,36 +37,12 @@ function Voter(t: ExecutionContext, tdsBlindSigPublicKey: Buffer, nonce: Buffer)
     ])
     const getChallenge = (message: Buffer) => voterSession.challenge(message)
     const signature = (blindedSignature: BN) => voterSession.signature(blindedSignature)
-    const createAccountTransaction = async (tdsStellarPublicKey: string, voteToken: Asset, votesCap: number): Promise<Transaction> => {
-        const tdsAccount = await server.loadAccount(tdsStellarPublicKey)
-
-        // For better scalability it should go through channel account 
-        const tx = new TransactionBuilder(tdsAccount, OPTIONS)
-            .addOperation(Operation.createAccount({
-                destination: keypair.publicKey(),
-                startingBalance: '2',
-            }))
-            .addOperation(Operation.changeTrust({
-                source: keypair.publicKey(),
-                asset: voteToken,
-                limit: `${votesCap / (10 ** 7)}`,
-            }))
-            .addOperation(Operation.payment({
-                destination: keypair.publicKey(),
-                asset: voteToken,
-                amount: `${1 / (10 ** 7)}`,
-            }))
-            .setTimeout(30)
-            .build()
-
+    const publicKey = () => keypair.publicKey()
+    const publishAccountTransaction = (tx: Transaction) => {
         tx.sign(keypair)
-        return tx
+        return server.submitTransaction(tx)
     }
-
-    const publishAccountTransaction = (tx: Transaction) => server.submitTransaction(tx)
-
     const createEncodedMemo = (voteOption: number): Memo<MemoType.Hash> => Memo.hash(encodeMemo(voteOption).toString('hex'))
-
     const publishVoteTransaction = async (memo: Memo<MemoType.Hash>, voteToken: Asset, mergePublicKey: string, ballotBoxPublicKey: string, encryptionKey: string) => {
         const account = await server.loadAccount(keypair.publicKey())
         const encryptedMemo = await encryptMemo(account.sequenceNumber(), keypair, encryptionKey, memo)
@@ -91,32 +67,34 @@ function Voter(t: ExecutionContext, tdsBlindSigPublicKey: Buffer, nonce: Buffer)
         return server.submitTransaction(tx)
     }
 
-
     return {
-        generateMessage, getChallenge, signature, createAccountTransaction, publishVoteTransaction, createEncodedMemo, publishAccountTransaction,
+        generateMessage, getChallenge, signature, publishVoteTransaction, createEncodedMemo, publishAccountTransaction, publicKey,
     }
 }
 
-async function TDS(t: ExecutionContext) {
+async function TDS(t: ExecutionContext, votesCap: number) {
     const tdsBlindingSessionKeypair = ed25519.keyFromSecret(randomBytes(32))
     const encryptionKeypair = Keypair.random()
     // This value must be constant to every voter and available to every voter
     const signerSession = new SignerSession(tdsBlindingSessionKeypair.getSecret());
-    const { issuerKeypair, distributionKeypair, ballotBoxKeypair, votingToken } = await createVoting()
+    const { issuerKeypair, distributionKeypair, ballotBoxKeypair, votingToken, channels } = await createVoting()
+    const usedChannels = []
 
     async function createVoting() {
         const issuerKeypair = Keypair.random()
-        const votesCap = 10
         const tdsStartingBalance = votesCap * 2
+        const channelsFunding = votesCap * 2
+        const issuerStartingBalance = tdsStartingBalance + channelsFunding
 
-        await createIssuerAccount(masterKeypair, issuerKeypair, tdsStartingBalance)
+        await createIssuerAccount(masterKeypair, issuerKeypair, issuerStartingBalance)
+        const channels = await createChannelAccounts(votesCap, issuerKeypair)
 
         const votingToken = createVoteToken(issuerKeypair.publicKey(), randomBytes(20).toString('hex'))
         console.log('created vote token', votingToken)
         const [distributionKeypair, ballotBoxKeypair] =
             await createDistributionAndBallotAccount(issuerKeypair, votesCap, votingToken, tdsStartingBalance)
         console.log('created tds, ballotbox and vote token')
-        return { issuerKeypair, distributionKeypair, ballotBoxKeypair, votingToken }
+        return { issuerKeypair, distributionKeypair, ballotBoxKeypair, votingToken, channels }
     }
 
     const initBlindToken = (authenticationToken: string) => {
@@ -143,22 +121,47 @@ async function TDS(t: ExecutionContext) {
     const decryptionKey = () => encryptionKeypair.secret()
     const ballotBoxPublicKey = () => ballotBoxKeypair.publicKey()
 
-    const requestAccountCreation = (tx: Transaction, authorizationToken: { message: Buffer, signature: Buffer }) => {
+    const requestAccountCreation = async (voterPublicKey: string, authorizationToken: { message: Buffer, signature: Buffer }) => {
         if (!ed25519.verify(authorizationToken.message, authorizationToken.signature, ed25519.encodePoint(signerSession.publicKey()))) {
             throw new Error('Verification failed')
         }
+
         const publicKeyPoint = authorizationToken.message.slice(0, ed25519.encodePoint(signerSession.publicKey()).length)
         t.deepEqual(publicKeyPoint, Buffer.from(ed25519.encodePoint(signerSession.publicKey())))
         const votingId = authorizationToken.message.slice(ed25519.encodePoint(signerSession.publicKey()).length).toString()
         console.log('extraction votingId', votingId)
         t.deepEqual(votingId, VOTING_ID)
         // check if userId is already contained in the issuedUsers db
+        const channel = channels.pop()
+        if (!channel) {
+            throw new Error('Could not allocate new channel')
+        }
+        usedChannels.push(channel)
 
-        tx.sign(distributionKeypair)
-        // Validate transactions
-        // Submit transaction in case voter doesn't do so
-        server.submitTransaction(tx)
-        // Return the signed transaction to the user
+        const channelAccount = await server.loadAccount(channel.publicKey())
+
+        // For better scalability it should go through channel account 
+        const tx = new TransactionBuilder(channelAccount, OPTIONS)
+            .addOperation(Operation.createAccount({
+                source: distributionKeypair.publicKey(),
+                destination: voterPublicKey,
+                startingBalance: '2',
+            }))
+            .addOperation(Operation.changeTrust({
+                source: voterPublicKey,
+                asset: votingToken,
+                limit: `${votesCap / (10 ** 7)}`,
+            }))
+            .addOperation(Operation.payment({
+                source: distributionKeypair.publicKey(),
+                destination: voterPublicKey,
+                asset: votingToken,
+                amount: `${1 / (10 ** 7)}`,
+            }))
+            .setTimeout(30)
+            .build()
+
+        tx.sign(channel, distributionKeypair)
         return tx
     }
 
@@ -170,8 +173,9 @@ async function TDS(t: ExecutionContext) {
 }
 
 test('complete voting protocol', async (t: ExecutionContext) => {
+    const VOTES_CAP = 100
     try {
-        const tds = await TDS(t)
+        const tds = await TDS(t, VOTES_CAP)
         const as = AS()
         // Voter authenticate in AS with his ID
         // ...
@@ -197,9 +201,8 @@ test('complete voting protocol', async (t: ExecutionContext) => {
         // and shows up as anonymous voter with blindly singed token
         // and request account creation transaction
 
-        const accountCreationTx = await voter.createAccountTransaction(tds.tdsPublicKey(), tds.votingToken, 100)
-        const sigedAccountCreationTx = tds.requestAccountCreation(accountCreationTx, authorizationToken)
-        const createAccRes = await voter.publishAccountTransaction(sigedAccountCreationTx)
+        const accountCreationTx = await tds.requestAccountCreation(voter.publicKey(), authorizationToken)
+        const createAccRes = await voter.publishAccountTransaction(accountCreationTx)
         console.log(createAccRes.hash)
 
         const encodedMemo = voter.createEncodedMemo(1)
@@ -214,15 +217,10 @@ test('complete voting protocol', async (t: ExecutionContext) => {
     }
 })
 
-function sleep(time: number) {
-    return new Promise((resolve, rejest) => {
-        setTimeout(resolve, time)
-    })
-}
-
 test.only('handle multiple voters', async (t: ExecutionContext) => {
+    const VOTES_CAP = 100
     try {
-        const tds = await TDS(t)
+        const tds = await TDS(t, VOTES_CAP)
         const as = AS()
         await Promise.all([1, 2, 3].map(async (index) => {
             console.log(`starting ${index} voter`)
@@ -250,12 +248,8 @@ test.only('handle multiple voters', async (t: ExecutionContext) => {
             // and shows up as anonymous voter with blindly singed token
             // and request account creation transaction
 
-            console.log('falling asleep', index)
-            await sleep(index * 5000)
-            console.log('wakingup', index)
-            const accountCreationTx = await voter.createAccountTransaction(tds.tdsPublicKey(), tds.votingToken, 100)
-            const sigedAccountCreationTx = tds.requestAccountCreation(accountCreationTx, authorizationToken)
-            const createAccRes = await voter.publishAccountTransaction(sigedAccountCreationTx)
+            const accountCreationTx = await tds.requestAccountCreation(voter.publicKey(), authorizationToken)
+            const createAccRes = await voter.publishAccountTransaction(accountCreationTx)
             console.log(createAccRes.hash)
 
             const encodedMemo = voter.createEncodedMemo(1)
@@ -263,10 +257,14 @@ test.only('handle multiple voters', async (t: ExecutionContext) => {
             console.log(castVoteRes.hash)
         }))
     } catch (e) {
-        console.log({
-            extras: e.response.data.extras,
-            operations: e.response.data.extras.result_codes.operations
-        })
-        t.fail()
+        if (e.response.data.extras) {
+            console.log({
+                extras: e.response.data.extras,
+                operations: e.response.data.extras.result_codes.operations
+            })
+            t.fail()
+        } else {
+            throw e
+        }
     }
 })

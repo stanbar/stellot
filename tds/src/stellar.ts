@@ -7,6 +7,7 @@ import {
   Server,
   TransactionBuilder,
 } from 'stellar-sdk';
+import { chunk } from 'lodash';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -90,4 +91,37 @@ export async function createDistributionAndBallotAccount(
   tx.sign(issuerKeypair, ballotBoxKeypair, distributionKeypair);
   await server.submitTransaction(tx);
   return [distributionKeypair, ballotBoxKeypair];
+}
+
+export async function createChannelAccounts(
+  channelCount: number,
+  issuerKeypair: Keypair,
+): Promise<Keypair[]> {
+
+  const channels = Array.from(Array(channelCount).keys()).map(() => Keypair.random())
+
+  const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
+
+  // Stellar allows up to 100 ops per transaction
+  const txs = chunk(channels, 100).map((chunkedChannels) => {
+    const builder = new TransactionBuilder(issuerAccount, {
+      fee: BASE_FEE,
+      networkPassphrase: Networks.TESTNET,
+    })
+    chunkedChannels.forEach(channel => {
+      builder.addOperation(Operation.createAccount({
+        destination: channel.publicKey(),
+        startingBalance: '2'
+      }))
+    })
+    builder.setTimeout(20)
+    return builder.build();
+  })
+
+  for (const tx of txs) {
+    tx.sign(issuerKeypair);
+    await server.submitTransaction(tx)
+  }
+
+  return channels
 }
