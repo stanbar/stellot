@@ -49,14 +49,15 @@ async function createCastVoteTransaction(ballotBoxKeypair: Keypair, voterKeypair
 
 test.serial.skip('stellar tx can contain create account and trust line op', async (t) => {
     const issuerKeypair = Keypair.random()
-    const votesCap = 100
+    const votesCap = 10
+    const tdsStartingBalance = votesCap * 2
 
-    await createIssuerAccount(masterKeypair, issuerKeypair)
+    await createIssuerAccount(masterKeypair, issuerKeypair, tdsStartingBalance)
 
-    const voteToken = createVoteToken(issuerKeypair, randomBytes(20).toString('hex'))
+    const voteToken = createVoteToken(issuerKeypair.publicKey(), randomBytes(20).toString('hex'))
     console.log('created vote token', voteToken)
     const [distributionKeypair, ballotBoxKeypair] =
-        await createDistributionAndBallotAccount(issuerKeypair, votesCap, voteToken)
+        await createDistributionAndBallotAccount(issuerKeypair, votesCap, voteToken, tdsStartingBalance)
 
     const voterKeypair = Keypair.random()
 
@@ -81,14 +82,14 @@ test.serial.skip('stellar tx can contain create account and trust line op', asyn
     }
 });
 
-test.serial('send encrypted message from voter to ballotbox using secret-box', async (t) => {
+test.serial.skip('send encrypted message from voter to ballotbox using secret-box', async (t) => {
     const voterKeypair = Keypair.random()
     const ballotBox = Keypair.random()
     const encryptionKeys = Keypair.random()
 
     try {
-        await createIssuerAccount(masterKeypair, voterKeypair)
-        await createIssuerAccount(masterKeypair, ballotBox)
+        await createIssuerAccount(masterKeypair, voterKeypair, 1)
+        await createIssuerAccount(masterKeypair, ballotBox, 1)
     } catch (e) {
         console.log({
             extras: e.response.data.extras,

@@ -10,13 +10,13 @@ import {
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
-export async function createIssuerAccount(masterKeypair: Keypair, issuerKeypair: Keypair) {
+export async function createIssuerAccount(masterKeypair: Keypair, issuerKeypair: Keypair, tdsStartingBalance: number) {
   const masterAccount = await server.loadAccount(masterKeypair.publicKey());
   const tx = new TransactionBuilder(masterAccount, {
     fee: BASE_FEE, networkPassphrase: Networks.TESTNET,
   }).addOperation(Operation.createAccount({
     destination: issuerKeypair.publicKey(),
-    startingBalance: '10',
+    startingBalance: `${10 + tdsStartingBalance}`,
   }))
     .setTimeout(30)
     .build();
@@ -24,16 +24,17 @@ export async function createIssuerAccount(masterKeypair: Keypair, issuerKeypair:
   await server.submitTransaction(tx);
 }
 
-export function createVoteToken(issuer: Keypair, title: string): Asset {
+export function createVoteToken(issuerPublicKey: string, title: string): Asset {
   return new Asset(
     title.replace(/[^0-9a-z]/gi, '').substr(0, 11),
-    issuer.publicKey())
+    issuerPublicKey)
 }
 
 export async function createDistributionAndBallotAccount(
   issuerKeypair: Keypair,
   votesCap: number,
-  voteToken: Asset): Promise<[Keypair, Keypair]> {
+  voteToken: Asset,
+  tdsStartingBalance: number): Promise<[Keypair, Keypair]> {
   const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
   const distributionKeypair = Keypair.random();
   const ballotBoxKeypair = Keypair.random();
@@ -45,7 +46,7 @@ export async function createDistributionAndBallotAccount(
     // Create distribution account
     .addOperation(Operation.createAccount({
       destination: distributionKeypair.publicKey(),
-      startingBalance: '4', // TODO calculate exactly
+      startingBalance: `${tdsStartingBalance}`, // TODO calculate exactly
     }))
     // Create ballot box
     .addOperation(Operation.createAccount({
