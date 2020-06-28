@@ -12,7 +12,6 @@ export default interface CreateVotingRequest {
   votesCap: number;
   encrypted: boolean;
   encryptedUntil?: Date; // ISO 8601, Date.toJSON()
-  challenges: number;
   startDate: Date;
   endDate: Date;
 }
