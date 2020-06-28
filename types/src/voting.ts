@@ -1,6 +1,5 @@
 import Poll from './poll';
 import KeybaseAuthOptions from './keybaseAuth';
-import EmailsAuthOptions from "./emailAuth";
 import { Visibility, Authorization } from './index';
 import Encryption from './encryption';
 
