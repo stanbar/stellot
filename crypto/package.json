@@ -1,6 +1,6 @@
 {
   "name": "@stellot/crypto",
-  "version": "2.0.10",
+  "version": "2.1.0",
   "description": "Crypto libraries for front and backend",
   "author": "stasbar <stachu@stasbar.com>",
   "homepage": "https://stellot.com",
@@ -31,18 +31,21 @@
     "url": "https://github.com/stasbar/stellar-voting/issues"
   },
   "dependencies": {
+    "@futuretense/ed25519-box": "^1.0.1",
     "@futuretense/secret-memo": "^1.0.0",
     "asn1.js": "^5.3.0",
     "bn.js": "^5.1.2",
     "elliptic": "^6.5.2",
     "es6-error": "^4.1.1",
     "jsbn": "^1.1.0",
+    "long": "^4.0.0",
     "randombytes": "^2.1.0"
   },
   "devDependencies": {
     "@types/bn.js": "^4.11.6",
     "@types/elgamal": "^0.3.0",
     "@types/elliptic": "^6.4.12",
+    "@types/long": "^4.0.1",
     "@types/node": "^13.13.12",
     "ava": "^3.9.0",
     "ava-ts": "^0.25.2",
