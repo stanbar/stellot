@@ -45,7 +45,7 @@ test('ElGamal.fromPublicKey transtestivtesty', (t) => {
     t.is(pub.y.toString(), eg.y.toString())
 });
 test('ciphertext should be 2 times keysize', (t) => {
-    Array.from({ length: 20 }, () => {
+    Array.from({ length: 5 }, () => {
         const keySizeBytes = 16
         const { publicKey } = createEncryptionKeypair(keySizeBytes * 8)
         const pub = decodePublicKey(publicKey)
@@ -63,7 +63,7 @@ test('ciphertext should be 2 times keysize', (t) => {
     })
 });
 test('should encrypt and decrypt random 16 byte memo wtesth elgamal', (t) => {
-    Array.from({ length: 20 }, () => {
+    Array.from({ length: 5 }, () => {
         const { privateKey, publicKey } = createEncryptionKeypair()
         const pub = decodePublicKey(publicKey)
         const priv = decodePrivateKey(privateKey)
@@ -81,7 +81,7 @@ test('should encrypt and decrypt random 16 byte memo wtesth elgamal', (t) => {
 });
 
 test('should encrypt and decrypt random 16 byte memo wtesth 128btest elgamal', (t) => {
-    Array.from({ length: 20 }, () => {
+    Array.from({ length: 5 }, () => {
         const { privateKey, publicKey } = createEncryptionKeypair(128)
         const pub = decodePublicKey(publicKey)
         const priv = decodePrivateKey(privateKey)

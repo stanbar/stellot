@@ -2,7 +2,7 @@ import { Keypair, StrKey } from 'stellar-sdk';
 import {
     encrypt as _encrypt,
     decrypt as _decrypt
-} from '@futuretense/ed25519-box';
+} from './ed25519-box';
 
 export function encrypt(
     keys: Keypair,
