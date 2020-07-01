@@ -1,30 +1,28 @@
-import {
-  Asset,
-  Keypair,
-  Networks,
-  Operation,
-  Server,
-  TransactionBuilder,
-} from 'stellar-sdk';
+import { Asset, Keypair, Networks, Operation, Server, TransactionBuilder } from 'stellar-sdk';
 import { chunk } from 'lodash';
 
 const server = new Server('https://horizon-testnet.stellar.org');
-const DEFAULT_OPTIONS = { fee: "200", networkPassphrase: Networks.TESTNET };
 
+async function defaultOptions() {
+  return {
+    networkPassphrase: Networks.TESTNET,
+    fee: `${(await server.fetchBaseFee()) * 2}`,
+    timebounds: await server.fetchTimebounds(30),
+  };
+}
 export async function createIssuerAccount(
   masterKeypair: Keypair,
   issuerKeypair: Keypair,
   tdsStartingBalance: number,
 ) {
   const masterAccount = await server.loadAccount(masterKeypair.publicKey());
-  const tx = new TransactionBuilder(masterAccount, DEFAULT_OPTIONS)
+  const tx = new TransactionBuilder(masterAccount, await defaultOptions())
     .addOperation(
       Operation.createAccount({
         destination: issuerKeypair.publicKey(),
         startingBalance: `${10 + tdsStartingBalance}`,
       }),
     )
-    .setTimeout(30)
     .build();
   tx.sign(masterKeypair);
   await server.submitTransaction(tx);
@@ -44,7 +42,7 @@ export async function createDistributionAndBallotAccount(
   const distributionKeypair = Keypair.random();
   const ballotBoxKeypair = Keypair.random();
 
-  const tx = new TransactionBuilder(issuerAccount, DEFAULT_OPTIONS)
+  const tx = new TransactionBuilder(issuerAccount, await defaultOptions())
     // Create distribution account
     .addOperation(
       Operation.createAccount({
@@ -90,7 +88,6 @@ export async function createDistributionAndBallotAccount(
         limit: `${votesCap / 10 ** 7}`,
       }),
     )
-    .setTimeout(30)
     .build();
 
   tx.sign(issuerKeypair, ballotBoxKeypair, distributionKeypair);
@@ -108,7 +105,7 @@ export async function createChannelAccounts(
     const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
 
     // Stellar allows up to 100 ops per transaction
-    const builder = new TransactionBuilder(issuerAccount, DEFAULT_OPTIONS);
+    const builder = new TransactionBuilder(issuerAccount, await defaultOptions());
     chunkedChannels.forEach(channel => {
       builder.addOperation(
         Operation.createAccount({
@@ -117,13 +114,12 @@ export async function createChannelAccounts(
         }),
       );
     });
-    builder.setTimeout(20);
     const tx = builder.build();
 
     tx.sign(issuerKeypair);
     console.log({ chunkedChannels });
     await server.submitTransaction(tx);
-    console.log("submited channel tx")
+    console.log('submited channel tx');
   }
   return channels;
 }
@@ -139,7 +135,7 @@ export async function createBallotIssuingTransaction(
   const channelAccount = await server.loadAccount(channelKeypair.publicKey());
 
   // For better scalability it should go through channel account
-  const tx = new TransactionBuilder(channelAccount, DEFAULT_OPTIONS)
+  const tx = new TransactionBuilder(channelAccount, await defaultOptions())
     .addOperation(
       Operation.createAccount({
         source: distributionKeypair.publicKey(),
@@ -164,7 +160,6 @@ export async function createBallotIssuingTransaction(
         amount: `${1 / 10 ** 7}`,
       }),
     )
-    .setTimeout(30)
     .build();
 
   tx.sign(channelKeypair, distributionKeypair);
