@@ -3,10 +3,10 @@ import { chunk } from 'lodash';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
-async function defaultOptions() {
+async function defaultOptions(): Promise<TransactionBuilder.TransactionBuilderOptions> {
   return {
     networkPassphrase: Networks.TESTNET,
-    fee: `${(await server.fetchBaseFee()) * 2}`,
+    fee: `${(await server.fetchBaseFee()) * 3}`,
     timebounds: await server.fetchTimebounds(30),
   };
 }
@@ -110,14 +110,15 @@ export async function createChannelAccounts(
       builder.addOperation(
         Operation.createAccount({
           destination: channel.publicKey(),
-          startingBalance: '2',
+        // Minimum Balance = (2 + # of entries) * base reserve (0.5)
+        // Fee for 3 operations (payment, marge)
+        startingBalance: "2",
         }),
       );
     });
     const tx = builder.build();
 
     tx.sign(issuerKeypair);
-    console.log({ chunkedChannels });
     await server.submitTransaction(tx);
     console.log('submited channel tx');
   }
