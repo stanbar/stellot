@@ -1,3 +1,5 @@
+import "./ipfs"
+
 export const dva = {
   config: {
     onError(err: ErrorEvent) {
