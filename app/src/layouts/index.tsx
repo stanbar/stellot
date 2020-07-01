@@ -19,7 +19,6 @@ interface LayoutProps extends ConnectProps {
 /* eslint-disable jsx-a11y/alt-text */
 const BasicLayout: React.FC<LayoutProps> = props => {
   const { route, computedMatch, location } = props;
-  console.log({ route, location, computedMatch });
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [location?.pathname]);

@@ -120,21 +120,13 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
   const decryptedMemo = async (
     tx: ServerApi.TransactionRecord,
     memoBuffer: Buffer,
-  ): Promise<Memo<MemoType.Hash>> => {
-    console.log({
-      seq: tx.source_account_sequence,
-      decryption: Keypair.fromSecret(voting.encryption!.decryptionKey!),
-      sourceAccount: tx.source_account,
-      memo: Memo.hash(memoBuffer.toString('hex')),
-    });
-
-    return decryptMemo(
+  ): Promise<Memo<MemoType.Hash>> =>
+    decryptMemo(
       tx.source_account_sequence,
       Keypair.fromSecret(voting.encryption!.decryptionKey!),
       tx.source_account,
       Memo.hash(memoBuffer.toString('hex')),
     ) as Promise<Memo<MemoType.Hash>>;
-  };
 
   console.log({ numberOfTxs: transactions.length });
   await Promise.all(
@@ -168,32 +160,21 @@ export async function getMyCandidate(
   voterPublicKey: string,
 ): Promise<Option | undefined> {
   console.log({ memoBuffer, seqNumber, voterPublicKey });
-  const decryptedMemo = async (memoBuffer: Buffer): Promise<Memo<MemoType.Hash>> => {
-    console.log({
-      seq: seqNumber,
-      decryption: Keypair.fromSecret(voting.encryption!.decryptionKey!),
-      sourceAccount: voterPublicKey,
-      memo: Memo.hash(memoBuffer.toString('hex')),
-    });
-    return decryptMemo(
+  const decryptedMemo = async (memoBuffer: Buffer): Promise<Memo<MemoType.Hash>> =>
+    decryptMemo(
       seqNumber,
       Keypair.fromSecret(voting.encryption!.decryptionKey!),
       voterPublicKey,
       Memo.hash(memoBuffer.toString('hex')),
     ) as Promise<Memo<MemoType.Hash>>;
-  };
-  const decryptedBuffer = (await decryptedMemo(memoBuffer)).value;
-  console.log({ decryptedBuffer });
   const candidateCode: Array<number> = decodeMemo(
     voting.encryption ? (await decryptedMemo(memoBuffer)).value : memoBuffer,
     1,
   ); // TODO dont hardcore one answer
-  console.log({ candidateCode });
 
   return voting.polls[0].options.find((option) => option.code === candidateCode[0]);
 }
 
 export function castVote(tx: Transaction) {
-  console.log('Submitting transaction');
   return server.submitTransaction(tx);
 }
