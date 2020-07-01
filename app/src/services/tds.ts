@@ -1,15 +1,15 @@
 import { Voting, CreateVotingRequest, CreateVotingResponse } from '@stellot/types';
-import BN from "bn.js";
-import { Memo, Transaction } from "stellar-sdk";
+import BN from 'bn.js';
+import { Memo, Transaction } from 'stellar-sdk';
 
-const BASE_URL = REACT_APP_ENV === 'production' ? TDS_SERVER_URL : ''
+const BASE_URL = REACT_APP_ENV === 'production' ? TDS_SERVER_URL : '';
 
 export async function fetchVotes(): Promise<Voting[]> {
   const res = await fetch(`${BASE_URL}/api/voting`);
   if (!res.ok) {
-    throw new Error(await res.text())
+    throw new Error(await res.text());
   }
-  return res.json()
+  return res.json();
 }
 
 export async function fetchVoting(votingSlug: string): Promise<Voting> {
@@ -20,16 +20,17 @@ export async function fetchVoting(votingSlug: string): Promise<Voting> {
     },
   });
   if (!res.ok) {
-    throw new Error(await res.text())
+    throw new Error(await res.text());
   }
-  return res.json()
+  return res.json();
 }
 
-export async function createVoting(createVotingRequest: CreateVotingRequest)
-  : Promise<CreateVotingResponse> {
+export async function createVoting(
+  createVotingRequest: CreateVotingRequest,
+): Promise<CreateVotingResponse> {
   const response = await fetch(`${BASE_URL}/api/voting`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ createVotingRequest }),
   });
 
@@ -43,18 +44,20 @@ export async function createVoting(createVotingRequest: CreateVotingRequest)
 }
 
 export interface ResSession {
-  id: number;
   R: string; // hex
   P: string; // hex
 }
 
-export async function initSessions(votingId: string, authToken?: string): Promise<[string, ResSession[]]> {
+export async function initSessions(
+  votingId: string,
+  authToken?: string,
+): Promise<[string, ResSession]> {
   console.log({ initSession: authToken });
-  const response = await fetch(`${BASE_URL}/api/blindsig/init`, {
+  const response = await fetch(`${BASE_URL}/api/castVote/init`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+      ...(authToken && { Authorization: `Bearer ${authToken}` }),
     },
     body: JSON.stringify({ votingId }),
   });
@@ -66,31 +69,31 @@ export async function initSessions(votingId: string, authToken?: string): Promis
     const body = await response.json();
     throw new Error(body?.errors?.message);
   }
-  console.log({ 'SESSION-TOKEN': response.headers.get('SESSION-TOKEN') })
+  console.log({ 'SESSION-TOKEN': response.headers.get('SESSION-TOKEN') });
   const sessionId = response.headers.get('SESSION-TOKEN') || response.headers.get('session-token');
   if (!sessionId) {
     console.error(`Didn't receive SESSION-TOKEN`);
     throw new Error(`Didn't receive SESSION-TOKEN`);
   }
 
-  const responseJson: Array<{
-    id: number,
-    R: Array<number>,
-    P: Array<number>
-  }> = await response.json();
+  const responseJson: {
+    R: Array<number>;
+    P: Array<number>;
+  } = await response.json();
 
-  return [sessionId, responseJson.map(res => ({
-    id: res.id,
-    R: Buffer.from(res.R).toString('hex'),
-    P: Buffer.from(res.P).toString('hex'),
-  }))]
+  return [
+    sessionId,
+    {
+      R: Buffer.from(responseJson.R).toString('hex'),
+      P: Buffer.from(responseJson.P).toString('hex'),
+    },
+  ];
 }
 
 export async function getChallenges(
   sessionToken: string,
-  blindedTransactionBatches: Array<{ id: number, blindedTransactionBatch: Array<BN> }>,
-)
-  : Promise<number> {
+  blindedTransactionBatches: Array<{ id: number; blindedTransactionBatch: Array<BN> }>,
+): Promise<number> {
   const response = await fetch(`${BASE_URL}/api/blindsig/getChallenges`, {
     method: 'POST',
     headers: {
@@ -109,7 +112,6 @@ export async function getChallenges(
   const res: { luckyBatchTransaction: number } = await response.json();
   return res.luckyBatchTransaction;
 }
-
 
 export class TransactionInBatch {
   candidateCode: number;
@@ -130,7 +132,7 @@ export class TransactionInBatch {
   toJSON() {
     return {
       transaction: this.transaction.toXDR(),
-    }
+    };
   }
 }
 
@@ -138,12 +140,14 @@ export type TransactionsBatch = Array<TransactionInBatch>;
 
 interface Proof {
   id: number;
-  voterSession: { a: BN, b: BN };
+  voterSession: { a: BN; b: BN };
   transactionsBatch: TransactionsBatch;
 }
 
-export async function proofChallenge(sessionToken: string, proofs: Proof[])
-  : Promise<{ id: number, sigs: Array<BN> }> {
+export async function proofChallenge(
+  sessionToken: string,
+  proofs: Proof[],
+): Promise<{ id: number; sigs: Array<BN> }> {
   console.log({ proofs: JSON.stringify({ proofs }) });
   const response = await fetch(`${BASE_URL}/api/blindsig/proofChallenges`, {
     method: 'POST',
@@ -160,9 +164,8 @@ export async function proofChallenge(sessionToken: string, proofs: Proof[])
     console.error('Failed to proof challenges');
     throw new Error(await response.text());
   }
-  const signedLuckyBatch: { id: number, sigs: Array<BN> } = await response.json();
+  const signedLuckyBatch: { id: number; sigs: Array<BN> } = await response.json();
   // TODO it is working, but is it really needed ? does the BN serialize it anyway ?
-  signedLuckyBatch.sigs = signedLuckyBatch.sigs.map(sig => new BN(sig, 16));
-  return signedLuckyBatch
+  signedLuckyBatch.sigs = signedLuckyBatch.sigs.map((sig) => new BN(sig, 16));
+  return signedLuckyBatch;
 }
-
