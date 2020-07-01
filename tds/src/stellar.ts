@@ -1,6 +1,5 @@
 import {
   Asset,
-  BASE_FEE,
   Keypair,
   Networks,
   Operation,
