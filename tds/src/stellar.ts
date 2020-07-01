@@ -10,7 +10,7 @@ import {
 import { chunk } from 'lodash';
 
 const server = new Server('https://horizon-testnet.stellar.org');
-const DEFAULT_OPTIONS = { fee: BASE_FEE, networkPassphrase: Networks.TESTNET };
+const DEFAULT_OPTIONS = { fee: "200", networkPassphrase: Networks.TESTNET };
 
 export async function createIssuerAccount(
   masterKeypair: Keypair,
@@ -105,7 +105,7 @@ export async function createChannelAccounts(
 ): Promise<Keypair[]> {
   const channels = Array.from(Array(channelCount).keys()).map(() => Keypair.random());
 
-  for (const chunkedChannels of chunk(channels, 20)) {
+  for (const chunkedChannels of chunk(channels, 50)) {
     const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
 
     // Stellar allows up to 100 ops per transaction
