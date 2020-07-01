@@ -18,7 +18,7 @@ import { decodeMemo } from '@/crypto/utils';
 import { Option, Voting } from '@stellot/types';
 import Result from '@/types/result';
 import _ from 'lodash';
-import { decodePrivateKey, ElGamal, decodeMemo as decryptMemo } from '@stellot/crypto';
+import { decodeMemo as decryptMemo } from '@stellot/crypto';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 const OPTIONS = {
