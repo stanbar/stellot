@@ -98,7 +98,6 @@ const renderActiveShape = (props: any) => {
 const VoteResults: React.FC<VotePreviewProps> = props => {
   const { loading, loadingResults, results, match, dispatch, voting, } = props;
   const myTransaction = voting ? storage.getMyTransaction(voting.id) : undefined;
-  const { myTxHash, myTxMemo } = myTransaction || {};
   const votingSlug = match?.params['id']!; // We can safely use ! because, undefined id is handled by vote/index
   const [chart, setChart] = useState<ChartType>(ChartType.Bar)
   const [activeIndex, setActiveIndex] = useState<number>(0)
@@ -192,7 +191,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
       }
 
 
-      {myTxHash && myTxMemo &&
+      {myTransaction && myTransaction.myTxHash && myTransaction.myTxMemo &&
         <Button type="link" onClick={() => setShowMyVote(!showMyVote)}>
           <span style={{ marginLeft: 2 }}>{showMyVote ? <UpOutlined /> : <DownOutlined />}My vote</span>
         </Button>
@@ -210,23 +209,23 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
           <span style={{ marginLeft: 2 }}>Ballot-box account</span>
         </Button>
       </a>
-      {showMyVote && myTxHash && myTxMemo &&
+      {showMyVote && myTransaction && myTransaction.myTxHash && myTransaction.myTxMemo &&
         <>
 
           <Card
             title={<AntTooltip title="Copy to clipboard">
-              <h2 style={{ cursor: 'pointer' }} onClick={() => copyTextToClipboard(myTxHash)}
-                className={styles.myVoteCardTitle}>{myTxHash}</h2>
+              <h2 style={{ cursor: 'pointer' }} onClick={() => copyTextToClipboard(myTransaction.myTxHash!)}
+                className={styles.myVoteCardTitle}>{myTransaction.myTxHash}</h2>
             </AntTooltip>}
             extra={[<AntTooltip
               title="This information is stored in your browser only, if you clear it, you will be unable to track your vote. Store the vote identifier in safe place."><QuestionCircleOutlined /></AntTooltip>]}
             actions={[
-              <a rel="noopener noreferrer" target="_blank" href={`https://testnet.lumenscan.io/txns/${myTxHash}`}>
+              <a rel="noopener noreferrer" target="_blank" href={`https://testnet.lumenscan.io/txns/${myTransaction.myTxHash}`}>
                 Show in blockchain</a>
             ]} style={{ maxWidth: 350 }}>
 
             <p className={styles.option}>
-              Option: <EncryptedDecrypted voting={voting} myTxMemo={myTxMemo} />
+              Option: <EncryptedDecrypted voting={voting} storedVoting={myTransaction} />
             </p>
           </Card>
         </>

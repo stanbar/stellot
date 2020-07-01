@@ -8,40 +8,93 @@ import {
   Server,
   Transaction,
   TransactionBuilder,
-  MemoHash
-} from "stellar-sdk";
-import { decodeMemo, decryptMemo } from "@/crypto/utils";
-import { Option, Voting } from "@stellot/types";
-import Result from "@/types/result";
+  MemoHash,
+  Keypair,
+  Horizon,
+  MemoType,
+  ServerApi,
+} from 'stellar-sdk';
+import { decodeMemo } from '@/crypto/utils';
+import { Option, Voting } from '@stellot/types';
+import Result from '@/types/result';
 import _ from 'lodash';
-import { decodePrivateKey, ElGamal, DecryptionElGamal } from '@stellot/crypto';
+import { decodePrivateKey, ElGamal, decodeMemo as decryptMemo } from '@stellot/crypto';
 
 const server = new Server('https://horizon-testnet.stellar.org');
+const OPTIONS = {
+  fee: BASE_FEE,
+  networkPassphrase: Networks.TESTNET,
+};
 
 export async function getAccountSequenceNumber(accountId: string) {
   return (await server.loadAccount(accountId)).sequenceNumber();
 }
 
-export function createTransaction(account: Account, memo: Memo, voting: Voting)
-  : Transaction {
+export function createTransaction(account: Account, memo: Memo, voting: Voting): Transaction {
   const voteToken = new Asset(voting.assetCode, voting.issueAccountId);
   return new TransactionBuilder(account, {
-    fee: BASE_FEE,
-    networkPassphrase: Networks.TESTNET,
+    ...OPTIONS,
     memo,
-    // TODO timebounds: endoftheelections
   })
     .addOperation(
       Operation.payment({
         destination: voting.ballotBoxAccountId,
         asset: voteToken,
-        amount: `${1 / (10 ** 7)}`,
+        amount: `${1 / 10 ** 7}`,
       }),
     )
     .setTimeout(30)
     .build();
 }
 
+export function parseTransactiion(transactionXdr: string) {
+  return new Transaction(transactionXdr, Networks.TESTNET);
+}
+
+export function publishAccountCreationTx(tx: Transaction) {
+  return server.submitTransaction(tx);
+}
+
+export async function loadAccount(publicKey: string) {
+  return await server.loadAccount(publicKey);
+}
+
+export async function createCastVoteTransaction(
+  voterKeypair: Keypair,
+  voteToken: Asset,
+  ballotBoxPublicKey: string,
+  encryptedMemo: Memo,
+  mergeAccountId: string,
+): Promise<Horizon.SubmitTransactionResponse> {
+  const voterAccount = await server.loadAccount(voterKeypair.publicKey());
+  const tx = new TransactionBuilder(voterAccount, {
+    ...OPTIONS,
+    memo: encryptedMemo,
+    // TODO timebounds: endoftheelections
+  })
+    .addOperation(
+      Operation.payment({
+        destination: ballotBoxPublicKey,
+        asset: voteToken,
+        amount: `${1 / 10 ** 7}`,
+      }),
+    )
+    .addOperation(
+      Operation.changeTrust({
+        asset: voteToken,
+        limit: '0',
+      }),
+    )
+    .addOperation(
+      Operation.accountMerge({
+        destination: mergeAccountId,
+      }),
+    )
+    .setTimeout(30)
+    .build();
+  tx.sign(voterKeypair);
+  return server.submitTransaction(tx);
+}
 
 export async function fetchResults(voting: Voting): Promise<Result[]> {
   const payments = await server
@@ -51,56 +104,96 @@ export async function fetchResults(voting: Voting): Promise<Result[]> {
     .forAccount(voting.ballotBoxAccountId)
     .call();
 
-  const transactions = await Promise.all(payments.records.filter(
-    tx =>
-      tx.asset_code === voting.assetCode &&
-      tx.asset_issuer === voting.issueAccountId,
-  ).map(payment => payment.transaction()));
+  const transactions = await Promise.all(
+    payments.records
+      .filter(
+        (tx) => tx.asset_code === voting.assetCode && tx.asset_issuer === voting.issueAccountId,
+      )
+      .map((payment) => payment.transaction()),
+  );
 
   const results = voting.polls[0].options.map((option: Option) => ({
     option,
     votes: 0,
   }));
 
-  let decryptor: DecryptionElGamal | undefined = undefined
-
-  if (voting.encryption && voting.encryption.decryptionKey) {
-    const privateKey = decodePrivateKey(Buffer.from(voting.encryption.decryptionKey, 'base64'))
-    decryptor = ElGamal.fromPrivateKey(privateKey.p.toString(), privateKey.g.toString(), privateKey.y.toString(), privateKey.x.toString())
-  }
-
-  console.log({ numberOfTxs: transactions.length })
-  transactions
-    .filter(tx => tx.memo_type === MemoHash && tx.memo)
-    .forEach(tx => {
-      const memoBuffer = new Buffer(tx.memo!, 'base64')
-      const candidateCode: Array<number> = decodeMemo(decryptor ? decryptMemo(memoBuffer, decryptor) : memoBuffer, 1); // TODO dont hardcore one answer
-      const result = results.find(it => it.option.code === candidateCode[0]);
-      if (result === undefined) {
-        console.log(`Detected invalid vote on candidateCode: ${candidateCode}`)
-      } else {
-        result.votes += 1;
-        console.log(`Detected valid vote on candidateCode: ${candidateCode}`)
-      }
+  const decryptedMemo = async (
+    tx: ServerApi.TransactionRecord,
+    memoBuffer: Buffer,
+  ): Promise<Memo<MemoType.Hash>> => {
+    console.log({
+      seq: tx.source_account_sequence,
+      decryption: Keypair.fromSecret(voting.encryption!.decryptionKey!),
+      sourceAccount: tx.source_account,
+      memo: Memo.hash(memoBuffer.toString('hex')),
     });
-  return _.shuffle(results.map(result => ({ name: result.option.name, votes: result.votes })));
+
+    return decryptMemo(
+      tx.source_account_sequence,
+      Keypair.fromSecret(voting.encryption!.decryptionKey!),
+      tx.source_account,
+      Memo.hash(memoBuffer.toString('hex')),
+    ) as Promise<Memo<MemoType.Hash>>;
+  };
+
+  console.log({ numberOfTxs: transactions.length });
+  await Promise.all(
+    transactions
+      .filter((tx) => tx.memo_type === MemoHash && tx.memo)
+      .map(async (tx) => {
+        const memoBuffer = Buffer.from(tx.memo!, 'base64');
+
+        const candidateCode: Array<number> = decodeMemo(
+          voting.encryption?.decryptionKey
+            ? (await decryptedMemo(tx, memoBuffer)).value
+            : memoBuffer,
+          1,
+        ); // TODO dont hardcore one answer
+        const result = results.find((it) => it.option.code === candidateCode[0]);
+        if (result === undefined) {
+          console.log(`Detected invalid vote on candidateCode: ${candidateCode}`);
+        } else {
+          result.votes += 1;
+          console.log(`Detected valid vote on candidateCode: ${candidateCode}`);
+        }
+      }),
+  );
+  return _.shuffle(results.map((result) => ({ name: result.option.name, votes: result.votes })));
 }
 
-export function getMyCandidate(voting: Voting, memoBuffer: Buffer): Option | undefined {
+export async function getMyCandidate(
+  voting: Voting,
+  memoBuffer: Buffer,
+  seqNumber: string,
+  voterPublicKey: string,
+): Promise<Option | undefined> {
+  console.log({ memoBuffer, seqNumber, voterPublicKey });
+  const decryptedMemo = async (memoBuffer: Buffer): Promise<Memo<MemoType.Hash>> => {
+    console.log({
+      seq: seqNumber,
+      decryption: Keypair.fromSecret(voting.encryption!.decryptionKey!),
+      sourceAccount: voterPublicKey,
+      memo: Memo.hash(memoBuffer.toString('hex')),
+    });
+    return decryptMemo(
+      seqNumber,
+      Keypair.fromSecret(voting.encryption!.decryptionKey!),
+      voterPublicKey,
+      Memo.hash(memoBuffer.toString('hex')),
+    ) as Promise<Memo<MemoType.Hash>>;
+  };
+  const decryptedBuffer = (await decryptedMemo(memoBuffer)).value;
+  console.log({ decryptedBuffer });
+  const candidateCode: Array<number> = decodeMemo(
+    voting.encryption ? (await decryptedMemo(memoBuffer)).value : memoBuffer,
+    1,
+  ); // TODO dont hardcore one answer
+  console.log({ candidateCode });
 
-  let decryptor
-  if (voting.encryption && voting.encryption.decryptionKey) {
-    const privateKey = decodePrivateKey(Buffer.from(voting.encryption.decryptionKey, 'base64'))
-    decryptor = ElGamal.fromPrivateKey(privateKey.p.toString(), privateKey.g.toString(), privateKey.y.toString(), privateKey.x.toString())
-  }
-
-  const candidateCode: Array<number> = decodeMemo(decryptor ? decryptMemo(memoBuffer, decryptor) : memoBuffer, 1); // TODO dont hardcore one answer
-
-  return voting.polls[0].options.find(option => option.code === candidateCode[0])
+  return voting.polls[0].options.find((option) => option.code === candidateCode[0]);
 }
 
 export function castVote(tx: Transaction) {
   console.log('Submitting transaction');
   return server.submitTransaction(tx);
 }
-

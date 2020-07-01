@@ -10,7 +10,7 @@ export function encodeMemo(candidateCode: number): Buffer {
   if (candidateCode === 0) {
     throw new Error('Code 0 will be skipped by ascii encoding, please start enumeration with code 1')
   }
-  const randomMemo: Buffer = new Buffer(rand(16));
+  const randomMemo: Buffer = new Buffer(rand(32));
   // Write answer 0
   randomMemo.writeUInt8(candidateCode, 0);
   return randomMemo
