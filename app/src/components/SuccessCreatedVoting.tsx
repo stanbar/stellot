@@ -24,7 +24,6 @@ const SuccessCreatedVotingModal: React.FC<SuccessCreatedVotingModalProps> = prop
         history.replace(`/voting/${voting.slug}`);
         dispatchCancelSuccessCreationModel(dispatch)
     };
-    console.log({ location: window.location })
     return (
         <Modal visible={voting && showSuccessCreation}
             title={<h2><CheckCircleTwoTone twoToneColor="#52c41a" style={{marginRight: 4}} />Successfully created voting</h2>}

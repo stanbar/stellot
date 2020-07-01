@@ -32,7 +32,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       case Authorization.KEYBASE:
         return val.authorizationOptions
       case Authorization.EMAILS:
-        console.log(emails)
         return { emails: await val.authorizationOptions.emails }
       case Authorization.DOMAIN:
         return val.authorizationOptions

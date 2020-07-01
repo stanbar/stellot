@@ -28,7 +28,6 @@ export async function initSession(
     const body = await response.json();
     throw new Error(body?.errors?.message);
   }
-  console.log({ 'SESSION-TOKEN': response.headers.get('SESSION-TOKEN') });
   const sessionId = response.headers.get('SESSION-TOKEN') || response.headers.get('session-token');
   if (!sessionId) {
     console.error(`Didn't receive SESSION-TOKEN`);

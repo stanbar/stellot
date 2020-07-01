@@ -49,7 +49,6 @@ const EncryptedDecrypted: React.FC<EncryptedDecryptedProps> = ({ voting, storedV
       <AntTooltip title="Ballot is encrypted, click to decrypt">
         <span
           onClick={async () => {
-            console.log({ storedVoting });
             if (
               !!storedVoting.myTxMemo &&
               !!storedVoting.seqNumber &&
@@ -61,7 +60,6 @@ const EncryptedDecrypted: React.FC<EncryptedDecryptedProps> = ({ voting, storedV
                 storedVoting.seqNumber,
                 storedVoting.voterPublicKey,
               );
-              console.log({ targetMyOption });
               if (targetMyOption) {
                 setEncrypted(storedVoting.myTxMemo.toString('hex'));
                 animateDecryption(targetMyOption.name, 0);

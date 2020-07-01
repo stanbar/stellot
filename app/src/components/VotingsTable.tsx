@@ -46,7 +46,6 @@ const VotingsTable: React.FC<WallProps> = ({ dispatch, votes }) => {
         },
       ]
     ;
-    console.log({ votes });
     return (
       <div>
         <Table pagination={false} columns={columns} dataSource={votes} rowKey={row => row.slug}/>
