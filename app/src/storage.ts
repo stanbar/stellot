@@ -1,8 +1,10 @@
-interface StoredVoting {
-  authorizationToken?: string,
+export interface StoredVoting {
+  authenticationToken?: string,
   myTxHash?: string,
   myTxMemo?: Buffer,
-  voted?: boolean;
+  voted?: boolean,
+  seqNumber?: string,
+  voterPublicKey?: string,
 }
 
 function getVoting(votingId: string): StoredVoting | undefined {
@@ -22,24 +24,26 @@ function setVoting(votingId: string, storedVoting: StoredVoting) {
   localStorage.setItem(votingId, JSON.stringify(storedVoting))
 }
 
-export function setAuthorizationToken(votingId: string, authorizationToken?: string) {
+export function setAuthenticationToken(votingId: string, authenticationToken?: string) {
   const voting = getVoting(votingId) || {};
-  voting.authorizationToken = authorizationToken;
+  voting.authenticationToken = authenticationToken;
   setVoting(votingId, voting);
 }
 
-export function getAuthorizationToken(votingId: string): string | undefined {
-  return getVoting(votingId)?.authorizationToken
+export function getAuthenticationToken(votingId: string): string | undefined {
+  return getVoting(votingId)?.authenticationToken
 }
 
-export function setMyTransaction(votingId: string, txHash: string, memo: Buffer) {
+export function setMyTransaction(votingId: string, txHash: string, memo: Buffer, seqNumber: string, voterPublicKey: string) {
   const voting = getVoting(votingId) || {};
   voting.myTxHash = txHash;
   voting.myTxMemo = memo;
+  voting.seqNumber = seqNumber;
+  voting.voterPublicKey = voterPublicKey;
   setVoting(votingId, voting)
 }
 
-export function getMyTransaction(votingId: string): { myTxHash?: string, myTxMemo?: Buffer } {
+export function getMyTransaction(votingId: string): StoredVoting {
   return { ...getVoting(votingId) }
 }
 
