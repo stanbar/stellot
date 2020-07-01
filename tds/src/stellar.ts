@@ -143,7 +143,7 @@ export async function createBallotIssuingTransaction(
         destination: voterPublicKey,
         // Minimum Balance = (2 + # of entries (1 for the voteToken)) * base reserve (0.5)
         // Fee for 3 operations (payment, marge)
-        startingBalance: `${(2 + 1) * 0.5 + 3 * 10 ** 7}`,
+        startingBalance: '2',
       }),
     )
     .addOperation(
