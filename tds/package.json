@@ -10,6 +10,7 @@
     "lint:prettier": "check-prettier lint",
     "start": "ts-node -r dotenv/config .",
     "start:dev": "ts-node-dev -r dotenv/config src/main.ts",
+    "start:prod": "NODE_ENV=production ts-node -r dotenv/config .",
     "test": "npx ava-ts",
     "test:watch": "npx ava-ts --watch --color",
     "prettier": "prettier -c --write \"**/*\"",

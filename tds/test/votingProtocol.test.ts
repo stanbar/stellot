@@ -18,9 +18,8 @@ import {
   createChannelAccounts,
 } from '../src/stellar';
 import { randomBytes } from 'crypto';
-import { encodeMemo as encryptMemo } from '../src/secretMemo';
 import { encodeMemo } from '../src/utils';
-import { ed25519, VoterSession, SignerSession } from '@stellot/crypto';
+import { ed25519, VoterSession, SignerSession, encodeMemo as encryptMemo } from '@stellot/crypto';
 import jwt from 'jsonwebtoken';
 import BN from 'bn.js';
 
@@ -303,7 +302,7 @@ test.only('complete voting protocol', async (t: ExecutionContext) => {
       }),
     );
   } catch (e) {
-    if (e.response.data.extras) {
+    if (e.response?.data?.extras) {
       console.log({
         extras: e.response.data.extras,
         operations: e.response.data.extras.result_codes.operations,

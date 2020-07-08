@@ -20,6 +20,12 @@ import Result from '@/types/result';
 import _ from 'lodash';
 import { decodeMemo as decryptMemo } from '@stellot/crypto';
 
+const publicHorizons = [
+  'https://horizon-testnet.stellar.org',
+  'https://horizon.stellar.lobstr.co/',
+  'https://stellar-horizon.satoshipay.io/',
+  'https://horizon.stellar.coinqvest.com/',
+];
 const server = new Server('https://horizon-testnet.stellar.org');
 const OPTIONS = {
   fee: BASE_FEE,

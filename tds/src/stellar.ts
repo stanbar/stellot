@@ -1,5 +1,6 @@
 import { Asset, Keypair, Networks, Operation, Server, TransactionBuilder } from 'stellar-sdk';
 import { chunk } from 'lodash';
+import fetch from 'node-fetch';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 
@@ -13,19 +14,31 @@ async function defaultOptions(): Promise<TransactionBuilder.TransactionBuilderOp
 export async function createIssuerAccount(
   masterKeypair: Keypair,
   issuerKeypair: Keypair,
-  tdsStartingBalance: number,
+  issuerStartingBalance: number,
 ) {
-  const masterAccount = await server.loadAccount(masterKeypair.publicKey());
-  const tx = new TransactionBuilder(masterAccount, await defaultOptions())
-    .addOperation(
-      Operation.createAccount({
-        destination: issuerKeypair.publicKey(),
-        startingBalance: `${10 + tdsStartingBalance}`,
-      }),
-    )
-    .build();
-  tx.sign(masterKeypair);
-  await server.submitTransaction(tx);
+  if (process.env.NODE_ENV === 'production') {
+    const masterAccount = await server.loadAccount(masterKeypair.publicKey());
+    const tx = new TransactionBuilder(masterAccount, await defaultOptions())
+      .addOperation(
+        Operation.createAccount({
+          destination: issuerKeypair.publicKey(),
+          startingBalance: `${10 + issuerStartingBalance}`,
+        }),
+      )
+      .build();
+    tx.sign(masterKeypair);
+    await server.submitTransaction(tx);
+  } else {
+    return fundWithFriendlyBot(issuerKeypair.publicKey());
+  }
+}
+
+async function fundWithFriendlyBot(issuerPublicKey: string) {
+  const response = await fetch(
+    `https://friendbot.stellar.org?addr=${encodeURIComponent(issuerPublicKey)}`,
+  );
+  const responseJSON = await response.json();
+  console.log('SUCCESS Funding account with friendbot! \n', responseJSON);
 }
 
 export function createVoteToken(issuerPublicKey: string, title: string): Asset {
@@ -110,9 +123,9 @@ export async function createChannelAccounts(
       builder.addOperation(
         Operation.createAccount({
           destination: channel.publicKey(),
-        // Minimum Balance = (2 + # of entries) * base reserve (0.5)
-        // Fee for 3 operations (payment, marge)
-        startingBalance: "2",
+          // Minimum Balance = (2 + # of entries) * base reserve (0.5)
+          // Fee for 3 operations (payment, marge)
+          startingBalance: '2',
         }),
       );
     });
