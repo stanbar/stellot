@@ -87,7 +87,7 @@ const CastVoteModal: React.FC<CastVoteModalProps> = (props) => {
       />
       {errorMessage && (
         <p>
-          {errorMessage} <a onClick={signInAgain}>Sign in again</a>
+          {errorMessage} <a onClick={signInAgain}>Try again</a>
         </p>
       )}
       <p>{status}</p>

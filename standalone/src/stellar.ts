@@ -289,7 +289,7 @@ async function proofChallenge(tokenId: string, proofs: Proof[])
   });
 
   if (response.ok) {
-    console.log('Successfully proofed challenges');
+    console.log('Successfully proved challenges');
   } else {
     console.error('Failed to proof challenges');
     throw new Error(await response.text());

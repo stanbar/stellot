@@ -101,9 +101,9 @@ export async function requestAccountCreation(
   });
 
   if (response.ok) {
-    console.log('Successfully proofed challenges');
+    console.log('Successfully created account');
   } else {
-    console.error('Failed to proof challenges');
+    console.error('Failed to create account');
     throw new Error(await response.text());
   }
   const { transactionXdr } = await response.json();
