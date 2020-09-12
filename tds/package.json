@@ -63,7 +63,7 @@
     "mongoose": "^5.9.19",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "~1.9.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "prettier": "^1.19.1",
     "request": "^2.88.0",
     "slug": "^2.1.1",
