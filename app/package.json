@@ -10,7 +10,8 @@
     "test:watch": "jest --watch",
     "lint:es": "eslint --ext .js src mock tests",
     "precommit": "lint-staged",
-    "publish:docs": "npx gh-pages -m 'Updates' -d ../docs"
+    "publish": "npx gh-pages -m 'updates' -d dist",
+    "deploy": "npm run build && npm run publish"
   },
   "dependencies": {
     "@ant-design/icons": "^4.2.1",

@@ -47,5 +47,4 @@ export default defineConfig({
     },
   },
   copy: ['CNAME'],
-  outputPath: '../docs'
 })
