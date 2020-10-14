@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import { Authorization, Visibility, Voting } from '@stellot/types';
-import { VOTING } from './models';
+import { Voting, VOTING } from './models';
 import { getAuthorizationOptions } from './authorizationOptions';
 import { getDecryptionKey } from './keychain';
 import moment from 'moment'
@@ -81,3 +81,6 @@ export async function updateIpfsCid(voting: Omit<Voting, 'ipfsCid'>, ipfsCid: st
   return saved.toJSON();
 }
 
+export async function deleteVotingBySlug(votingSlug: string) {
+  return VotingSchema.deleteOne({slug: votingSlug})
+}

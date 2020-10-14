@@ -1,6 +1,7 @@
 import express from 'express';
+import createHttpError, { HttpError } from 'http-errors';
 import { createVoting } from '../../createVoting';
-import { getPublicVotings, getVotingBySlug } from '../../database/voting';
+import { deleteVotingBySlug, getPublicVotings, getVotingBySlug } from '../../database/voting';
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get('/:slug', async (req, res, next) => {
     const result = await getVotingBySlug(slug);
     res.json(result);
   } catch (e) {
-    next(e)
+    next(e);
   }
 });
 
@@ -35,7 +36,20 @@ router.post('/', async (req, res, next) => {
     debug('created Voting');
     return res.json(createVotingResponse).end();
   } catch (e) {
-    next(e)
+    next(e);
+  }
+});
+router.delete('/:slug', async (req, res, next) => {
+  const { slug } = req.params;
+
+  try {
+    if (req.headers['authorization'] !== process.env.MASTER_SECRET_KEY) {
+      throw new createHttpError.Unauthorized('unauthorized operation');
+    }
+    const result = await deleteVotingBySlug(slug);
+    res.json(result);
+  } catch (e) {
+    next(e);
   }
 });
 
