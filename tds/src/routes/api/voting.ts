@@ -1,5 +1,5 @@
 import express from 'express';
-import createHttpError, { HttpError } from 'http-errors';
+import createHttpError from 'http-errors';
 import { createVoting } from '../../createVoting';
 import { deleteVotingBySlug, getPublicVotings, getVotingBySlug } from '../../database/voting';
 
