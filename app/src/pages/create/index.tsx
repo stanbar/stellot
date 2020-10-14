@@ -315,7 +315,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
         </Form.Item>
 
         <Form.Item
-          label="Number of votes cap"
+          label="Number of votes"
           name="votesCap"
           rules={[{
             validator: (rule, value) => {

@@ -28,7 +28,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       className={styles.whitePanel}
     >
       <Panel
-        header={<h2>How does the whole process of voting looks like ?</h2>}
+        header={<h2>How does the whole process of voting look like?</h2>}
         key="sequence-flow"
       >
         <article>
