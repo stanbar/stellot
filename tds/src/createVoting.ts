@@ -59,7 +59,6 @@ export async function createVoting({
   );
   console.log('created distribution and ballot account');
 
-
   let encryptionKey;
   let decryptionKey;
   if (encrypted) {
@@ -90,34 +89,25 @@ export async function createVoting({
     endDate: endDate,
   };
 
-  const savedVoting = await database
-    .saveVoting(voting)
-    .then(savedVoting => {
-      console.log('saved voting');
-      if (voting.authorization === Authorization.KEYBASE) {
-        if (authorizationOptions as KeybaseAuthOptions | undefined) {
-          const { team } = authorizationOptions as KeybaseAuthOptions;
-          keybase.joinTeam(team);
-          console.log('send join team request');
-          return { ...savedVoting, authorizationOptions: { team } };
-        }
-      }
-      return { ...savedVoting, authorizationOptions: undefined };
-    })
-    .then(async savedVoting => {
-      const cid = await ipfs.putVoting(savedVoting);
-      console.log(`uploaded voting to ipfs with cid ${cid}`);
-      return { savedVoting, cid };
-    })
-    .then(({ savedVoting, cid }) => {
-      return database.updateIpfsCid(savedVoting, cid);
-    });
-
-  await saveAuthorizationOptions(savedVoting, authorizationOptions);
+  const partialVoting = await database.saveVoting(voting);
+  console.log('saved partial voting');
+  let savedVoting;
+  if (
+    voting.authorization === Authorization.KEYBASE &&
+    (authorizationOptions as KeybaseAuthOptions | undefined)
+  ) {
+    const { team } = authorizationOptions as KeybaseAuthOptions;
+    keybase.joinTeam(team);
+    console.log('send join team request');
+    savedVoting = { ...partialVoting, authorizationOptions: { team } };
+  } else {
+    savedVoting = { ...partialVoting, authorizationOptions: undefined };
+  }
+  await saveAuthorizationOptions(partialVoting, authorizationOptions);
   console.log('saved authorizationOptions');
 
   saveChannels(savedVoting.id, channels);
-  console.log('saved channels to database');
+  console.log('saved channels');
 
   await saveKeychain(
     savedVoting.id,
@@ -128,8 +118,14 @@ export async function createVoting({
   );
   console.log('saved keychain');
 
-  // TODO reverse changes if someone throws error
-  return savedVoting;
+  try {
+    const cid = await ipfs.putVoting(savedVoting);
+    console.log(`uploaded voting to ipfs with cid ${cid}`);
+    return database.updateIpfsCid(savedVoting, cid);
+  } catch (error) {
+    // TODO reverse changes if someone throws error
+    return savedVoting;
+  }
 }
 
 function calculateStartingBalances(votesCap: number) {
