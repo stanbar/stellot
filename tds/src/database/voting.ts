@@ -41,18 +41,16 @@ export async function populateAuthorizationOptions(votingDoc: Document): Promise
     // Prevent emails/codes leakage
     const authorizationOptions = await getAuthorizationOptions(voting);
     return { ...voting, authorizationOptions };
-  } else {
-    return { ...voting };
   }
+  return { ...voting };
 }
 
 export async function populateDecryptionKey(voting: Voting): Promise<Voting> {
   if (voting.encryption && moment(voting.encryption.encryptedUntil).isBefore()) {
     const decryptionKey = await getDecryptionKey(voting.id);
     return { ...voting, encryption: { ...voting.encryption, decryptionKey } };
-  } else {
-    return { ...voting };
   }
+  return { ...voting };
 }
 
 export function votingExists(votingId: string): Promise<boolean> {

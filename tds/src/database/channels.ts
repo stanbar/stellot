@@ -22,7 +22,7 @@ export async function consumeChannel(votingId: string): Promise<Channel | null> 
 }
 
 export async function saveChannels(votingId: string, channels: Keypair[]): Promise<Channel[]> {
-  return await Promise.all(
+  return Promise.all(
     channels.map(async channel => {
       const channelSchema = new ChannelSchema({
         voting: votingId,

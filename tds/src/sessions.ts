@@ -1,4 +1,4 @@
-import { Keypair, Memo, Transaction } from 'stellar-sdk'
+import { Keypair, Memo, Transaction } from 'stellar-sdk';
 import BN from 'bn.js';
 import { Voting, Authorization } from '@stellot/types';
 import { ed25519, SignerSession, VoterSession } from '@stellot/crypto';
@@ -24,8 +24,9 @@ export async function isUserAuthorizedToInitSession(voting: Voting, userId?: str
       return userId && initSessions.get(voting.id)?.get(userId) === undefined;
     case Authorization.IP:
       return userId && initSessions.get(voting.id)?.get(userId) === undefined;
+    default:
+      return true;
   }
-  return true;
 }
 
 export interface ChallengeSession extends InitSession {
@@ -44,8 +45,7 @@ export interface InitResponse {
   P: Buffer;
 }
 
-export function createSession(voting: Voting, userId: string, keychain: Keychain)
-  : InitResponse[] {
+export function createSession(voting: Voting, userId: string, keychain: Keychain): InitResponse[] {
   const distributionKeypair = Keypair.fromSecret(keychain.distribution);
   const userSessions = new Array<InitSession>(cutAndChooseCount);
   const response = new Array<InitResponse>(cutAndChooseCount);
@@ -60,22 +60,23 @@ export function createSession(voting: Voting, userId: string, keychain: Keychain
     };
     userSessions[i] = { id: i, signerSession };
   }
-  const votingSessions: Map<string, InitSession[]> = initSessions.get(voting.id) || new Map()
-  votingSessions.set(userId, userSessions)
-  initSessions.set(voting.id, votingSessions)
+  const votingSessions: Map<string, InitSession[]> = initSessions.get(voting.id) || new Map();
+  votingSessions.set(userId, userSessions);
+  initSessions.set(voting.id, votingSessions);
   // should we key session by uuid or username or jwt maybe ?
   return response;
 }
 
-export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>
+export type ChallengeRequest = Array<{ id: number; blindedTransactionBatch: BN[] }>;
 
 export function storeAndPickLuckyBatch(
   votingId: string,
   userId: string,
-  blindedTransactionBatches: ChallengeRequest): number {
+  blindedTransactionBatches: ChallengeRequest,
+): number {
   const userSessions = initSessions.get(votingId)?.get(userId);
   if (!userSessions) {
-    throw new Error('Could not find corresponding user session')
+    throw new Error('Could not find corresponding user session');
   }
 
   const luckyBatchId = getRandomInt(cutAndChooseCount);
@@ -89,19 +90,19 @@ export function storeAndPickLuckyBatch(
     };
   }
 
-  const votingSessions: Map<string, ChallengeSession[]>
-    = challengeSessions.get(votingId) || new Map()
-  votingSessions.set(userId, session)
-  challengeSessions.set(votingId, votingSessions)
+  const votingSessions: Map<string, ChallengeSession[]> =
+    challengeSessions.get(votingId) || new Map();
+  votingSessions.set(userId, session);
+  challengeSessions.set(votingId, votingSessions);
   // TODO save number of attempts preventing DoS
   return luckyBatchId;
 }
 
 export interface TransactionInBatch {
-  candidateCode: number,
-  memo: Memo,
-  transaction: Transaction,
-  isMyOption: boolean // TODO remove in clientApp
+  candidateCode: number;
+  memo: Memo;
+  transaction: Transaction;
+  isMyOption: boolean; // TODO remove in clientApp
 }
 
 type TransactionsBatch = Array<TransactionInBatch>;
@@ -119,14 +120,14 @@ export function isAlreadyProofedSession(tokenId: string) {
 
 export interface Proof {
   id: number;
-  voterSession: { a: BN, b: BN };
+  voterSession: { a: BN; b: BN };
   transactionsBatch: TransactionsBatch;
 }
 
 export function proofChallenges(votingId: string, userId: string, proofs: Proof[]) {
   const challengeSession = challengeSessions.get(votingId)?.get(userId);
   if (!challengeSession) {
-    throw new Error('Could not find corresponding challenge session')
+    throw new Error('Could not find corresponding challenge session');
   }
   const valid = challengeSession.every((session, id) => {
     if (session.lucky) return true;
@@ -134,16 +135,16 @@ export function proofChallenges(votingId: string, userId: string, proofs: Proof[
   });
 
   if (!valid) {
-    throw new Error('Failed to pass verification')
+    throw new Error('Failed to pass verification');
   }
 
   const luckySession = challengeSession.find(session => session.lucky)!;
   return signTransactionBatch(luckySession);
 }
 
-function signTransactionBatch(session: ChallengeSession): { id: number, sigs: Array<BN> } {
-  return ({
+function signTransactionBatch(session: ChallengeSession): { id: number; sigs: Array<BN> } {
+  return {
     id: session.id,
     sigs: session.blindedTransactionsBatch.map(btx => session.signerSession.sign(new BN(btx, 16))),
-  })
+  };
 }

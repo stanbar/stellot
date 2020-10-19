@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import errorhandler from 'errorhandler';
@@ -26,7 +26,7 @@ app.use(cookieParser());
 if (!isProduction) {
   app.use(errorhandler());
 }
-app.get('/health', (req, res) => res.sendStatus(200).end());
+app.get('/health', (_, res) => res.sendStatus(200).end());
 app.get('/myIp', (req, res) => {
   const { ip, ips } = req;
   const forwarded = req.headers['X-Forwarded-For'];
@@ -52,7 +52,7 @@ app.use((req, res, next) => {
 
 // / error handlers
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _: Request, res: Response) => {
   // development will print stacktrace
   // production error handler no stacktraces leaked to user
   if (!isProduction) {
