@@ -1,6 +1,5 @@
 import { Voting, Authorization } from '@stellot/types';
 import { SignerSession, ed25519 } from '@stellot/crypto';
-import Keychain from './types/keychain';
 import BN from 'bn.js';
 import { Keypair, Asset } from 'stellar-sdk';
 import { createBallotIssuingTransaction } from './stellar';
@@ -36,11 +35,12 @@ export async function isUserAuthorizedToInitSession(voting: Voting, userId?: str
       return userId && initSessions.get(voting.id)?.get(userId) === undefined;
     case Authorization.IP:
       return userId && initSessions.get(voting.id)?.get(userId) === undefined;
+    default:
+      return true
   }
-  return true;
 }
 
-export function createSession(voting: Voting, userId: string, keychain: Keychain): InitResponse {
+export function createSession(voting: Voting, userId: string): InitResponse {
   const signerSession = new SignerSession(blindTokenSecretKey);
   const R = signerSession.publicNonce();
   const P = signerSession.publicKey();

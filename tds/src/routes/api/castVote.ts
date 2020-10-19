@@ -56,7 +56,7 @@ router.post('/init', async (req, res, next) => {
         `Could not find keychain for votingId ${votingId}`,
       );
     }
-    const session = createSession(voting, userId, keychain);
+    const session = createSession(voting, userId);
     debug('created session');
     const sessionToken = createSessionToken(voting.id, userId);
     res.setHeader('SESSION-TOKEN', sessionToken);
@@ -78,13 +78,15 @@ router.post('/getSignedToken', (req, res, next) => {
 
     const { userId, votingId } = verifyAndGetUserId(sessionToken);
 
-    if (!userId)
+    if (!userId) {
       throw new createHttpError.Unauthorized('Provided JWT does not contain userId field');
-    if (!votingId)
+    }
+    if (!votingId) {
       throw new createHttpError.Unauthorized('Provided JWT does not contain votingId field');
+    }
 
     const blindedSignature = signBlindly(votingId, userId, challenge);
-    res.status(200).send({ blindedSignature });
+    return res.status(200).send({ blindedSignature });
   } catch (e) {
     return next(e);
   }

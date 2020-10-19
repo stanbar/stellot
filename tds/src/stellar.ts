@@ -27,10 +27,9 @@ export async function createIssuerAccount(
       )
       .build();
     tx.sign(masterKeypair);
-    await server.submitTransaction(tx);
-  } else {
-    return fundWithFriendlyBot(issuerKeypair.publicKey());
+    return server.submitTransaction(tx);
   }
+  return fundWithFriendlyBot(issuerKeypair.publicKey());
 }
 
 async function fundWithFriendlyBot(issuerPublicKey: string) {

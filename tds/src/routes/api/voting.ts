@@ -7,7 +7,7 @@ const router = express.Router();
 
 const debug = require('debug')('blindsig');
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (_, res, next) => {
   try {
     const result = await getPublicVotings();
     res.json(result);
@@ -36,14 +36,14 @@ router.post('/', async (req, res, next) => {
     debug('created Voting');
     return res.json(createVotingResponse).end();
   } catch (e) {
-    next(e);
+    return next(e);
   }
 });
 router.delete('/:slug', async (req, res, next) => {
   const { slug } = req.params;
 
   try {
-    if (req.headers['authorization'] !== process.env.MASTER_SECRET_KEY) {
+    if (req.headers.authorization !== process.env.MASTER_SECRET_KEY) {
       throw new createHttpError.Unauthorized('unauthorized operation');
     }
     const result = await deleteVotingBySlug(slug);

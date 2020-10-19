@@ -89,7 +89,7 @@ function deleteReferences(votingId: String) {
 }
 
 // @ts-ignore
-VotingSchema.pre('deleteMany', { document: true, query: false },  async function() {
+VotingSchema.pre('deleteMany', { document: true, query: false }, async function() {
   // @ts-ignore
   await deleteReferences(this._id);
 });
@@ -104,8 +104,8 @@ VotingSchema.pre('deleteOne', { document: true, query: false }, async function()
   await deleteReferences(this._id);
 });
 
+// eslint-disable-next-line func-names
 VotingSchema.methods.slugify = function() {
-  // eslint-disable-next-line no-bitwise
   this.slug = `${slug(this.title)}-${((Math.random() * 36 ** 6) | 0).toString(36)}`;
 };
 

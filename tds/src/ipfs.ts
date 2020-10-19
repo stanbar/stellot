@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 import IpfsClient from 'ipfs-http-client'
 import { Voting } from '@stellot/types';
 
@@ -19,3 +19,4 @@ export async function putVoting(voting: Omit<Voting, 'ipfsCid'>): Promise<string
     const cid = await ipfs.dag.put(normalizedObject, { pin: true, format: 'dag-cbor', hashAlg: 'sha2-256' })
     return cid.toString()
 }
+

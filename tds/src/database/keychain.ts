@@ -1,6 +1,6 @@
-import Keychain from '../types/keychain'
 import { Keypair } from 'stellar-sdk';
 import mongoose from 'mongoose';
+import Keychain from '../types/keychain'
 import { KEYCHAIN } from './models';
 
 const KeychainSchema = mongoose.model(KEYCHAIN);
@@ -26,7 +26,7 @@ export async function saveKeychain(
     issuer: issuer.secret(),
     distribution: distribution.secret(),
     ballotBox: ballotBox.secret(),
-    decryption
+    decryption,
   });
   await keychain.save()
 }
