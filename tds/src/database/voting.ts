@@ -1,9 +1,10 @@
-import mongoose, { Document } from 'mongoose';
+import { Document } from 'mongoose';
 import { Authorization, Visibility, Voting } from '@stellot/types';
-import { Voting, VOTING } from './models';
+import { VotingModel } from './models';
 import { getAuthorizationOptions } from './authorizationOptions';
 import { getDecryptionKey } from './keychain';
-import moment from 'moment'
+import moment from 'moment';
+import createHttpError from 'http-errors';
 
 const debug = require('debug')('dao');
 
@@ -13,10 +14,8 @@ export function setIssued(voting: Voting, userId: string) {
   issues[voting.id][userId] = true;
 }
 
-const VotingSchema = mongoose.model(VOTING);
-
 export async function getVotingById(votingId: string): Promise<Voting | undefined> {
-  const votingDoc = await VotingSchema.findById(votingId);
+  const votingDoc = await VotingModel.findById(votingId);
   if (!votingDoc) {
     return undefined;
   }
@@ -24,7 +23,7 @@ export async function getVotingById(votingId: string): Promise<Voting | undefine
 }
 
 export async function getVotingBySlug(votingSlug: string): Promise<Voting | undefined> {
-  const votingDoc = await VotingSchema.findOne({ slug: votingSlug });
+  const votingDoc = await VotingModel.findOne({ slug: votingSlug });
   if (!votingDoc) {
     return undefined;
   }
@@ -32,7 +31,7 @@ export async function getVotingBySlug(votingSlug: string): Promise<Voting | unde
 }
 
 export async function getPublicVotings(): Promise<Voting[]> {
-  const votingDocs = await VotingSchema.find({ visibility: Visibility.PUBLIC });
+  const votingDocs = await VotingModel.find({ visibility: Visibility.PUBLIC });
   return Promise.all(votingDocs.map(votingDoc => populateAuthorizationOptions(votingDoc)));
 }
 
@@ -57,21 +56,24 @@ export async function populateDecryptionKey(voting: Voting): Promise<Voting> {
 }
 
 export function votingExists(votingId: string): Promise<boolean> {
-  return VotingSchema.exists({ _id: votingId })
+  return VotingModel.exists({ _id: votingId });
 }
 
-export async function saveVoting(voting: Omit<Omit<Omit<Omit<Voting, 'id'>, 'slug'>, 'authorizationOptions'>, 'ipfsCid'>)
-  : Promise<Omit<Omit<Voting, 'authorizationOptions'>, 'ipfsCid'>> {
+export async function saveVoting(
+  voting: Omit<Omit<Omit<Omit<Voting, 'id'>, 'slug'>, 'authorizationOptions'>, 'ipfsCid'>,
+): Promise<Omit<Omit<Voting, 'authorizationOptions'>, 'ipfsCid'>> {
   debug('saveVoting');
-  const votingDoc = new VotingSchema({ ...voting });
+  const votingDoc = new VotingModel({ ...voting });
   const saved = await votingDoc.save();
   return saved.toJSON();
 }
 
-export async function updateIpfsCid(voting: Omit<Voting, 'ipfsCid'>, ipfsCid: string)
-  : Promise<Voting> {
+export async function updateIpfsCid(
+  voting: Omit<Voting, 'ipfsCid'>,
+  ipfsCid: string,
+): Promise<Voting> {
   debug('updatingIpfsCid');
-  const votingDoc = await VotingSchema.findOne({ _id: voting.id });
+  const votingDoc = await VotingModel.findOne({ _id: voting.id });
   if (!votingDoc) {
     throw new Error(`Could not find requesting voting wih id ${voting.id}`);
   }
@@ -82,5 +84,10 @@ export async function updateIpfsCid(voting: Omit<Voting, 'ipfsCid'>, ipfsCid: st
 }
 
 export async function deleteVotingBySlug(votingSlug: string) {
-  return VotingSchema.deleteOne({slug: votingSlug})
+  const doc = await VotingModel.findOne({ slug: votingSlug });
+  if (!doc) {
+    throw new createHttpError.NotFound(`Could not find voting with slug: ${votingSlug}`);
+  }
+  const result = await doc.deleteOne();
+  console.log(result);
 }

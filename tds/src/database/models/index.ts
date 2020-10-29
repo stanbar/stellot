@@ -6,13 +6,18 @@ export const DOMAIN_AUTH_OPTIONS = 'DomainAuthOptions';
 export const CHANNEL = 'Channel';
 
 // Don't change order because of cyclic dependency
-import Voting from './Voting'
-import Keychain from './Keychain'
-import KeybaseAuthOptions from './KeybaseAuthOptions'
-import EmailsAuthOptions from './EmailsAuthOptions'
-import DomainAuthOptions from './DomainAuthOptions'
-import Channel from './Channel'
+import VotingModel from './Voting';
+import KeychainModel from './Keychain';
+import KeybaseAuthOptionsModel from './KeybaseAuthOptions';
+import EmailsAuthOptionsModel from './EmailsAuthOptions';
+import DomainAuthOptionsModel from './DomainAuthOptions';
+import ChannelModel from './Channel';
 
 export {
-  Voting, Keychain, KeybaseAuthOptions, EmailsAuthOptions, DomainAuthOptions, Channel,
-}
+  VotingModel,
+  KeychainModel,
+  KeybaseAuthOptionsModel,
+  EmailsAuthOptionsModel,
+  DomainAuthOptionsModel,
+  ChannelModel,
+};

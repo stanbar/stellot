@@ -79,20 +79,29 @@ VotingSchema.pre('validate', function(next) {
   next();
 });
 function deleteReferences(votingId: String) {
-  model(CHANNEL).deleteOne({ voting: votingId });
-  model(DOMAIN_AUTH_OPTIONS).deleteOne({ voting: votingId });
-  model(EMAILS_AUTH_OPTIONS).deleteOne({ voting: votingId });
-  model(KEYBASE_AUTH_OPTIONS).deleteOne({ voting: votingId });
-  model(KEYCHAIN).deleteOne({ voting: votingId });
+  return Promise.all([
+    model(CHANNEL).deleteMany({ voting: votingId }),
+    model(DOMAIN_AUTH_OPTIONS).deleteMany({ voting: votingId }),
+    model(EMAILS_AUTH_OPTIONS).deleteMany({ voting: votingId }),
+    model(KEYBASE_AUTH_OPTIONS).deleteMany({ voting: votingId }),
+    model(KEYCHAIN).deleteMany({ voting: votingId }),
+  ]);
 }
-VotingSchema.pre('deleteMany', function(next) {
+
+// @ts-ignore
+VotingSchema.pre('deleteMany', { document: true, query: false },  async function() {
   // @ts-ignore
-  deleteReferences(this._id);
+  await deleteReferences(this._id);
 });
 
-VotingSchema.pre('deleteOne', function(next) {
+// It will trigger only on doc.deletOne() (document) not VotingSchema.deleteOne({...}) (query)
+// because the latter one does not provide doc element with this so we skip it
+// @ts-ignore
+VotingSchema.pre('deleteOne', { document: true, query: false }, async function() {
   // @ts-ignore
-  deleteReferences(this._id);
+  console.log('removing voting with _id with its corresponding references', this._id);
+  // @ts-ignore
+  await deleteReferences(this._id);
 });
 
 VotingSchema.methods.slugify = function() {
