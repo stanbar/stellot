@@ -1,11 +1,11 @@
 {
-    "files.exclude": {
-        "dist": true,
-        "docs": true,
-        "node_modules": true
-    },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+  "files.exclude": {
+    "dist": true,
+    "docs": true,
+    "node_modules": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

@@ -1,3 +1,5 @@
 dist
 .cache
 node_modules
+# don't lint nyc coverage output
+coverage
