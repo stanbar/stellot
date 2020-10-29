@@ -23,29 +23,22 @@ export function authorizeAndAuthenticateToken(authToken: string, options: Keybas
 }
 
 function getUsername(authToken: string, requiredTeam?: string): string {
-  const decodedToken = jwt.verify(authToken, publicKey, { audience, issuer });
+  const decodedToken: any = jwt.verify(authToken, publicKey, { audience, issuer });
 
-  // @ts-ignore
   if (!decodedToken || !decodedToken.sub) {
     throw new Error('token is missing sub field')
   }
-  // @ts-ignore
   if (requiredTeam) {
-    // @ts-ignore
     if (!decodedToken.requiredTeam) {
       throw new Error('token does not contain requiredTeam field while it is required')
     }
-    // @ts-ignore
     if (decodedToken.requiredTeam !== requiredTeam) {
-      // @ts-ignore
       throw new Error(`token has different requiredTeam proof ${decodedToken.requiredTeam}`)
     }
   }
-  // @ts-ignore
   if (!decodedToken.sub) {
     throw new Error('token subject field is empty')
   }
-  // @ts-ignore
   return decodedToken.sub;
 }
 
