@@ -53,7 +53,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       period: Array<Date>,
       encrypted: boolean,
       encryptedUntil: Date | undefined,
-      challenges: number,
     };
 
     const authorizationOptions = await getAuthorizationOptions(val.authorization, val)
@@ -71,7 +70,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       votesCap: val.votesCap,
       encrypted: val.encrypted,
       encryptedUntil: val.encryptedUntil,
-      challenges: val.challenges,
       startDate: val.period[0],
       endDate: val.period[1],
     };
@@ -140,7 +138,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
           authorization: Authorization.OPEN,
           visibility: Visibility.PUBLIC,
           encrypted: false,
-          challenges: 100,
         }}>
         <Form.Item name="title" label="Title" rules={[{
           required: true,
@@ -364,13 +361,6 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
                 <DatePicker showTime defaultValue={(getFieldValue('period') || [null, moment()])[1]} />
               </Form.Item> : null
           )}
-        </Form.Item>
-        <Form.Item
-          label="Security level"
-          style={{ 'display': showAdvanced ? '' : 'none' }}>
-          <Form.Item name="challenges" noStyle>
-            <InputNumber min={2} max={500} />
-          </Form.Item>
         </Form.Item>
         <Form.Item {...formItemLayoutWithOutLabel} >
           <BtnSubmit size="large" type="primary" htmlType="submit" loading={loading}>
