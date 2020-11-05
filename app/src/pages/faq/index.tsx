@@ -5,10 +5,10 @@ import { Voting } from '@stellot/types';
 import { VoteStatus } from '@/types/voteStatus';
 import { Collapse } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons/lib';
-import { Title } from '@/components/Title';
 import styles from './index.less';
 import stellotDecentralization from '../../assets/svg/stellot-decentralization.svg';
 import sequenceDiagram from '../../assets/svg/sequence-diagram.svg';
+import { H3, P } from '../index';
 
 const { Panel } = Collapse;
 
@@ -21,18 +21,15 @@ interface VotePreviewProps extends ConnectProps {
 
 const FAQ: React.FC<VotePreviewProps> = () => (
   <div>
-    <Title style={{ textAlign: 'center' }}>FAQ</Title>
+    <H3>FAQ</H3>
     <Collapse
       bordered={false}
       expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       className={styles.whitePanel}
     >
-      <Panel
-        header={<h2>How does the whole process of voting look like?</h2>}
-        key="sequence-flow"
-      >
+      <Panel header={<h2>How does the whole process of voting look like?</h2>} key="sequence-flow">
         <article>
-          <p>
+          <P>
             <img
               width="80%"
               style={{ textAlign: 'center' }}
@@ -60,7 +57,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
               <li>Anonymous mark the candidate.</li>
               <li>Anonymous throws the ballot paper into the ballot box.</li>
             </ol>
-          </p>
+          </P>
         </article>
       </Panel>
       <Panel
@@ -72,7 +69,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         key="verify-vote"
       >
         <article>
-          <p>
+          <P>
             A voting act is represented in the stellar transaction. This transaction transfer 1 vote
             token from distribution account to ballot-box account. A user itself is responsible for
             creating and publishing such transaction <strong>directly</strong> to the Stellar
@@ -80,7 +77,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
             transaction id, which can be used to track the transaction in the blockchain. If a user
             loses the transaction id, he can not prove his vote option. We considered it rather as a
             privacy feature than a flaw.
-          </p>
+          </P>
         </article>
       </Panel>
       <Panel
@@ -93,14 +90,14 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         key="who-makes-the-validation"
       >
         <article>
-          <p>
+          <P>
             Stellar network uses Federated Byzantine Agreement, which is decentralized version of
             Byzantine Agreement. FBA allows anyone to join the network and participate in validation
             process. In Stellar, the validator nodes are held by many organizations, we could (and
             will) create our own Stellar nodes too. Additionally since the ballots are
             salt-encrypted, there is no way of filtering one kind of votes based on the vote option
             in it.
-          </p>
+          </P>
         </article>
       </Panel>
       <Panel
@@ -109,7 +106,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         className="site-collapse-custom-panel"
       >
         <article>
-          <p>
+          <P>
             This solution is built with non-crypto users in mind. We argue that this is the only way
             to use this solution on large scale. Proof-of-stake voting or rather stake-weighted
             voting, would be very interesting in crypto space. If we take the basic weighting model,
@@ -119,7 +116,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
             then from the user account to ballot-box account. This way, counting results would
             involve one additional step, checking the account balance at the end of elections. This
             kind of voting has one disadvantage, we lose privacy.
-          </p>
+          </P>
         </article>
       </Panel>
       <Panel
@@ -128,12 +125,12 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         className="site-collapse-custom-panel"
       >
         <article>
-          <p>
+          <P>
             Right now only the crucial part of the system is decentralized, that is the storage
             (a.k.a. Ballot-Box) and the client webapp. As long as this system relies on a
             centralized identification provider, it inherits this property too. Figure below
             describe the parts of the system that are considered centralized and decentralized.
-          </p>
+          </P>
           <img
             width="80%"
             style={{ textAlign: 'center' }}
@@ -148,7 +145,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
         className="site-collapse-custom-panel"
       >
         <article>
-          <p>
+          <P>
             In Stellot, besides auth, everything is recorded on the blockchain. Each user can count
             the voting results on its behalf, without the trust to government. The user is
             responsible for publishing the vote transaction to the stellar voting, so he can be sure
@@ -156,7 +153,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
             votes are completely anonymous since no one (besides the voter) knows who cast the
             particular transaction to the network. But everyone can be sure that this transaction
             was authorized by TDS (because he blindly signed the transaction).
-          </p>
+          </P>
         </article>
       </Panel>
     </Collapse>

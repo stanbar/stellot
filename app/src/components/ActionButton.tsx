@@ -5,16 +5,32 @@ import { Button } from "antd";
 
 
 const Btn = styled(Button)`
+  display: inline-block;
   background-color: ${CORNFLOWER};
-  border-radius: 5px;
+  border-radius: 8px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  text-decoration: none;
+  text-transform: uppercase;
   border: 0;
   color: ${WHITE};
   cursor: pointer;
   font-family: 'Clear Sans Bold','Nitti Grotesk','Museo Sans','Helvetica Neue',Verdana,Arial,sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  line-height: initial;
-  padding: 14px 0 18px 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0;
+  margin-top: auto;
+  letter-spacing: 1px;
+  cursor: pointer;
+  vertical-align: baseline;
+
+  @media (max-width: 479px) {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
   &:hover {
     opacity: 0.8;
   }
@@ -31,9 +47,6 @@ export const BtnHeading = styled(Btn)<{
   color: ${WHITE};
   border-color: ${props => (props.color ? props.color : CORNFLOWER)};
   float: right;
-  width: 120px;
-  font-size: 16px;
-  padding: 10px 0;
   &:disabled {
     background: ${DUSTYGRAY};
     opacity: 0.6;
@@ -51,10 +64,7 @@ export const BtnOutlined = styled(Btn)<{ color?: string }>`
   color: ${props => (props.color ? props.color : CORNFLOWER)};
   border-color: ${props => (props.color ? props.color : CORNFLOWER)};
   float: right;
-  border: 1px solid;
-  width: 150px;
-  font-size: 16px;
-  padding: 10px 0;
+  border: 2px solid;
   &:disabled {
     opacity: 0.5;
     cursor: default;
@@ -69,8 +79,6 @@ export const BtnOutlined = styled(Btn)<{ color?: string }>`
 export const BtnSubmit = styled(Btn)<{ color?: string }>`
   background-color: ${props => (props.color ? props.color : CORNFLOWER)};
   width: 150px;
-  font-size: 16px;
-  padding: 10px 0;
   &:disabled {
     opacity: 0.5;
     cursor: default;
