@@ -26,7 +26,7 @@ const publicHorizons = [
   'https://stellar-horizon.satoshipay.io/',
   'https://horizon.stellar.coinqvest.com/',
 ];
-const server = new Server('https://horizon-testnet.stellar.org');
+const server = new Server(HORIZON_SERVER_URL);
 const OPTIONS = {
   fee: BASE_FEE,
   networkPassphrase: Networks.TESTNET,
