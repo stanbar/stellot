@@ -3,7 +3,6 @@ import {
   Asset,
   BASE_FEE,
   Memo,
-  Networks,
   Operation,
   Server,
   Transaction,
@@ -29,7 +28,7 @@ const publicHorizons = [
 const server = new Server(HORIZON_SERVER_URL);
 const OPTIONS = {
   fee: BASE_FEE,
-  networkPassphrase: Networks.TESTNET,
+  networkPassphrase: NETWORK_PASSPHRASE,
 };
 
 export async function getAccountSequenceNumber(accountId: string) {

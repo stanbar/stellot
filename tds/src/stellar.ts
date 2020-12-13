@@ -1,12 +1,12 @@
-import { Asset, Keypair, Networks, Operation, Server, TransactionBuilder } from 'stellar-sdk';
+import { Asset, Keypair, Operation, Server, TransactionBuilder } from 'stellar-sdk';
 import { chunk } from 'lodash';
 import fetch from 'node-fetch';
 
-const server = new Server('https://horizon-testnet.stellar.org');
+const server = new Server(HORIZON_SERVER_URL);
 
 async function defaultOptions(): Promise<TransactionBuilder.TransactionBuilderOptions> {
   return {
-    networkPassphrase: Networks.TESTNET,
+    networkPassphrase: NETWORK_PASSPHRASE,
     fee: `${(await server.fetchBaseFee()) * 3}`,
     timebounds: await server.fetchTimebounds(30),
   };
@@ -16,7 +16,7 @@ export async function createIssuerAccount(
   issuerKeypair: Keypair,
   issuerStartingBalance: number,
 ) {
-  if (process.env.NODE_ENV === 'production') {
+  if (NODE_ENV === 'production') {
     const masterAccount = await server.loadAccount(masterKeypair.publicKey());
     const tx = new TransactionBuilder(masterAccount, await defaultOptions())
       .addOperation(
