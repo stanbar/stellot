@@ -54,7 +54,7 @@ const ec = new Eddsa('ed25519');
  * @param privKey -
  * @param pubKey -
  */
-function deriveKey(
+export function deriveKey(
     privKey: Buffer,
     pubKey: Buffer
 ) {
