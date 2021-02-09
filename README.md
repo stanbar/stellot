@@ -42,11 +42,9 @@
 I believe that this project is valuable for Stellar, mainly because it proves that Stellar can be used not only for asset tokenization and payments but also as a robust i-voting system backbone.
 Starting with the general-purpose voting platform, we would like to target all kinds of votings including domain-specific elections, straw polls, referendums, plebiscites. It would be amazing to host the next SCF voting with Stellot, proving its self-contained ecosystem. Since we have connections with our University, we will start here with annual elections every February. When applied successfully, we will scale the product to other domains, bringing Stellar high notability.
 
-The voter privacy is achieved by the blind-signature technique on the stellar transaction, while the signer is protected by a cut-and-choose method.  Deeper technical details are available in [this **draft** of the article](https://github.com/stasbar/stellot/releases/download/0.0.1/draft_evoting_on_stellar.pdf) (should be finished in about month or two). We provide demo implementation for the proposed system under [https://stellot.com](https://stellot.com). This general-purpose voting service is great for end-users votings, but we believe that our goal is also to digitize the academic/government votings. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions. Especially the Auth-Server is something that will differ in every institution.
+The voter privacy is achieved by the blind-signature technique on the stellar transaction.  Deeper technical details are available in [whitepaper](https://www.mdpi.com/2076-3417/10/21/7606/pdf). We provide demo implementation for the proposed system under [https://stellot.com](https://stellot.com). This general-purpose voting service is great for end-users votings, but we believe that our goal is also to digitize the academic/government votings. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions. Especially the Auth-Server is something that will differ in every institution.
 
 **Links**:
 - Article: https://www.mdpi.com/2076-3417/10/21/7606/pdf
-- Repository: https://github.com/stasbar/stellot
+- Repository: https://github.com/stanbar/stellot
 - Demo: https://stellot.com
-
-Tags: voting, i-voting, privacy, platform
