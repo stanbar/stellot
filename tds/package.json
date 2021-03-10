@@ -47,7 +47,7 @@
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "elgamal": "^0.3.0",
-    "elliptic": "^6.5.3",
+    "elliptic": "^6.5.4",
     "errorhandler": "^1.5.1",
     "express": "~4.17.1",
     "fetch": "^1.1.0",
