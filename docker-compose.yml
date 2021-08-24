@@ -7,13 +7,22 @@ services:
       - $DOCKER_VOLUMES/stellot-ipfs/data:/data/ipfs
       - $DOCKER_VOLUMES/stellot-ipfs/staging:/export
     ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
-      - $IPFS_SWARM_PORT:4001
-      - $IPFS_WEB_GATEWAY:8080
-      - $IPFS_SWARM_WEBSOCKET:8081
+      - "4001:4001"
+      - "5001"
+      - "8080"
+      - "8081"
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.ipfs-node.rule=Host(`ipfs.stellot.com`)"
+      - "traefik.http.services.ipfs-node.loadbalancer.server.port=8080"
+      - "traefik.enable=true"
 
   mongo:
     container_name: "stellot-tds-mongodb"
     image: mongo:latest
+    networks:
+      - traefik
     restart: 'unless-stopped'
     volumes:
       - $DOCKER_VOLUMES/stellot-tds:/data/db
@@ -25,11 +34,17 @@ services:
       dockerfile: Dockerfile
     env_file: ./tds/.env
     ports:
-      - $TDS_PORT:8080
+      - "80"
     restart: 'unless-stopped'
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.tds.rule=Host(`tds.stellot.com`)"
+      - "traefik.http.services.tds.loadbalancer.server.port=80"
+      - "traefik.enable=true"
     environment:
-      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth:$KEYBASE_AS_PORT
-      - EMAILS_AUTH_SERVER_URL=http://emails-auth:$EMAILS_AS_PORT
+      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth
       - IPFS_NODE_URL=http://ipfs-node:5001
     links:
       - mongo
@@ -48,9 +63,15 @@ services:
       context: keybase-auth
       dockerfile: Dockerfile
     env_file: ./keybase-auth/.env
-    ports:
-      - $KEYBASE_AS_PORT:8080
     restart: 'unless-stopped'
+    ports:
+      - "80"
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.keybase-auth.rule=Host(`keybase.stellot.com`)"
+      - "traefik.http.services.tds.loadbalancer.server.port=80"
+      - "traefik.enable=true"
 
   emails-auth:
     container_name: "stellot-emails-auth"
@@ -58,7 +79,17 @@ services:
       context: emails-auth
       dockerfile: Dockerfile
     env_file: ./emails-auth/.env
-    ports:
-      - $EMAILS_AS_PORT:8080
     restart: 'unless-stopped'
+    ports:
+      - "80"
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.emails-auth.rule=Host(`emails.stellot.com`)"
+      - "traefik.http.services.emails-auth.loadbalancer.server.port=80"
+      - "traefik.enable=true"
 
+
+networks:
+  traefik:
+    external: true

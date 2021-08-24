@@ -6,31 +6,35 @@ const result = config();
 if (result.error) {
   throw result.error;
 }
+const { PORT, NODE_ENV, MONGODB_URI } = process.env;
 
 /**
  * Module dependencies.
  */
+if (!PORT) {
+  throw new Error('PORT must be defined');
+}
 
+const httpPort = Number(PORT);
 
 const debug = require('debug')('stellar-voting:server');
 
 /**
  * Get port from environment and store in Express.
  */
-const httpPort = 8080;
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = NODE_ENV === 'production';
 
-if (!process.env.MONGODB_URI) {
+if (!MONGODB_URI) {
   throw new Error('MONGODB_URI must be set');
 }
 if (isProduction) {
-  mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => debug('connected to db'))
     .catch(err => console.error(err));
 } else {
   mongoose.set('debug', true);
-  mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => debug('connected to db'))
     .catch(err => console.error(err));
 }

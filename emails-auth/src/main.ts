@@ -6,6 +6,14 @@ if (result.error) {
   throw result.error;
 }
 
+const { PORT } = process.env;
+
+if (!PORT) {
+  throw new Error('PORT must be defined');
+}
+
+const httpPort = Number(PORT);
+
 /**
  * Module dependencies.
  */
@@ -16,8 +24,6 @@ const debug = require('debug')('stellar-voting:server');
 /**
  * Get port from environment and store in Express.
  */
-const httpPort = 8080;
-
 
 // eslint-disable-next-line import/first
 import app from './app';

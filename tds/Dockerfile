@@ -13,6 +13,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start" ]
+EXPOSE 80
 
-HEALTHCHECK --interval=60s CMD wget -qO- localhost:8080/health
+CMD [ "npm", "run", "start:prod" ]
+
+HEALTHCHECK --interval=60s CMD wget -qO- http://localhost/health
