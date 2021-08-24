@@ -5,14 +5,14 @@ import { KEYBASE_AUTH_OPTIONS, EMAILS_AUTH_OPTIONS } from './models';
 const KeybaseAuthOptionsSchema = mongoose.model(KEYBASE_AUTH_OPTIONS);
 const EmailsAuthOptionsSchema = mongoose.model(EMAILS_AUTH_OPTIONS);
 
-export async function getAuthorizationOptions(voting: Omit<Voting, 'authorizationOptions'>): Promise<object | null> {
+export async function getAuthorizationOptions(voting: Omit<Voting, 'authorizationOptions'>): Promise<object | undefined> {
     switch (voting.authorization) {
         case Authorization.KEYBASE:
             return (await KeybaseAuthOptionsSchema.findOne({ voting: voting.id }))?.toJSON();
         case Authorization.EMAILS:
             return (await EmailsAuthOptionsSchema.findOne({ voting: voting.id }))?.toJSON();
         default:
-            return null;
+            return undefined;
     }
 }
 

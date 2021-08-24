@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Keypair } from 'stellar-sdk';
 import mongoose from 'mongoose';
 import Keychain from '../types/keychain'

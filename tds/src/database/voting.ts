@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Document } from 'mongoose';
 import { Authorization, Visibility, Voting } from '@stellot/types';
 import { VotingModel } from './models';

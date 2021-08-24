@@ -106,6 +106,7 @@ VotingSchema.pre('deleteOne', { document: true, query: false }, async function()
 
 // eslint-disable-next-line func-names
 VotingSchema.methods.slugify = function() {
+  // @ts-ignore
   this.slug = `${slug(this.title)}-${((Math.random() * 36 ** 6) | 0).toString(36)}`;
 };
 

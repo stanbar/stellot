@@ -1,7 +1,12 @@
-declare module 'vfile-message' {
-  export type VFileMessage = any;
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: 'development' | 'production';
+      HORIZON_SERVER_URL?: string;
+      NETWORK_PASSPHRASE?: string;
+      PORT?: string;
+    }
+  }
 }
 
-declare const NODE_ENV: string | false;
-declare const HORIZON_SERVER_URL: string | false;
-declare const NETWORK_PASSPHRASE: string | false;
+export {};

@@ -18,10 +18,12 @@ export async function consumeChannel(votingId: string): Promise<Channel | null> 
   }
   channel.used = true;
   await channel.save();
+  // @ts-ignore
   return channel.toJSON();
 }
 
 export async function saveChannels(votingId: string, channels: Keypair[]): Promise<Channel[]> {
+  // @ts-ignore
   return Promise.all(
     channels.map(async channel => {
       const channelSchema = new ChannelSchema({

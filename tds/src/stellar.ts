@@ -2,6 +2,15 @@ import { Asset, Keypair, Operation, Server, TransactionBuilder } from 'stellar-s
 import { chunk } from 'lodash';
 import fetch from 'node-fetch';
 
+const { HORIZON_SERVER_URL, NODE_ENV, NETWORK_PASSPHRASE } = process.env;
+
+if (!HORIZON_SERVER_URL) {
+  throw new Error("HORIZON_SERVER_URL must be defined")
+}
+if (!NETWORK_PASSPHRASE) {
+  throw new Error("NETWORK_PASSPHRASE must be defined")
+}
+
 const server = new Server(HORIZON_SERVER_URL);
 
 async function defaultOptions(): Promise<TransactionBuilder.TransactionBuilderOptions> {
