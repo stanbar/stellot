@@ -40,8 +40,8 @@ services:
       - traefik
     labels:
       - "traefik.http.routers.tds.rule=Host(`tds.stellot.com`)"
-      - "traefik.http.services.tds.loadbalancer.server.port=80"
       - "traefik.enable=true"
+
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
       - EMAILS_AUTH_SERVER_URL=http://emails-auth
@@ -70,7 +70,6 @@ services:
       - traefik
     labels:
       - "traefik.http.routers.keybase-auth.rule=Host(`keybase.stellot.com`)"
-      - "traefik.http.services.tds.loadbalancer.server.port=80"
       - "traefik.enable=true"
 
   emails-auth:
@@ -86,7 +85,6 @@ services:
       - traefik
     labels:
       - "traefik.http.routers.emails-auth.rule=Host(`emails.stellot.com`)"
-      - "traefik.http.services.emails-auth.loadbalancer.server.port=80"
       - "traefik.enable=true"
 
 
