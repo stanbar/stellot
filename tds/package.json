@@ -57,7 +57,7 @@
     "lodash": "^4.17.21",
     "long": "^4.0.0",
     "minimist": ">=1.2.6",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "mongoose": "^5.13.8",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "~1.9.1",
