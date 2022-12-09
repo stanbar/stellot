@@ -1,0 +1,76 @@
+version: '3.7'
+services:
+  ipfs-node:
+    container_name: "stellot-ipfs-node"
+    image: ipfs/go-ipfs
+    volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
+      - $DOCKER_VOLUMES/stellot-ipfs/data:/data/ipfs
+      - $DOCKER_VOLUMES/stellot-ipfs/staging:/export
+    ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
+      - "4001:4001"
+      - "5001"
+      - "8080"
+      - "8081"
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.ipfs-node.rule=Host(`ipfs.stellot.com`)"
+      - "traefik.http.services.ipfs-node.loadbalancer.server.port=8080"
+      - "traefik.enable=true"
+
+  mongo:
+    container_name: "stellot-tds-mongodb"
+    image: mongo:latest
+    networks:
+      - traefik
+    restart: 'unless-stopped'
+    volumes:
+      - $DOCKER_VOLUMES/stellot-tds:/data/db
+
+  tds:
+    container_name: "stellot-tds"
+    build:
+      context: tds
+      dockerfile: Dockerfile
+    env_file: ./tds/.env
+    ports:
+      - "80"
+    restart: 'unless-stopped'
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.tds.rule=Host(`tds.stellot.com`)"
+      - "traefik.enable=true"
+
+    environment:
+      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth
+      - IPFS_NODE_URL=http://ipfs-node:5001
+    links:
+      - mongo
+      - emails-auth
+      - ipfs-node
+    depends_on:
+      - mongo
+      - emails-auth
+      - ipfs-node
+
+  emails-auth:
+    container_name: "stellot-emails-auth"
+    build:
+      context: emails-auth
+      dockerfile: Dockerfile
+    env_file: ./emails-auth/.env
+    restart: 'unless-stopped'
+    ports:
+      - "80"
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.emails-auth.rule=Host(`emails.stellot.com`)"
+      - "traefik.enable=true"
+
+
+networks:
+  traefik:
+    external: true
