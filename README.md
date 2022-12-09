@@ -53,3 +53,25 @@ The voter privacy is achieved by the blind-signature technique on the stellar tr
 - Article: https://www.mdpi.com/2076-3417/10/21/7606/pdf
 - Repository: https://github.com/stanbar/stellot
 - Demo: https://stellot.com
+
+# Installation
+
+## Traefik 
+
+Install and configure traefik `https://github.com/stanbar/traefik`
+
+## Keys
+
+1. Generate a new keypair for JWT tokens:
+
+Go to `scripts/` and run: `./generate-jwt-keypair.sh`
+
+2. Sendgrid API key
+
+Get Sendgrid API key from `https://app.sendgrid.com/settings/api_keys`.
+
+Add it to `.env` file `SENDGRID_API_KEY=`
+
+2. Update 
+
+Update `.env` files for each submodule accordingly, using `.env.example` as a template.
