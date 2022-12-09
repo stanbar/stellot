@@ -30,6 +30,8 @@
 - [x] 2021-22 - Research cohersion-resitant and private blockchain i-voting architectures. Reserach multi-party computation (MPC) and zkSNARK.
 - [x] Q2.2022 - Pitch Stellot at [Startup School 2022](https://pg.edu.pl/startup/2022-07/demo-day-2022-relacja).
 - [x] Q3.2022 - Redesign the protocol according to [Vitalik's MACI](https://ethresear.ch/t/minimal-anti-collusion-infrastructure/5413) scheme.
+- [x] Q4.2022 - Write [reserach statement](https://stan.bar/research-statement).
+
 - [ ] Q1.2023 - Implement the cohersion-resitant layer on top of current protocol.
 - [ ] Q2.2023 - Reserach the possibilities of running the nodes on end-user devices like smartphones and laptops.
 - [ ] Q3.2023 - Design a protocol for end-user devices.
