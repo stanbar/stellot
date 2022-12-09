@@ -2,7 +2,7 @@
 
 # Stellot
 
-**Summary**: Privacy-first i-Voting platform powered by Stellar.
+**Summary**: Privacy-first i-voting platform powered by Stellar.
 
 **Category**: Applications
 
@@ -12,29 +12,32 @@
 - Achieve privacy and verifiability for all voters.
 
 **Timeline**:
-- Q4.2019 - Start blockchain-based i-voting systems research. ✓
+- [x] Q4.2019 - Start blockchain-based i-voting systems research. ✓
 
-- Q1.2020 - Create a journal article draft. ✓
-- Q1.2020 - Create a proof-of-concept application. ✓
-- Q1.2020 - Create a proof-of-concept service for creating general-purpose votings. ✓
+- [x] Q1.2020 - Create a journal article draft. ✓
+- [x] Q1.2020 - Create a proof-of-concept application. ✓
+- [x] Q1.2020 - Create a proof-of-concept service for creating general-purpose votings. ✓
 
-- Q2.2020 - Add keybase auth via jwt and keybase-bot (similar how https://stellarcommunity.fund works) ✓
-- Q2.2020 - Add basic authN & authZ methods (cookie, IP address, codes, email, domain etc.) ✓
-- Q2.2020 - Add vote encryption (preventing partial results before the end of voting). ✓
+- [x] Q2.2020 - Add keybase auth via jwt and keybase-bot (similar how https://stellarcommunity.fund works) ✓
+- [x] Q2.2020 - Add basic authN & authZ methods (cookie, IP address, codes, email, domain etc.) ✓
+- [x] Q2.2020 - Add vote encryption (preventing partial results before the end of voting). ✓
 
-- Q3.2020 - Store voting meta-data on IPFS content-addressable network. ✓
-- Q3.2020 - Solve the scalability problems ✓
-- Q3.2020 - Finish service for creating general-purpose votings. ✓
-- Q3.2020 - Publish a journal article. ✓
+- [x] Q3.2020 - Store voting meta-data on IPFS content-addressable network. ✓
+- [x] Q3.2020 - Solve the scalability problems ✓
+- [x] Q3.2020 - Finish service for creating general-purpose votings. ✓
+- [x] Q3.2020 - Publish a journal article. ✓
 
-- Q4.2020 - Add multi-select voting.
-- Q4.2020 - Add stake-weighted votings.
-- Q4.2020 - Add domain-specific auth with OpenID Connect.
+- [x] 2021-22 - Research cohersion-resitant and private blockchain i-voting architectures. Reserach multi-party computation (MPC) and zkSNARK.
+- [x] Q2.2022 - Pitch Stellot at [Startup School 2022](https://pg.edu.pl/startup/2022-07/demo-day-2022-relacja).
+- [x] Q3.2022 - Redesign the protocol according to [Vitalik's MACI](https://ethresear.ch/t/minimal-anti-collusion-infrastructure/5413) scheme.
+- [ ] Q1.2023 - Implement the cohersion-resitant layer on top of current protocol.
+- [ ] Q2.2023 - Reserach the possibilities of running the nodes on end-user devices like smartphones and laptops.
+- [ ] Q3.2023 - Design a protocol for end-user devices.
+- [ ] Q4.2023 - Implement the protocol for end-user devices.
 
-- Q1.2021 - Add metamask support for stake-weighted votings.
-- Q1.2021 - Create a framework for creating domain-specific standalone votings.
-- Q1.2021 - Find academic/government votings where such a system could be used.
-- Q1.2021 - Host dean elections of the Gdańsk University of Technology with Stellot.
+- [ ] Q1.2024 - Create a framework for creating domain-specific standalone votings.
+- [ ] Q1.2024 - Find academic/government votings where such a system could be used.
+- [ ] Q1.2024 - Host dean elections of the Gdańsk Tech with Stellot.
 
 
 **Description**: Stellot is a privacy-first i-voting system powered by the Stellar network. We argue that the proposed system satisfies all requirements stated for robust i-voting systems such as transparency, verifiability, and voter anonymity/privacy. The system is designed in such a way, that voter is completely abstracted from blockchain technology used underneath. Open Stellar blockchain allows everyone to verify the election results without having to trust a central authority.
