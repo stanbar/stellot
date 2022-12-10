@@ -1,5 +1,20 @@
 version: '3.7'
 services:
+  stellar:
+    container_name: stellot-stellar
+    image: stellar/quickstart:latest
+    command: --standalone
+    ports:
+      - "8000"
+    volumes:
+      - $DOCKER_VOLUMES/stellar:/opt/stellar
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.ipfs-node.rule=Host(`stellar.stellot.com`)"
+      - "traefik.http.services.ipfs-node.loadbalancer.server.port=8000"
+      - "traefik.enable=true"
+
   ipfs-node:
     container_name: "stellot-ipfs-node"
     image: ipfs/go-ipfs
@@ -21,9 +36,9 @@ services:
   mongo:
     container_name: "stellot-tds-mongodb"
     image: mongo:latest
+    restart: 'unless-stopped'
     networks:
       - traefik
-    restart: 'unless-stopped'
     volumes:
       - $DOCKER_VOLUMES/stellot-tds:/data/db
 
@@ -36,24 +51,26 @@ services:
     ports:
       - "80"
     restart: 'unless-stopped'
+    environment:
+      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
+      - STELLAR_HORIZON_URL=http://stellar:8000
+      - EMAILS_AUTH_SERVER_URL=http://emails-auth
+      - IPFS_NODE_URL=http://ipfs-node:5001
+    links:
+      - mongo
+      - stellar
+      - emails-auth
+      - ipfs-node
+    depends_on:
+      - mongo
+      - stellar
+      - emails-auth
+      - ipfs-node
     networks:
       - traefik
     labels:
       - "traefik.http.routers.tds.rule=Host(`tds.stellot.com`)"
       - "traefik.enable=true"
-
-    environment:
-      - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
-      - EMAILS_AUTH_SERVER_URL=http://emails-auth
-      - IPFS_NODE_URL=http://ipfs-node:5001
-    links:
-      - mongo
-      - emails-auth
-      - ipfs-node
-    depends_on:
-      - mongo
-      - emails-auth
-      - ipfs-node
 
   emails-auth:
     container_name: "stellot-emails-auth"
