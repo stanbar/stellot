@@ -18,7 +18,7 @@ app.use(cookieParser());
 if (!isProduction) {
   app.use(errorhandler());
 }
-app.get('/health', (req, res) => res.sendStatus(200).end());
+app.get('/health', (_, res) => res.sendStatus(200).end());
 app.use(router);
 
 class HttpError extends Error {
