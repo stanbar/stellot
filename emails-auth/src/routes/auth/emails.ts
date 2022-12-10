@@ -13,7 +13,7 @@ router.post('/requestToken', async (req, res, next) => {
     }
     const token = auth.createJwt(email);
     await bot.sendEmail(email, token);
-    return res.sendStatus(200).end();
+    res.sendStatus(200).end();
   } catch (e) {
     next(e)
   }
