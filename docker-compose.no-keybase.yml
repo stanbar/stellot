@@ -1,33 +1,15 @@
 version: '3.7'
 services:
-  stellar:
-    container_name: stellot-stellar
-    image: stellar/quickstart:latest
-    command: --standalone
-    ports:
-      - "8000"
-    volumes:
-      - $DOCKER_VOLUMES/stellar:/opt/stellar
-    networks:
-      - traefik
-    labels:
-      - "traefik.http.routers.ipfs-node.rule=Host(`stellar.stellot.com`)"
-      - "traefik.http.services.ipfs-node.loadbalancer.server.port=8000"
-      - "traefik.enable=true"
-
   ipfs-node:
     container_name: "stellot-ipfs-node"
     image: ipfs/go-ipfs
-    volumes: # https://github.com/ipfs/go-ipfs#running-ipfs-inside-docker
-      - $DOCKER_VOLUMES/stellot-ipfs/data:/data/ipfs
-      - $DOCKER_VOLUMES/stellot-ipfs/staging:/export
     ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
       - "4001:4001"
       - "5001"
       - "8080"
       - "8081"
     networks:
-      - traefik
+      - public
     labels:
       - "traefik.http.routers.ipfs-node.rule=Host(`ipfs.stellot.com`)"
       - "traefik.http.services.ipfs-node.loadbalancer.server.port=8080"
@@ -38,9 +20,7 @@ services:
     image: mongo:latest
     restart: 'unless-stopped'
     networks:
-      - traefik
-    volumes:
-      - $DOCKER_VOLUMES/stellot-tds:/data/db
+      - public
 
   tds:
     container_name: "stellot-tds"
@@ -53,21 +33,18 @@ services:
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
-      - STELLAR_HORIZON_URL=http://stellar:8000
       - EMAILS_AUTH_SERVER_URL=http://emails-auth
       - IPFS_NODE_URL=http://ipfs-node:5001
     links:
       - mongo
-      - stellar
       - emails-auth
       - ipfs-node
     depends_on:
       - mongo
-      - stellar
       - emails-auth
       - ipfs-node
     networks:
-      - traefik
+      - public
     labels:
       - "traefik.http.routers.tds.rule=Host(`tds.stellot.com`)"
       - "traefik.enable=true"
@@ -82,12 +59,12 @@ services:
     ports:
       - "80"
     networks:
-      - traefik
+      - public
     labels:
       - "traefik.http.routers.emails-auth.rule=Host(`emails.stellot.com`)"
       - "traefik.enable=true"
 
 
 networks:
-  traefik:
+  public:
     external: true
