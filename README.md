@@ -56,10 +56,6 @@ The voter privacy is achieved by the blind-signature technique on the stellar tr
 
 # Installation
 
-## Traefik 
-
-Install and configure traefik `https://github.com/stanbar/traefik`
-
 ## Keys
 
 1. Generate a new keypair for JWT tokens:
@@ -72,6 +68,12 @@ Get Sendgrid API key from `https://app.sendgrid.com/settings/api_keys`.
 
 Add it to `.env` file `SENDGRID_API_KEY=`
 
-2. Update 
+3. Update `.env` files
 
 Update `.env` files for each submodule accordingly, using `.env.example` as a template.
+
+# Reverse Proxy - Caddy/Traefik/NGINX
+
+Expose services using reverse proxy. We recommend using Caddy or Traefik.
+
+The configuration files for Caddy are available in [https://github.com/stanbar/caddy](https://github.com/stanbar/caddy).
