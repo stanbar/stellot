@@ -26,8 +26,6 @@ services:
       context: tds
       dockerfile: Dockerfile
     env_file: ./tds/.env
-    ports:
-      - "80"
     restart: 'unless-stopped'
     environment:
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
@@ -52,8 +50,6 @@ services:
       dockerfile: Dockerfile
     env_file: ./emails-auth/.env
     restart: 'unless-stopped'
-    ports:
-      - "80"
     networks:
       - public
       - default
