@@ -59,12 +59,11 @@ export default function () {
   return (
     <IndexContainer>
       <Col style={{ marginBottom: 100 }}>
-        <Title>Welcome on Stellot</Title>
-        <SubTitle>Voting platform powered by Stellar blockchain </SubTitle>
+        <Title>Welcome to Stellot</Title>
+        <SubTitle>Stellot is an i-voting platform powered by Stellar blockchain</SubTitle>
         <SubSubTitle>
-          Designed around voter privacy, ensuring that everyone can be sure about its vote
-          anonymity. Inherited decentralized and permissionless Stellar blockchain properties,
-          allows everyone to verify the election results without having to trust central authority.
+          Designed with practicality, user-firendliness, anonimty, and security in mind.
+          Inherited decentralized and permissionless blockchain properties allow everyone to verify the voting correctness without having to trust a central authority.
         </SubSubTitle>
 
         <a href={PAPER_URL} target="_blank" rel="noreferrer noopener">
@@ -78,28 +77,27 @@ export default function () {
 
       <Features md={18} xs={20} offset={3}>
         <H3>Privacy-first</H3>
-        <P>Blind-signature algorithm preserves users anonymity during voting process.</P>
+        <P>Blind-signature algorithm guarantees users' anonymity during and after the voting process.</P>
 
         <H3>User friendly</H3>
         <P>
-          Stellot is designed for mass adoption in mind. Users are completely abstracted from
-          blockchain technology used underneath.
+          Stellot is designed with mass adoption in mind. 
+          End-users are abstracted from blockchain technology used underneath.
         </P>
 
         <H3>Trustless</H3>
         <P>
-          Stellot keeps each ballot publicly on Stellar blockchain, thus everyone is able to
-          calculate the voting results by itself.
+          Stellot records each vote publicly on Stellar blockchain, thus everyone can calculate the voting results by themselves—without having to trust a central authority.
         </P>
 
         <H3>Verifiable</H3>
         <P>
-          Users publish the vote transaction directly to the Stellar blockchain, in result, they can
-          track their vote transaction during counting process.
+          Users publish vote-cast transactions directly to the Stellar blockchain; 
+          therefore, they can track their vote transactions during the counting process.
         </P>
 
         <H3>Fair</H3>
-        <P>All votes are encrypted until the end of election.</P>
+        <P>Until the end of the election, all votes are end-to-end encrypted, preventing preliminary results disclosure.</P>
       </Features>
       <FAQ />
     </IndexContainer>

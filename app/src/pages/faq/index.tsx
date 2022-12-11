@@ -27,23 +27,35 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       className={styles.whitePanel}
     >
-      <Panel header={<h2>How does the whole process of voting look like?</h2>} key="sequence-flow">
+      <Panel header={<h2>How to visualise the voting protocol used in Stellot?</h2>} key="sequence-flow">
         <article>
           <P>
+            To understand the Stellar voting protocol, we present the real life analogy consisting of the following steps:
+            There are four actors in the voting protocol: 
+            <ul>
+              <li>User, a voter,</li>
+              <li>Identity Provider (IdP), an entity validating User's identity, and issuing a certificate,</li>
+              <li>Token Distribution Server (TDS), an entity validating (previously issued by IdP) User's certificate and issuing a vote token, and then redeeming the token for a ballot paper,</li>
+              <li>Ballot Box, an entity collecting votes.</li>
+            </ul>
+
+
+            The following sequence diagram shows the voting protocol in Stellot:
             <img
               width="80%"
               style={{ textAlign: 'center' }}
               src={sequenceDiagram}
               alt="sequence diagram"
             />
+
             <ol>
               <li>User proof its identity to Identity Provider.</li>
-              <li>Identity Provider issue certificate. </li>
+              <li>Identity Provider issue certificate.</li>
               <li>
-                User writes an authorization token (random number) on paper and put it into the
-                envelope with carbon paper.
+                User writes an authorization token (random number) on a paper and put it into an
+                envelope with a carbon paper.
               </li>
-              <li>User goes to election local, pass the certificate and authorization token.</li>
+              <li>User goes to an pooling station, shows the certificate and the authorization token.</li>
               <li>
                 TDS validate the certificate and check if the user hasn't already issued ballot
                 paper, then sign the envelope, and authorization token through the carbon.
@@ -57,33 +69,33 @@ const FAQ: React.FC<VotePreviewProps> = () => (
               <li>Anonymous mark the candidate.</li>
               <li>Anonymous throws the ballot paper into the ballot box.</li>
             </ol>
+
           </P>
         </article>
       </Panel>
       <Panel
         header={
           <h2>
-            How can a user verify that his vote is correct counted and stored in the blockchain ?
+            How can a user verify that his vote has been counted correctly?
           </h2>
         }
         key="verify-vote"
       >
         <article>
           <P>
-            A voting act is represented in the stellar transaction. This transaction transfer 1 vote
+            A voting act is represented as a stellar transaction. This transaction transfers one vote
             token from distribution account to ballot-box account. A user itself is responsible for
             creating and publishing such transaction <strong>directly</strong> to the Stellar
-            blockchain network. After a user successfully publishes the transaction, he obtains the
-            transaction id, which can be used to track the transaction in the blockchain. If a user
-            loses the transaction id, he can not prove his vote option. We considered it rather as a
-            privacy feature than a flaw.
+            blockchain. Upon successfully publishing the transaction, the user obtains the transaction id,
+            which can be used to track the transaction in the blockchain. If a user loses the transaction id,
+            he can not prove his vote option. We considered it rather as a privacy feature than a flaw.
           </P>
         </article>
       </Panel>
       <Panel
         header={
           <h2>
-            Who makes the validation of transactions? Is there any organization behind Stellar that
+            Who validate transactions? Is there any organization behind Stellar that
             can manipulate votes ?
           </h2>
         }
@@ -100,25 +112,7 @@ const FAQ: React.FC<VotePreviewProps> = () => (
           </P>
         </article>
       </Panel>
-      <Panel
-        header={<h2>Can people vote using proof of stake like on Binance with BNB?</h2>}
-        key="proof-of-stake"
-        className="site-collapse-custom-panel"
-      >
-        <article>
-          <P>
-            This solution is built with non-crypto users in mind. We argue that this is the only way
-            to use this solution on large scale. Proof-of-stake voting or rather stake-weighted
-            voting, would be very interesting in crypto space. If we take the basic weighting model,
-            i.e. based just on amount of XLM on your account, then the implementation is really
-            straightforward. Instead of the vote token go directly from distribution account to
-            ballot-box account, it would go first from distribution account to the user account, and
-            then from the user account to ballot-box account. This way, counting results would
-            involve one additional step, checking the account balance at the end of elections. This
-            kind of voting has one disadvantage, we lose privacy.
-          </P>
-        </article>
-      </Panel>
+      
       <Panel
         header={<h2>Is the system decentralized ?</h2>}
         key="1"
@@ -126,9 +120,8 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       >
         <article>
           <P>
-            Right now only the crucial part of the system is decentralized, that is the storage
-            (a.k.a. Ballot-Box) and the client webapp. As long as this system relies on a
-            centralized identification provider, it inherits this property too. Figure below
+            Before Stellot implements smart contracts (which should happen soon, see <a href="https://soroban.stellar.org">Stellot's Soroban</a>), only the crucial part of the system is decentralized — the ballot box storage and the client webapp. 
+            As long as this system relies on a centralized identification provider, it inherits this property too. Figure below
             describe the parts of the system that are considered centralized and decentralized.
           </P>
           <img
@@ -146,13 +139,11 @@ const FAQ: React.FC<VotePreviewProps> = () => (
       >
         <article>
           <P>
-            In Stellot, besides auth, everything is recorded on the blockchain. Each user can count
-            the voting results on its behalf, without the trust to government. The user is
-            responsible for publishing the vote transaction to the stellar voting, so he can be sure
-            that his vote was taken into account. But the biggest advantage is the fact that the
-            votes are completely anonymous since no one (besides the voter) knows who cast the
-            particular transaction to the network. But everyone can be sure that this transaction
-            was authorized by TDS (because he blindly signed the transaction).
+            In Stellot, besides auth, everything is recorded on the blockchain. 
+            Each user can count the voting result independently, without trust in a central authority. 
+            User is responsible for publishing the vote transaction to the blockchain, so he can be sure that his vote was taken into account. 
+            But the biggest advantage is the fact that the votes are completely anonymous since no one (besides the voter) knows who cast the particular transaction to the network. 
+            But everyone can be sure that this transaction was authorized by TDS (because he blindly signed the transaction).
           </P>
         </article>
       </Panel>

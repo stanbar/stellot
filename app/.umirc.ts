@@ -1,17 +1,19 @@
 import { defineConfig } from 'umi';
 // ref: https://umijs.org/config/
-const { REACT_APP_ENV, KEYBASE_AUTH_SERVER_URL, EMAILS_AUTH_SERVER_URL, TDS_SERVER_URL } = process.env;
+const { REACT_APP_ENV, KEYBASE_AUTH_SERVER_URL, EMAILS_AUTH_SERVER_URL, TDS_SERVER_URL, HORIZON_SERVER_URL, NETWORK_PASSPHRASE } = process.env;
 export default defineConfig({
   define: {
     REACT_APP_ENV: REACT_APP_ENV || false,
     KEYBASE_AUTH_SERVER_URL: KEYBASE_AUTH_SERVER_URL || false,
     EMAILS_AUTH_SERVER_URL: EMAILS_AUTH_SERVER_URL || false,
     TDS_SERVER_URL: TDS_SERVER_URL || false,
+    HORIZON_SERVER_URL: HORIZON_SERVER_URL || false,
+    NETWORK_PASSPHRASE: NETWORK_PASSPHRASE || false,
   },
   antd: {},
   dva: {},
   dynamicImport: { loading: '@/components/LoadingPage/index', },
-  title: 'Stellot - Voting platform powered by Stellar blockchain',
+  title: 'Stellot - i-voting platform powered by Stellar blockchain',
   locale: {
     default: 'en-US',
     // antd: true,
