@@ -53,7 +53,7 @@ export function createTransaction(account: Account, memo: Memo, voting: Voting):
 }
 
 export function parseTransactiion(transactionXdr: string) {
-  return new Transaction(transactionXdr, Networks.TESTNET);
+  return new Transaction(transactionXdr, OPTIONS.networkPassphrase);
 }
 
 export function publishAccountCreationTx(tx: Transaction) {
