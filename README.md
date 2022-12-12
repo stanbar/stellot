@@ -33,6 +33,9 @@
 - [x] Q4.2022 - Write [reserach statement](https://stan.bar/research-statement).
 
 - [ ] Q1.2023 - Implement the cohersion-resitant layer on top of current protocol.
+- [ ] Q1.2023 - Develop an MPC protocol to compute the encryption key using Distributed Key Generation (DKG) schemes.
+- [ ] Replace the current storage mechanism based on Stellar transactions, with the new [Stellar's Soroban](https://soroban.stellar.org) smart contract platform.
+- [ ] Q1.2023 - Implement the MPC protocol for decryption and tally the votes stored in Soroban smart contract. This will remove the need for trusted-third-party used in the current protocol.
 - [ ] Q2.2023 - Reserach the possibilities of running the nodes on end-user devices like smartphones and laptops.
 - [ ] Q3.2023 - Design a protocol for end-user devices.
 - [ ] Q4.2023 - Implement the protocol for end-user devices.
@@ -40,7 +43,6 @@
 - [ ] Q1.2024 - Create a framework for creating domain-specific standalone votings.
 - [ ] Q1.2024 - Find academic/government votings where such a system could be used.
 - [ ] Q1.2024 - Host dean elections of the Gdańsk Tech with Stellot.
-
 
 **Description**: In this paper, we propose a privacy-preserving i-voting system based on the public Stellar
 Blockchain network. We argue that the proposed system satisfies all requirements stated for a robust
