@@ -42,12 +42,19 @@
 - [ ] Q1.2024 - Host dean elections of the Gdańsk Tech with Stellot.
 
 
-**Description**: Stellot is a privacy-first i-voting system powered by the Stellar network. We argue that the proposed system satisfies all requirements stated for robust i-voting systems such as transparency, verifiability, and voter anonymity/privacy. The system is designed in such a way, that voter is completely abstracted from blockchain technology used underneath. Open Stellar blockchain allows everyone to verify the election results without having to trust a central authority.
+**Description**: In this paper, we propose a privacy-preserving i-voting system based on the public Stellar
+Blockchain network. We argue that the proposed system satisfies all requirements stated for a robust
+i-voting system including transparency, verifiability, and voter anonymity. The practical architecture
+of the system abstracts a voter from blockchain technology used underneath. To keep user privacy,
+we propose a privacy-first protocol that protects voter anonymity. Additionally, high throughput
+and low transaction fees allow handling large scale voting at low costs. As a result we built an
+open-source, cheap, and secure system for i-voting that uses public blockchain, where everyone can
+participate and verify the election process without the need to trust a central authority. The main
+contribution to the field is a method based on a blind signature used to construct reliable voting
+protocol. The proposed method fulfills all requirements defined for i-voting systems, which is
+challenging to achieve altogether.
 
-I believe that this project is valuable for Stellar, mainly because it proves that Stellar can be used not only for asset tokenization and payments but also as a robust i-voting system backbone.
-Starting with the general-purpose voting platform, we would like to target all kinds of votings including domain-specific elections, straw polls, referendums, plebiscites. It would be amazing to host the next SCF voting with Stellot, proving its self-contained ecosystem. Since we have connections with our University, we will start here with annual elections every February. When applied successfully, we will scale the product to other domains, bringing Stellar high notability.
-
-The voter privacy is achieved by the blind-signature technique on the stellar transaction.  Deeper technical details are available in [whitepaper](https://www.mdpi.com/2076-3417/10/21/7606/pdf). We provide demo implementation for the proposed system under [https://stellot.com](https://stellot.com). This general-purpose voting service is great for end-users votings, but we believe that our goal is also to digitize the academic/government votings. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions. Especially the Auth-Server is something that will differ in every institution.
+Voter privacy is achieved by the blind-signature technique on the stellar transaction.  Deeper technical details are available in [whitepaper](https://www.mdpi.com/2076-3417/10/21/7606/pdf). We provide demo implementation for the proposed system under [https://stellot.com](https://stellot.com). This general-purpose voting service is great for end-users voting, but we believe that our goal is also to digitize academic/government voting. Such elections require domain-specific applications, and so we would like to create a framework for these types of solutions. Especially the Auth-Server is something that will differ in every institution.
 
 **Links**:
 - Article: https://www.mdpi.com/2076-3417/10/21/7606/pdf
