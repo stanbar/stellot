@@ -45,7 +45,7 @@ export async function createIssuerAccount(
   }
 }
 
-async function fundWithFriendlyBot(issuerPublicKey: string) {
+export async function fundWithFriendlyBot(issuerPublicKey: string) {
   const response = await fetch(
     `https://friendbot.stellar.org?addr=${encodeURIComponent(issuerPublicKey)}`,
   );

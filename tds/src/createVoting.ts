@@ -16,6 +16,7 @@ import {
   createVoteToken,
   createDistributionAndBallotAccount,
   createChannelAccounts,
+  fundWithFriendlyBot,
 } from './stellar';
 import { saveChannels } from './database/channels';
 
@@ -24,6 +25,14 @@ if (!process.env.MASTER_SECRET_KEY) {
 }
 const masterSecretKey = process.env.MASTER_SECRET_KEY;
 const masterKeypair = Keypair.fromSecret(masterSecretKey);
+
+try {
+  console.log("Funding master account with friendbot in case testnet has been wiped")
+  fundWithFriendlyBot(masterKeypair.publicKey());
+} catch (e) {
+  console.error("Failed to fund master account with friendbot, probably because it already exists", e)
+}
+
 
 export async function createVoting({
   title,
