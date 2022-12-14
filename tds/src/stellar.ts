@@ -2,6 +2,8 @@ import { Asset, Keypair, Operation, Server, TransactionBuilder } from 'stellar-s
 import { chunk } from 'lodash';
 import fetch from 'node-fetch';
 
+const debug = require('debug')('stellar');
+
 const { HORIZON_SERVER_URL, NODE_ENV, NETWORK_PASSPHRASE } = process.env;
 
 if (!HORIZON_SERVER_URL) {
@@ -26,7 +28,9 @@ export async function createIssuerAccount(
   issuerStartingBalance: number,
 ) {
   if (NODE_ENV === 'production') {
+    debug("Creating issuer account via master account")
     const masterAccount = await server.loadAccount(masterKeypair.publicKey());
+    debug("Loaded master account")
     const tx = new TransactionBuilder(masterAccount, await defaultOptions())
       .addOperation(
         Operation.createAccount({
@@ -37,8 +41,10 @@ export async function createIssuerAccount(
       .build();
     tx.sign(masterKeypair);
     return server.submitTransaction(tx);
+  } else {
+    debug("Creating issuer account via friendly bot")
+    return fundWithFriendlyBot(issuerKeypair.publicKey());
   }
-  return fundWithFriendlyBot(issuerKeypair.publicKey());
 }
 
 async function fundWithFriendlyBot(issuerPublicKey: string) {
@@ -46,7 +52,7 @@ async function fundWithFriendlyBot(issuerPublicKey: string) {
     `https://friendbot.stellar.org?addr=${encodeURIComponent(issuerPublicKey)}`,
   );
   const responseJSON = await response.json();
-  console.log('SUCCESS Funding account with friendbot! \n', responseJSON);
+  debug('SUCCESS Funding account with friendbot! \n', responseJSON);
 }
 
 export function createVoteToken(issuerPublicKey: string, title: string): Asset {

@@ -17,7 +17,7 @@ import {
   requestAccountCreation,
 } from '../../newSessions';
 
-const debug = require('debug')('blindsig');
+const debug = require('debug')('castVote');
 
 const router = express.Router();
 
