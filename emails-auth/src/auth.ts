@@ -11,7 +11,13 @@ if (!process.env.EMAILS_AS_JWT_AUDIENCE) {
 if (!process.env.EMAILS_AS_JWT_ISSUER) {
   throw new Error('EMAILS_AS_JWT_ISSUER must be set')
 }
-const privateKey = fs.readFileSync(path.join(process.cwd(), process.env.JWT_PRIV_KEY));
+const pathToPrivateKey =  path.join(process.cwd(), process.env.JWT_PRIV_KEY);
+const privateKey = fs.readFileSync(pathToPrivateKey);
+if (fs.existsSync(pathToPrivateKey)) {
+  console.log('JWT Private key exists');
+} else {
+  throw new Error(`JWT Private key does not exist on path ${pathToPrivateKey}`)
+}
 const audience = process.env.EMAILS_AS_JWT_AUDIENCE;
 const issuer = process.env.EMAILS_AS_JWT_ISSUER;
 
