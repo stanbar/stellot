@@ -96,9 +96,17 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
     if (e.file.status === 'done') {
       const newEmails = await getEmailsList(e.file)
       const [passed, failed] = _.partition(newEmails, isEmail)
+      console.log({ passed, failed, newEmails })
       const uniqueEmails = _.uniq(passed)
-      const failedMessage = `${passed.length !== uniqueEmails.length ? `${passed.length - uniqueEmails.length} were duplicated and ` : ''}${failed.length > 0 ? `following emails were malformed: ${failed.join(' ')}` : ''}`
-      message.warn(failedMessage)
+      if (failed && failed.length > 0) {
+        const failedMessage = `${passed.length !== uniqueEmails.length ? `${passed.length - uniqueEmails.length} were duplicated and ` : ''}${failed.length > 0 ? `following emails were malformed: ${failed.join(' ')}` : ''}`
+        message.warn(failedMessage)
+      }
+      if (passed.length > 0) {
+        const successMessage = `${passed.length !== uniqueEmails.length ? `${passed.length - uniqueEmails.length} were duplicated and ` : ''}${passed.length} emails were successfully added`
+        message.success(successMessage)
+      }
+
       setEmails(uniqueEmails)
       return uniqueEmails
     }
@@ -114,7 +122,7 @@ const CreateVoting: React.FC<CreateVotingProps> = ({ dispatch, loading }) => {
       reader.readAsText(file.originFileObj);
       reader.onload = () => {
         if (typeof reader.result === 'string') {
-          resolve(reader.result.split(/[\n,]/).map(email => email.trim()));
+          resolve(reader.result.split(/[\n,]/).map(email => email.trim()).filter(isNotEmpty));
         } else {
           reject(new Error('Can not process ArrayBuffer'));
         }

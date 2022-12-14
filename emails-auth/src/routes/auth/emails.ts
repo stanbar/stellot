@@ -11,10 +11,22 @@ router.post('/requestToken', async (req, res, next) => {
     if (!email) {
       throw new createHttpError.BadRequest('You need to specify email');
     }
-    const token = auth.createJwt(email);
-    await bot.sendEmail(email, token);
-    res.sendStatus(200).end();
+    try {
+      const token = auth.createJwt(email);
+
+    try {
+      await bot.sendEmail(email, token);
+      } catch (e) {
+        console.error("Failed sending email")
+        throw e;
+      }
+      res.sendStatus(200).end();
+    } catch (e) {
+        console.error("Failed creating JWT token")
+        throw e;
+    }
   } catch (e) {
+    console.error(e)
     next(e)
   }
 });
