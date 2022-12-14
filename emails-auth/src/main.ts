@@ -19,8 +19,6 @@ const httpPort = Number(PORT);
  */
 
 
-const debug = require('debug')('stellar-voting:server');
-
 /**
  * Get port from environment and store in Express.
  */
@@ -74,6 +72,6 @@ function onListening(server: http.Server): () => void {
   return () => {
     const addr = server.address();
     if (!addr) throw Error('address is null');
-    debug(`Listening on ${JSON.stringify(addr, null)}`);
+    console.log(`Listening on ${JSON.stringify(addr, null)}`);
   };
 }

@@ -5,8 +5,6 @@ import { deleteVotingBySlug, getPublicVotings, getVotingBySlug } from '../../dat
 
 const router = express.Router();
 
-const debug = require('debug')('voting');
-
 router.get('/', async (_, res, next) => {
   try {
     const result = await getPublicVotings();
@@ -32,9 +30,9 @@ router.post('/', async (req, res, next) => {
     return res.sendStatus(400).end();
   }
   try {
-    debug("createVotingRequest: ", createVotingRequest)
+    console.log("createVotingRequest: ", createVotingRequest)
     const createVotingResponse = await createVoting(createVotingRequest);
-    debug('created Voting');
+    console.log('created Voting');
     return res.json(createVotingResponse).end();
   } catch (e) {
     return next(e);

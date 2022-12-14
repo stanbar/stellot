@@ -7,8 +7,6 @@ import { getDecryptionKey } from './keychain';
 import moment from 'moment';
 import createHttpError from 'http-errors';
 
-const debug = require('debug')('dao');
-
 const issues: { [votingId: string]: { [userId: string]: boolean } } = {};
 
 export function setIssued(voting: Voting, userId: string) {
@@ -61,7 +59,7 @@ export function votingExists(votingId: string): Promise<boolean> {
 export async function saveVoting(
   voting: Omit<Omit<Omit<Omit<Voting, 'id'>, 'slug'>, 'authorizationOptions'>, 'ipfsCid'>,
 ): Promise<Omit<Omit<Voting, 'authorizationOptions'>, 'ipfsCid'>> {
-  debug('saveVoting');
+  console.log('saveVoting');
   const votingDoc = new VotingModel({ ...voting });
   const saved = await votingDoc.save();
   return saved.toJSON();
@@ -71,7 +69,7 @@ export async function updateIpfsCid(
   voting: Omit<Voting, 'ipfsCid'>,
   ipfsCid: string,
 ): Promise<Voting> {
-  debug('updatingIpfsCid');
+  console.log('updatingIpfsCid');
   const votingDoc = await VotingModel.findOne({ _id: voting.id });
   if (!votingDoc) {
     throw new Error(`Could not find requesting voting wih id ${voting.id}`);

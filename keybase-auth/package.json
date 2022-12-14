@@ -34,7 +34,6 @@
   "dependencies": {
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
-    "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
     "express": "~4.17.3",
@@ -63,7 +62,7 @@
     "@types/jest": "^24.0.16",
     "@types/jsonwebtoken": "^8.3.9",
     "@types/morgan": "^1.7.37",
-    "@types/node": "^12.12.37",
+    "@types/node": "^12.20.55",
     "@types/slug": "^0.9.1",
     "@types/supertest": "^2.0.9",
     "@umijs/fabric": "^1.1.10",

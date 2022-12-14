@@ -35,7 +35,6 @@
     "@sendgrid/mail": "^7.7.0",
     "cookie-parser": "~1.4.6",
     "cors": "^2.8.5",
-    "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
     "express": "~4.17.3",

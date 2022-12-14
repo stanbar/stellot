@@ -19,10 +19,6 @@ import {
 } from './stellar';
 import { saveChannels } from './database/channels';
 
-const debug = require('debug')('castVote');
-
-// const debug = require('debug')('creatingVoting');
-
 if (!process.env.MASTER_SECRET_KEY) {
   throw new Error('MASTER_SECRET_KEY must be provided in env variable');
 }
@@ -45,13 +41,13 @@ export async function createVoting({
 
   const issuerKeypair = Keypair.random();
   await createIssuerAccount(masterKeypair, issuerKeypair, issuerStartingBalance);
-  debug('created issuer account');
+  console.log('created issuer account');
 
   const channels = await createChannelAccounts(votesCap, issuerKeypair);
-  debug('created channel accounts');
+  console.log('created channel accounts');
 
   const voteToken = createVoteToken(issuerKeypair.publicKey(), title);
-  debug('created vote token');
+  console.log('created vote token');
 
   const [distributionKeypair, ballotBoxKeypair] = await createDistributionAndBallotAccount(
     issuerKeypair,
@@ -59,7 +55,7 @@ export async function createVoting({
     voteToken,
     tdsStartingBalance,
   );
-  debug('created distribution and ballot account');
+  console.log('created distribution and ballot account');
 
   let encryptionKey;
   let decryptionKey;

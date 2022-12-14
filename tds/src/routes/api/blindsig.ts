@@ -18,7 +18,6 @@ import { getAuthorizationOptions } from '../../database/authorizationOptions';
 import { getVotingById } from '../../database/voting';
 import { getKeychain } from '../../database/keychain';
 
-const debug = require('debug')('blindsig');
 
 const router = express.Router();
 
@@ -34,7 +33,7 @@ function getTokenFromHeader(req: Request) {
 
 async function handleExternalAuth(req: Request, voting: Voting): Promise<string> {
   const authToken = getTokenFromHeader(req);
-  debug(`authToken: ${authToken}`);
+  console.log(`authToken: ${authToken}`);
   if (!authToken) {
     throw new HttpError('missing Authorization header with Bearer JWT', 401);
   }
@@ -56,7 +55,7 @@ async function handleExternalAuth(req: Request, voting: Voting): Promise<string>
 
 router.post('/init', async (req, res, next) => {
   const { votingId } = req.body;
-  debug(`votingId: ${votingId}`);
+  console.log(`votingId: ${votingId}`);
   try {
     const voting = await getVotingById(votingId);
     if (!voting) {
@@ -84,7 +83,7 @@ router.post('/init', async (req, res, next) => {
       return res.status(500).send(`Could not find keychain for votingId ${votingId}`);
     }
     const session = createSession(voting, userId, keychain);
-    debug('created session');
+    console.log('created session');
     const sessionToken = createSessionToken(voting.id, userId);
     res.setHeader('SESSION-TOKEN', sessionToken);
     return res.status(200).send(session);
@@ -98,7 +97,7 @@ router.post('/getChallenges', (req, res) => {
     blindedTransactionBatches,
   }: { tokenId: string; blindedTransactionBatches: ChallengeRequest } = req.body;
   const sessionToken = req.header('SESSION-TOKEN');
-  debug(`sessionToken: ${sessionToken}`);
+  console.log(`sessionToken: ${sessionToken}`);
   if (!sessionToken) {
     res
       .status(401)
@@ -120,7 +119,7 @@ router.post('/getChallenges', (req, res) => {
 router.post('/proofChallenges', async (req, res, next) => {
   const { proofs }: { tokenId: string; proofs: Proof[] } = req.body;
   const sessionToken = req.header('SESSION-TOKEN');
-  debug(`sessionToken: ${sessionToken}`);
+  console.log(`sessionToken: ${sessionToken}`);
   if (!sessionToken) {
     return res
       .status(401)

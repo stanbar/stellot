@@ -17,7 +17,6 @@ import {
   requestAccountCreation,
 } from '../../newSessions';
 
-const debug = require('debug')('castVote');
 
 const router = express.Router();
 
@@ -27,7 +26,7 @@ const router = express.Router();
 // return:body initSession: {nonce: Buffer, publicKey: Buffer}
 router.post('/init', async (req, res, next) => {
   const { votingId } = req.body;
-  debug(`votingId: ${votingId}`);
+  console.log(`votingId: ${votingId}`);
   try {
     const voting = await getVotingById(votingId);
     if (!voting) {
@@ -57,7 +56,7 @@ router.post('/init', async (req, res, next) => {
       );
     }
     const session = createSession(voting, userId);
-    debug('created session');
+    console.log('created session');
     const sessionToken = createSessionToken(voting.id, userId);
     res.setHeader('SESSION-TOKEN', sessionToken);
     return res.status(200).send(session);
@@ -72,7 +71,7 @@ router.post('/init', async (req, res, next) => {
 router.post('/getSignedToken', (req, res, next) => {
   const { challenge }: { challenge: string } = req.body;
   const sessionToken = req.header('SESSION-TOKEN');
-  debug(`sessionToken: ${sessionToken}`);
+  console.log(`sessionToken: ${sessionToken}`);
   try {
     if (!sessionToken) throw new createHttpError.BadRequest('SESSION-TOKEN header not found');
 
@@ -134,7 +133,7 @@ router.post('/requestAccountCreation', async (req, res, next) => {
 
 async function handleExternalAuth(req: Request, voting: Voting): Promise<string> {
   const authToken = getAuthTokenFromHeader(req);
-  debug(`authToken: ${authToken}`);
+  console.log(`authToken: ${authToken}`);
   if (!authToken) {
     throw new HttpError('missing Authorization header with Bearer JWT', 401);
   }

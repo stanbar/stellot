@@ -17,7 +17,6 @@ if (!PORT) {
 
 const httpPort = Number(PORT);
 
-const debug = require('debug')('stellar-voting:server');
 
 /**
  * Get port from environment and store in Express.
@@ -30,12 +29,12 @@ if (!MONGODB_URI) {
 }
 if (isProduction) {
   mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => debug('connected to db'))
+    .then(() => console.log('connected to db'))
     .catch(err => console.error(err));
 } else {
   mongoose.set('debug', true);
   mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => debug('connected to db'))
+    .then(() => console.log('connected to db'))
     .catch(err => console.error(err));
 }
 
@@ -90,6 +89,6 @@ function onListening(server: http.Server): () => void {
   return () => {
     const addr = server.address();
     if (!addr) throw Error('address is null');
-    debug(`Listening on ${JSON.stringify(addr, null)}`);
+    console.log(`Listening on ${JSON.stringify(addr, null)}`);
   };
 }
