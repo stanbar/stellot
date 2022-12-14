@@ -1,5 +1,6 @@
 {
   "private": true,
+  
   "scripts": {
     "start": "REACT_APP_ENV=development umi dev",
     "start:prod": "REACT_APP_ENV=production umi dev",

@@ -10,13 +10,16 @@ export default defineConfig({
     HORIZON_SERVER_URL: HORIZON_SERVER_URL || false,
     NETWORK_PASSPHRASE: NETWORK_PASSPHRASE || false,
   },
+  base: '/',
+  publicPath: '/',
   antd: {},
   dva: {},
   dynamicImport: { loading: '@/components/LoadingPage/index', },
   title: 'Stellot - i-voting platform powered by Stellar blockchain',
   locale: {
     default: 'en-US',
-    // antd: true,
+    antd: true,
+    baseNavigator: true,
   },
   theme: {
     // "primary-color": "#8EE3C3",
