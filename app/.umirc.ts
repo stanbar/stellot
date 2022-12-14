@@ -10,6 +10,10 @@ export default defineConfig({
     HORIZON_SERVER_URL: HORIZON_SERVER_URL || false,
     NETWORK_PASSPHRASE: NETWORK_PASSPHRASE || false,
   },
+  hash: true,
+  history: {
+    type: 'hash',
+  },
   base: '/',
   publicPath: '/',
   antd: {},
