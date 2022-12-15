@@ -11,9 +11,9 @@ export async function sendEmail(to: string, token: string) {
     to,
     from: 'Stellot Authenticator <noreply@stellot.com>',
     subject: 'Stellot voting authentication',
-    text: `Welcome to Stellot, to continue, please copy and paste the token below back to the app:\n
+    text: `Welcome to Stellot, to continue, please enter the token below back to the app:\n
     ${token}`,
-    html: `Welcome to Stellot, to continue, please copy and paste the token below back to the app:\n
+    html: `Welcome to Stellot, to continue, please enter the token below back to the app:\n
     <pre>${token}</pre>`,
   };
   try {
