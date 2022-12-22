@@ -41,7 +41,7 @@
     "http": "0.0.0",
     "http-errors": "^1.7.3",
     "http-status-codes": "latest",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "keybase-bot": "^3.6.1",
     "minimist": ">=1.2.6",
     "morgan": "~1.9.1",
