@@ -86,3 +86,24 @@ Update `.env` files for each submodule accordingly, using `.env.example` as a te
 Expose services using reverse proxy. We recommend using Caddy or Traefik.
 
 The configuration files for Caddy are available in [https://github.com/stanbar/caddy](https://github.com/stanbar/caddy).
+
+# Usage
+
+Start services with
+```
+docker compose up -d
+```
+
+# Administration
+
+You can remove votings from listing with
+```
+curl -X DELETE -H "authorization:<MASTER_SECRET_KEY>" https://stellot/api/voting/<voting slug>
+```
+
+Where:
+
+- `<MASTER_SECRET_KEY>` is the master account key, same as in `tds/.env`.
+- `<voting slug> is the voting's id.
+
+
