@@ -4,7 +4,7 @@ services:
     container_name: "stellot-ipfs-node"
     image: ipfs/go-ipfs
     ports: # https://github.com/ipfs/go-ipfs/blob/master/Dockerfile#L74 
-      - "4001:4001"
+      - "4001"
       - "5001"
       - "8080"
       - "8081"
@@ -20,6 +20,18 @@ services:
       - public
       - default
 
+  stellar:
+    container_name: "stellot-stellar"
+    image: stellar/quickstart
+    restart: 'unless-stopped'
+    command: --standalone
+    ports:
+      - "8000"
+    networks:
+      - public
+      - default
+
+
   tds:
     container_name: "stellot-tds"
     build:
@@ -28,14 +40,17 @@ services:
     env_file: ./tds/.env
     restart: 'unless-stopped'
     environment:
+      - STELLAR=http://stellar:8000
       - KEYBASE_AUTH_SERVER_URL=http://keybase-auth
       - EMAILS_AUTH_SERVER_URL=http://emails-auth
       - IPFS_NODE_URL=http://ipfs-node:5001
     links:
       - mongo
+      - stellar
       - emails-auth
       - ipfs-node
     depends_on:
+      - stellar
       - mongo
       - emails-auth
       - ipfs-node
