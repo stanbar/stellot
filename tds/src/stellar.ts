@@ -6,10 +6,15 @@ const { HORIZON_SERVER_URL, NODE_ENV, NETWORK_PASSPHRASE } = process.env;
 
 if (!HORIZON_SERVER_URL) {
   throw new Error("HORIZON_SERVER_URL must be defined")
+} else {
+  console.log(`using HORIZON_SERVER_URL=${HORIZON_SERVER_URL}`)
 }
 if (!NETWORK_PASSPHRASE) {
   throw new Error("NETWORK_PASSPHRASE must be defined")
+} else {
+  console.log(`using NETWORK_PASSPHRASE=${NETWORK_PASSPHRASE}`)
 }
+
 
 const server = new Server(HORIZON_SERVER_URL);
 
@@ -17,7 +22,7 @@ async function defaultOptions(): Promise<TransactionBuilder.TransactionBuilderOp
   return {
     networkPassphrase: NETWORK_PASSPHRASE,
     fee: `${(await server.fetchBaseFee()) * 3}`,
-    timebounds: await server.fetchTimebounds(30),
+    timebounds: { minTime: 0, maxTime: 0 }
   };
 }
 export async function createIssuerAccount(
@@ -124,10 +129,12 @@ export async function createChannelAccounts(
   channelCount: number,
   issuerKeypair: Keypair,
 ): Promise<Keypair[]> {
+  console.log(`creating ${channelCount} channel accounts using issuer ${issuerKeypair.publicKey()}`)
   const channels = Array.from(Array(channelCount).keys()).map(() => Keypair.random());
 
   for (const chunkedChannels of chunk(channels, 50)) {
     const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
+    console.log("loaded issuer account", issuerAccount)
 
     // Stellar allows up to 100 ops per transaction
     const builder = new TransactionBuilder(issuerAccount, await defaultOptions());
@@ -144,8 +151,8 @@ export async function createChannelAccounts(
     const tx = builder.build();
 
     tx.sign(issuerKeypair);
-    await server.submitTransaction(tx);
-    console.log('submited channel tx');
+    const response = await server.submitTransaction(tx);
+    console.log('submited channel tx', response);
   }
   return channels;
 }
@@ -159,6 +166,7 @@ export async function createBallotIssuingTransaction(
 ) {
   const channelKeypair = Keypair.fromSecret(channelSecret);
   const channelAccount = await server.loadAccount(channelKeypair.publicKey());
+  console.log("loaded channel account", channelKeypair.publicKey());
 
   // For better scalability it should go through channel account
   const tx = new TransactionBuilder(channelAccount, await defaultOptions())
