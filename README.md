@@ -104,6 +104,11 @@ curl -X DELETE -H "authorization:<MASTER_SECRET_KEY>" https://stellot/api/voting
 Where:
 
 - `<MASTER_SECRET_KEY>` is the master account key, same as in `tds/.env`.
-- `<voting slug> is the voting's id.
+- `<voting slug>` is the voting's id.
+
+
+# Stellar Horizon
+
+This project runs [standalone Stellar Core and Horizon], available at [https://stellar.stellot.com](https://stellar.stellot.com). You can browse this instance using following [Stallar laboratory link](https://laboratory.stellar.org/#explorer?network=custom&horizonURL=https%3A%2F%2Fstellar.stellot.com&networkPassphrase=Standalone%20Network%20%3B%20February%202017)
 
 

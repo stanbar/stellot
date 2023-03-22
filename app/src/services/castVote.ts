@@ -101,9 +101,9 @@ export async function requestAccountCreation(
   });
 
   if (response.ok) {
-    console.log('Successfully created account');
+    console.log('Received account creation transaction');
   } else {
-    console.error('Failed to create account');
+    console.error('Failed to receive account creation transaction');
     throw new Error(await response.text());
   }
   const { transactionXdr } = await response.json();

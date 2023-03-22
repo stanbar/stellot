@@ -39,16 +39,22 @@ export async function* performCastVoteTransaction(
   });
 
   yield VoteStatus.PUBLISH_ACCOUNT_CREATION_TRANSACTION;
+  console.log("Parsing account creation transaction")
   const tx = parseTransactiion(accountCreationTx);
   tx.sign(keypair);
-  await publishAccountCreationTx(tx);
+  console.log("Publishing account creation transaction", tx.toXDR())
+  const accountCreationResponse = await publishAccountCreationTx(tx);
+  console.log("Published account creation transaction", accountCreationResponse)
 
   yield VoteStatus.WAITING_RANDOM_PEROID;
-  await waitRandomTime(1000, 10000);
+  await waitRandomTime(5000, 10000);
 
   yield VoteStatus.CASTING_VOTE;
+  console.log("Casting vote")
   const voterAccount = await loadAccount(keypair.publicKey());
+  console.log("Loaded account")
   const [memo, res] = await castVoteTransaction(keypair, voting, voterAccount, optionCode);
+  console.log("Casted vote")
 
   yield VoteStatus.SAVING_CASTED_TRANSACTION;
   storage.setMyTransaction(

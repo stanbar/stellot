@@ -57,7 +57,16 @@ export function parseTransactiion(transactionXdr: string) {
 }
 
 export function publishAccountCreationTx(tx: Transaction) {
-  return server.submitTransaction(tx);
+  // we send this transaction manually to horizon as standard server.submitTransaction()
+  // fetchers all soure accounts prior to sending the tx
+  // in our case the source account is created and then used as source account
+  // so we need to send the tx manually
+  return fetch(HORIZON_SERVER_URL+'/transactions?'+ new URLSearchParams({tx: tx.toXDR()}), {
+    method: 'POST',
+    headers: {
+      "Accept": "application/json"
+    }
+  })
 }
 
 export async function loadAccount(publicKey: string) {
