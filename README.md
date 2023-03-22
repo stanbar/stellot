@@ -94,6 +94,21 @@ Start services with
 docker compose up -d
 ```
 
+It starts the following services:
+
+- `stellar-core` - the Stellar blockchain node and Horizon API
+- `tds` - the main service, responsible for creating votings, storing them on IPFS and publishing them on Stellar blockchain
+- `mongo` - the database for storing votings metadata
+- `ipfs` - the IPFS node for storing votings metadata
+- `keybase auth chatbot` - listens for auth requests and issue JWT tokens via Keybase chat
+- `email auth` - listens for auth requests and issue JWT tokens via email
+
+see [docker-compose.yml](docker-compose.yml) for more details.
+
+# Stellar Horizon
+
+This project runs [standalone Stellar Core and Horizon], available at [https://stellar.stellot.com](https://stellar.stellot.com). You can browse this instance using following [Stallar laboratory link](https://laboratory.stellar.org/#explorer?network=custom&horizonURL=https%3A%2F%2Fstellar.stellot.com&networkPassphrase=Standalone%20Network%20%3B%20February%202017)
+
 # Administration
 
 You can remove votings from listing with
@@ -105,10 +120,3 @@ Where:
 
 - `<MASTER_SECRET_KEY>` is the master account key, same as in `tds/.env`.
 - `<voting slug>` is the voting's id.
-
-
-# Stellar Horizon
-
-This project runs [standalone Stellar Core and Horizon], available at [https://stellar.stellot.com](https://stellar.stellot.com). You can browse this instance using following [Stallar laboratory link](https://laboratory.stellar.org/#explorer?network=custom&horizonURL=https%3A%2F%2Fstellar.stellot.com&networkPassphrase=Standalone%20Network%20%3B%20February%202017)
-
-
