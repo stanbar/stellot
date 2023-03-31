@@ -50,6 +50,9 @@ enum ChartType {
   Pie, Bar
 }
 
+const accountBrowserUrl = (accountId: string) => `https://stellar.stellot.com/accounts/${accountId}`;
+const transactionBrowserUrl = (txId: string) => `https://stellar.stellot.com/transactions/${txId}`;
+
 const renderActiveShape = (props: any) => {
   const RADIAN = Math.PI / 180;
   const {
@@ -197,14 +200,14 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
         </Button>
       }
       <a rel="noopener noreferrer" target="_blank"
-        href={`https://testnet.lumenscan.io/account/${voting.distributionAccountId}`}>
+        href={accountBrowserUrl(voting.distributionAccountId)}>
         <Button type="link" icon={<AuditOutlined />}>
           <span style={{ marginLeft: 2 }}>Distribution account</span>
         </Button>
       </a>
 
       <a rel="noopener noreferrer" target="_blank"
-        href={`https://testnet.lumenscan.io/account/${voting.ballotBoxAccountId}`}>
+        href={accountBrowserUrl(voting.ballotBoxAccountId)}>
         <Button type="link" icon={<BallotBoxIcon />}>
           <span style={{ marginLeft: 2 }}>Ballot-box account</span>
         </Button>
@@ -220,8 +223,7 @@ const VoteResults: React.FC<VotePreviewProps> = props => {
             extra={[<AntTooltip
               title="This information is stored in your browser only, if you clear it, you will be unable to track your vote. Store the vote identifier in safe place."><QuestionCircleOutlined /></AntTooltip>]}
             actions={[
-              <a rel="noopener noreferrer" target="_blank" href={`https://testnet.lumenscan.io/txns/${myTransaction.myTxHash}`}>
-                Show in blockchain</a>
+              <a rel="noopener noreferrer" target="_blank" href={transactionBrowserUrl(myTransaction.myTxHash)}>Show in blockchain</a>
             ]} style={{ maxWidth: 350 }}>
 
             <p className={styles.option}>
