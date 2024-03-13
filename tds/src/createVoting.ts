@@ -10,7 +10,6 @@ import * as database from './database/voting';
 import { saveKeychain } from './database/keychain';
 import * as keybase from './authorizationServers/keybase';
 import { saveAuthorizationOptions } from './database/authorizationOptions';
-import * as ipfs from './ipfs';
 import {
   createIssuerAccount,
   createVoteToken,
@@ -124,15 +123,7 @@ export async function createVoting({
     decryptionKey,
   );
   console.log('saved keychain');
-
-  try {
-    const cid = await ipfs.putVoting(savedVoting);
-    console.log(`uploaded voting to ipfs with cid ${cid}`);
-    return database.updateIpfsCid(savedVoting, cid);
-  } catch (error) {
-    // TODO reverse changes if someone throws error
-    return savedVoting;
-  }
+  return savedVoting;
 }
 
 function calculateStartingBalances(votesCap: number) {
