@@ -68,3 +68,5 @@ typings/
 .idea/
 npm-debug.log
 packages/*/lib
+
+.DS_Store
