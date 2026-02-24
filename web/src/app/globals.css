@@ -1,0 +1,35 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
+a { color: #7eb8f7; }
+h1, h2, h3 { margin-bottom: 0.75rem; }
+p { margin-bottom: 0.5rem; }
+.container { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
+.card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+.btn { display: inline-block; padding: 0.5rem 1.25rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; }
+.btn-primary { background: #7eb8f7; color: #0f0f0f; font-weight: 600; }
+.btn-secondary { background: #333; color: #e0e0e0; }
+.btn-danger { background: #c0392b; color: #fff; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+input, textarea, select { background: #222; border: 1px solid #444; color: #e0e0e0; border-radius: 4px; padding: 0.5rem; width: 100%; font-size: 0.9rem; }
+label { display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: #aaa; }
+.field { margin-bottom: 1rem; }
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.badge-active { background: #1a4a1a; color: #4caf50; }
+.badge-closed { background: #4a1a1a; color: #e57373; }
+.badge-tallied { background: #1a3a4a; color: #7eb8f7; }
+.mono { font-family: monospace; font-size: 0.8rem; word-break: break-all; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #333; }
+th { color: #aaa; font-size: 0.8rem; font-weight: 600; }
+.error { color: #e57373; font-size: 0.85rem; }
+.success { color: #4caf50; font-size: 0.85rem; }
+nav { padding: 1rem 2rem; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 1rem; }
+nav a { text-decoration: none; color: #aaa; }
+nav a:hover { color: #e0e0e0; }
+nav .brand { font-weight: 700; color: #7eb8f7; }
+.bar-chart { display: flex; flex-direction: column; gap: 0.5rem; }
+.bar-row { display: flex; align-items: center; gap: 0.75rem; }
+.bar-label { min-width: 80px; font-size: 0.85rem; }
+.bar-track { flex: 1; background: #333; border-radius: 4px; height: 20px; }
+.bar-fill { background: #7eb8f7; border-radius: 4px; height: 100%; transition: width 0.4s; }
+.bar-count { min-width: 40px; text-align: right; font-size: 0.85rem; }

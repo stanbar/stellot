@@ -1,0 +1,20 @@
+{
+  "name": "stellot-dagger-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dkg": "tsx scripts/dkg.ts",
+    "distributor": "tsx scripts/distributor.ts",
+    "post-share": "tsx scripts/post_share.ts"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.6.0",
+    "@noble/hashes": "^1.5.0",
+    "@stellar/stellar-sdk": "^13.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

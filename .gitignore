@@ -1,0 +1,27 @@
+# Rust / Cargo
+target/
+
+# Node
+node_modules/
+web/node_modules/
+web/.next/
+web/out/
+*.log
+npm-debug.log*
+
+# Generated key material (never commit secrets)
+keys/
+
+# Env files
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
