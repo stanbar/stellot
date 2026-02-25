@@ -14,6 +14,7 @@
  */
 
 import { secp256k1 } from "@noble/curves/secp256k1";
+import { ed25519 } from "@noble/curves/ed25519";
 import { SECP256K1_ORDER as Q } from "./crypto";
 
 export interface KHShare {
@@ -23,6 +24,10 @@ export interface KHShare {
   sk: bigint;
   /** 33-byte compressed A_j0 = a_j0 * G (constant-term commitment) */
   commitment: Uint8Array;
+  /** Ed25519 private key for signing post_share submissions */
+  edSk: Uint8Array;
+  /** Ed25519 public key (32 bytes) — stored in kh_roster on-chain */
+  edPk: Uint8Array;
 }
 
 export interface DKGOutput {
@@ -107,10 +112,14 @@ export function runDKG(m: number, t: number): DKGOutput {
     for (let j = 0; j < m; j++) {
       sk_i = (sk_i + polyEval(polynomials[j], BigInt(i))) % Q;
     }
+    const edSk = ed25519.utils.randomPrivateKey();
+    const edPk = ed25519.getPublicKey(edSk);
     khShares.push({
       index: i,
       sk: sk_i,
       commitment: allCommitments[i - 1][0], // A_{i-1,0}
+      edSk,
+      edPk,
     });
   }
 

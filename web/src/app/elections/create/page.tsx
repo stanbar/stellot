@@ -6,9 +6,14 @@ import Link from "next/link";
 import { runDKG } from "@/lib/dkg";
 import { buildTree } from "@/lib/merkle";
 import { hexToBytes, bytesToHex } from "@/lib/crypto";
-import { deployElection, setKhCommitment } from "@/lib/contract";
+import { deployElection, setKhCommitment, fundAccountIfNeeded } from "@/lib/contract";
 import { getSessionKeypair, saveOrganizerSession } from "@/lib/wallet";
 import { ed25519 } from "@noble/curves/ed25519";
+
+interface GeneratedKeypair {
+  pk: string;
+  sk: string;
+}
 
 export default function CreateElectionPage() {
   const router = useRouter();
@@ -25,6 +30,19 @@ export default function CreateElectionPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [generatedKeypairs, setGeneratedKeypairs] = useState<GeneratedKeypair[]>([]);
+
+  function generateTestKeypair() {
+    const sk = ed25519.utils.randomPrivateKey();
+    const pk = ed25519.getPublicKey(sk);
+    const skHex = bytesToHex(sk);
+    const pkHex = bytesToHex(pk);
+    setGeneratedKeypairs((prev) => [...prev, { pk: pkHex, sk: skHex }]);
+    setEligibleVoters((prev) => {
+      const lines = prev.split("\n").filter((l) => l.trim() && !l.startsWith("#"));
+      return `# Paste Ed25519 pubkeys (hex, one per line)\n${[...lines, pkHex].join("\n")}\n`;
+    });
+  }
 
   function addOption() {
     setOptions([...options, `Option ${String.fromCharCode(65 + options.length)}`]);
@@ -69,9 +87,11 @@ export default function CreateElectionPage() {
       const distSk = ed25519.utils.randomPrivateKey();
       const distPk = ed25519.getPublicKey(distSk);
 
-      // 4. Deploy
-      setStatus("Deploying election contract…");
+      // 4. Fund + Deploy
       const kp = getSessionKeypair();
+      setStatus("Funding account via Friendbot…");
+      await fundAccountIfNeeded(kp.publicKey());
+      setStatus("Deploying election contract…");
       const startTs = BigInt(Math.floor(new Date(startTime).getTime() / 1000));
       const endTs = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
@@ -84,7 +104,7 @@ export default function CreateElectionPage() {
         eligibilityRoot: root,
         distRoster: [distPk],
         distThreshold: 1,
-        khRoster: dkgOut.shares.map((s) => s.commitment.slice(1)), // use commitment as proxy pk
+        khRoster: dkgOut.shares.map((s) => s.edPk),
         khThreshold,
       });
 
@@ -101,6 +121,8 @@ export default function CreateElectionPage() {
           index: s.index,
           sk: s.sk.toString(16).padStart(64, "0"),
           commitment: bytesToHex(s.commitment),
+          edSk: bytesToHex(s.edSk),
+          edPk: bytesToHex(s.edPk),
         })),
         merkleLeaves: voterHexes,
         combinedPubkey: bytesToHex(dkgOut.combinedPubkey),
@@ -168,11 +190,37 @@ export default function CreateElectionPage() {
 
           <div className="field">
             <label>Eligible Voters (Ed25519 pubkeys, 64 hex chars, one per line)</label>
-            <textarea
-              rows={5}
-              value={eligibleVoters}
-              onChange={(e) => setEligibleVoters(e.target.value)}
-            />
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+              <textarea
+                rows={5}
+                style={{ flex: 1 }}
+                value={eligibleVoters}
+                onChange={(e) => setEligibleVoters(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={generateTestKeypair}
+                title="Generate a test Ed25519 keypair and add its pubkey to the list"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                + Test Voter
+              </button>
+            </div>
+            {generatedKeypairs.length > 0 && (
+              <div style={{ marginTop: "0.5rem", padding: "0.65rem 0.85rem", background: "#1a1a1a", borderRadius: "6px", border: "1px solid #333" }}>
+                <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.4rem" }}>
+                  Generated keypairs — save the secret keys before leaving this page:
+                </p>
+                {generatedKeypairs.map((kp, i) => (
+                  <div key={i} style={{ marginBottom: i < generatedKeypairs.length - 1 ? "0.65rem" : 0 }}>
+                    <p style={{ fontSize: "0.72rem", color: "#888", marginBottom: "0.15rem" }}>Voter {i + 1}</p>
+                    <p style={{ fontSize: "0.72rem", color: "#6af" }}>pk: <span className="mono">{kp.pk}</span></p>
+                    <p style={{ fontSize: "0.72rem", color: "#fa6" }}>sk: <span className="mono">{kp.sk}</span></p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>

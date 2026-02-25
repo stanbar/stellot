@@ -56,6 +56,45 @@ function getContract() {
   return new Contract(CONTRACT_ID);
 }
 
+// ── Friendbot helper ───────────────────────────────────────────────────────────
+
+function getFriendbotUrl(): string {
+  if (RPC_URL.includes("localhost") || RPC_URL.includes("127.0.0.1")) {
+    // Local sandbox: replace /soroban/rpc suffix with /friendbot
+    return RPC_URL.replace(/\/soroban\/rpc\/?$/, "/friendbot");
+  }
+  return "https://friendbot.stellar.org";
+}
+
+/**
+ * Fund `publicKey` via Friendbot if the account doesn't exist yet.
+ * Safe to call repeatedly — a no-op if already funded.
+ */
+export async function fundAccountIfNeeded(publicKey: string): Promise<void> {
+  const rpc = getRpc();
+  try {
+    await rpc.getAccount(publicKey);
+    return; // already exists
+  } catch {
+    // fall through to fund
+  }
+  const url = `${getFriendbotUrl()}?addr=${publicKey}`;
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => resp.statusText);
+    throw new Error(`Friendbot funding failed: ${text}`);
+  }
+  // Wait for the account to appear on-chain (up to 10 s)
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 500));
+    try {
+      await rpc.getAccount(publicKey);
+      return;
+    } catch { /* not yet */ }
+  }
+  throw new Error("Account still not found after Friendbot funding");
+}
+
 // ── Submit helper ──────────────────────────────────────────────────────────────
 
 async function submitTx(
@@ -64,6 +103,7 @@ async function submitTx(
   args: xdr.ScVal[],
 ): Promise<xdr.ScVal> {
   const rpc = getRpc();
+  await fundAccountIfNeeded(kp.publicKey());
   const account = await rpc.getAccount(kp.publicKey());
   const contract = getContract();
 
@@ -168,9 +208,9 @@ export async function deployElection(
     nativeToScVal(params.endTime, { type: "u64" }),
     xdr.ScVal.scvBytes(Buffer.from(params.encPubkey)),
     xdr.ScVal.scvBytes(Buffer.from(params.eligibilityRoot)),
-    nativeToScVal(params.distRoster.map((pk) => Buffer.from(pk)), { type: "vec" }),
+    xdr.ScVal.scvVec(params.distRoster.map((pk) => xdr.ScVal.scvBytes(Buffer.from(pk)))),
     nativeToScVal(params.distThreshold, { type: "u32" }),
-    nativeToScVal(params.khRoster.map((pk) => Buffer.from(pk)), { type: "vec" }),
+    xdr.ScVal.scvVec(params.khRoster.map((pk) => xdr.ScVal.scvBytes(Buffer.from(pk)))),
     nativeToScVal(params.khThreshold, { type: "u32" }),
   ];
 
