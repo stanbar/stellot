@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { runDKG } from "@/lib/dkg";
 import { buildTree } from "@/lib/merkle";
 import { hexToBytes, bytesToHex } from "@/lib/crypto";
@@ -142,7 +143,7 @@ export default function CreateElectionPage() {
   return (
     <>
       <nav>
-        <span className="brand">Stellot†</span>
+        <Link href="/" className="logo-wrap"><Logo size="sm" color="currentColor" /></Link>
         <Link href="/">Elections</Link>
         <Link href="/elections/create">Create</Link>
       </nav>

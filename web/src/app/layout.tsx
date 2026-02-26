@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // Required for @cloudflare/next-on-pages: all server components must use the Edge runtime
 export const runtime = "edge";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 const mono = JetBrains_Mono({
   subsets: ["latin"],
@@ -29,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
+    <html lang="en" className={mono.variable}>
       <body>{children}</body>
     </html>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import {
   getElection,
   getBallotCount,
@@ -148,7 +149,7 @@ export default function ElectionPage() {
   return (
     <>
       <nav>
-        <span className="brand">Stellot†</span>
+        <Link href="/" className="logo-wrap"><Logo size="sm" color="currentColor" /></Link>
         <Link href="/">Elections</Link>
         <Link href="/elections/create">Create</Link>
       </nav>

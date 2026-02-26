@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { getNextElectionId, getElection, ElectionInfo } from "@/lib/contract";
 
 function statusBadge(info: ElectionInfo) {
@@ -13,12 +14,12 @@ function statusBadge(info: ElectionInfo) {
 }
 
 const TAGS = [
-  { label: "Feldman VSS DKG", accent: true },
-  { label: "Threshold ElGamal", accent: true },
-  { label: "Shamir Secret Sharing", accent: true },
-  { label: "secp256k1", accent: false },
-  { label: "Ed25519 Nullifiers", accent: false },
-  { label: "Stellar Soroban", accent: false },
+  { label: "Feldman VSS DKG",        cls: "hero-tag-accent" },
+  { label: "Threshold ElGamal",      cls: "hero-tag-accent" },
+  { label: "Shamir Secret Sharing",  cls: "hero-tag-accent" },
+  { label: "secp256k1",              cls: "hero-tag-teal" },
+  { label: "Ed25519 Nullifiers",     cls: "hero-tag-teal" },
+  { label: "Stellar Soroban",        cls: "hero-tag-teal" },
 ];
 
 export default function HomePage() {
@@ -48,7 +49,9 @@ export default function HomePage() {
   return (
     <>
       <nav>
-        <span className="brand">Stellot†</span>
+        <Link href="/" className="logo-wrap">
+          <Logo size="sm" color="currentColor" />
+        </Link>
         <Link href="/">Elections</Link>
         <Link href="/elections/create">Create</Link>
       </nav>
@@ -56,21 +59,24 @@ export default function HomePage() {
       <div className="container">
         {/* Hero */}
         <div className="hero">
-          <h1 className="hero-title">Threshold E-Voting<br />on Stellar Soroban</h1>
+          <div className="hero-logo">
+            <Logo size="lg" color="white" />
+          </div>
+          <p className="hero-title">Threshold E-Voting on Stellar Soroban</p>
           <p className="hero-sub">
-            A cryptographically real PoC of the Stellot† protocol — no stubs,
-            no shortcuts. Every primitive implemented for real.
+            A cryptographically real PoC — no stubs, no shortcuts.
+            Every primitive implemented for real: from the DKG ceremony to on-chain tally.
           </p>
           <div className="hero-tags">
             {TAGS.map((t) => (
-              <span key={t.label} className={`hero-tag${t.accent ? " hero-tag-accent" : ""}`}>
+              <span key={t.label} className={`hero-tag ${t.cls}`}>
                 {t.label}
               </span>
             ))}
           </div>
           <Link href="/elections/create">
-            <button className="btn btn-primary" style={{ fontSize: "0.95rem", padding: "0.65rem 1.75rem" }}>
-              + Create Election
+            <button className="btn btn-primary" style={{ fontSize: "0.85rem", padding: "0.65rem 2rem" }}>
+              Create Election
             </button>
           </Link>
         </div>
@@ -117,7 +123,7 @@ export default function HomePage() {
                 {statusBadge(e)}
                 {e.tallied && (
                   <Link href={`/elections/${e.eid}/tally`}>
-                    <button className="btn btn-secondary" style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem" }}>
+                    <button className="btn btn-secondary" style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem", letterSpacing: "0.02em", textTransform: "none" }}>
                       Results
                     </button>
                   </Link>
