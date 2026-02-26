@@ -5,7 +5,9 @@ target/
 node_modules/
 web/node_modules/
 web/.next/
+web/.vercel/
 web/out/
+*.tsbuildinfo
 *.log
 npm-debug.log*
 
