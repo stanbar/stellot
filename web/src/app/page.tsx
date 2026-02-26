@@ -12,6 +12,15 @@ function statusBadge(info: ElectionInfo) {
   return <span className="badge badge-active">Active</span>;
 }
 
+const TAGS = [
+  { label: "Feldman VSS DKG", accent: true },
+  { label: "Threshold ElGamal", accent: true },
+  { label: "Shamir Secret Sharing", accent: true },
+  { label: "secp256k1", accent: false },
+  { label: "Ed25519 Nullifiers", accent: false },
+  { label: "Stellar Soroban", accent: false },
+];
+
 export default function HomePage() {
   const [elections, setElections] = useState<ElectionInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,56 +52,85 @@ export default function HomePage() {
         <Link href="/">Elections</Link>
         <Link href="/elections/create">Create</Link>
       </nav>
-      <div className="container">
-        <h1>Elections</h1>
-        <p style={{ color: "#888", marginBottom: "1.5rem" }}>
-          Threshold ElGamal e-voting on Stellar Soroban &mdash; <em>PoC</em>
-        </p>
 
-        {loading && <p>Loading elections from chain…</p>}
+      <div className="container">
+        {/* Hero */}
+        <div className="hero">
+          <h1 className="hero-title">Threshold E-Voting<br />on Stellar Soroban</h1>
+          <p className="hero-sub">
+            A cryptographically real PoC of the Stellot† protocol — no stubs,
+            no shortcuts. Every primitive implemented for real.
+          </p>
+          <div className="hero-tags">
+            {TAGS.map((t) => (
+              <span key={t.label} className={`hero-tag${t.accent ? " hero-tag-accent" : ""}`}>
+                {t.label}
+              </span>
+            ))}
+          </div>
+          <Link href="/elections/create">
+            <button className="btn btn-primary" style={{ fontSize: "0.95rem", padding: "0.65rem 1.75rem" }}>
+              + Create Election
+            </button>
+          </Link>
+        </div>
+
+        <hr className="hero-divider" />
+
+        {/* Elections list */}
+        <h2 style={{ marginBottom: "1rem" }}>Elections</h2>
+
+        {loading && (
+          <div className="card" style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+            Loading elections from chain…
+          </div>
+        )}
         {error && <p className="error">{error}</p>}
 
         {!loading && !error && elections.length === 0 && (
-          <p>
-            No elections found.{" "}
-            <Link href="/elections/create">Create the first one.</Link>
-          </p>
+          <div className="card" style={{ textAlign: "center", padding: "2.5rem" }}>
+            <p style={{ color: "var(--text-dim)", marginBottom: "1rem" }}>No elections found.</p>
+            <Link href="/elections/create">
+              <button className="btn btn-primary">Create the first one</button>
+            </Link>
+          </div>
         )}
 
         {elections.map((e) => (
           <div key={e.eid.toString()} className="card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <h2>
-                  <Link href={`/elections/${e.eid}`}>{e.title}</Link>
+            <div className="election-card">
+              <div style={{ flex: 1 }}>
+                <h2 style={{ marginBottom: "0.2rem" }}>
+                  <Link href={`/elections/${e.eid}`} style={{ color: "inherit" }}>
+                    {e.title}
+                  </Link>
                 </h2>
-                <p style={{ color: "#888", fontSize: "0.85rem" }}>
+                <p className="election-meta">
                   eid={e.eid.toString()} &middot; {e.optionsCount} options
                 </p>
-                <p style={{ color: "#888", fontSize: "0.85rem" }}>
+                <p className="election-time">
                   {new Date(Number(e.startTime) * 1000).toLocaleString()} &rarr;{" "}
                   {new Date(Number(e.endTime) * 1000).toLocaleString()}
                 </p>
               </div>
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <div className="election-actions">
                 {statusBadge(e)}
                 {e.tallied && (
                   <Link href={`/elections/${e.eid}/tally`}>
-                    <button className="btn btn-secondary" style={{ fontSize: "0.8rem", padding: "0.3rem 0.75rem" }}>
+                    <button className="btn btn-secondary" style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem" }}>
                       Results
                     </button>
                   </Link>
                 )}
+                <Link href={`/elections/${e.eid}`}>
+                  <button className="btn btn-primary" style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem" }}>
+                    View
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
         ))}
-
-        <div style={{ marginTop: "1.5rem" }}>
-          <Link href="/elections/create">
-            <button className="btn btn-primary">+ Create Election</button>
-          </Link>
-        </div>
       </div>
     </>
   );

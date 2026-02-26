@@ -1,13 +1,26 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // Required for @cloudflare/next-on-pages: all server components must use the Edge runtime
 export const runtime = "edge";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Stellot† — Threshold E-Voting on Soroban",
   description:
-    "A cryptographically real proof-of-concept of the Stellot† e-voting protocol built on Stellar Soroban.",
+    "A cryptographically real proof-of-concept of the Stellot† e-voting protocol: threshold ElGamal, Feldman VSS DKG, Shamir secret sharing, and Ed25519 nullifiers on Stellar Soroban.",
 };
 
 export default function RootLayout({
@@ -16,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
