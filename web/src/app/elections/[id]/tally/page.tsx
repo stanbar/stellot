@@ -226,19 +226,19 @@ export default function TallyPage() {
 
         {/* KH secrets — visible to the organizer so keys can be verified / backed up */}
         {orgSession && (
-          <div className="card" style={{ borderColor: "#554" }}>
-            <h3>Key Holder Secrets <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "#888" }}>(this browser only — copy to back up)</span></h3>
-            <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+          <div className="card card-amber">
+            <h3>Key Holder Secrets <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "var(--text-dim)" }}>(this browser only — copy to back up)</span></h3>
+            <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {orgSession.khShares.map((kh) => (
-                <div key={kh.index} style={{ padding: "0.5rem 0.75rem", background: "#1a1a1a", borderRadius: "6px", border: "1px solid #333" }}>
-                  <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.3rem" }}>KH {kh.index}</p>
-                  <p style={{ fontSize: "0.72rem" }}>
-                    <span style={{ color: "#888" }}>secp sk: </span>
-                    <span className="mono" style={{ color: "#6af", wordBreak: "break-all" }}>{kh.sk}</span>
+                <div key={kh.index} className="key-box">
+                  <p className="key-box-label">KH {kh.index}</p>
+                  <p style={{ fontSize: "0.72rem", marginBottom: "0.15rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>secp sk: </span>
+                    <span className="mono key-pk">{kh.sk}</span>
                   </p>
-                  <p style={{ fontSize: "0.72rem", marginTop: "0.2rem" }}>
-                    <span style={{ color: "#888" }}>ed25519 pk: </span>
-                    <span className="mono" style={{ color: "#aaa", wordBreak: "break-all" }}>{kh.edPk}</span>
+                  <p style={{ fontSize: "0.72rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>ed25519 pk: </span>
+                    <span className="mono" style={{ color: "var(--text-dim)" }}>{kh.edPk}</span>
                   </p>
                 </div>
               ))}
@@ -250,7 +250,7 @@ export default function TallyPage() {
         {orgSession && isClosed && !election.tallied && (
           <div className="card">
             <h2>Organizer Controls</h2>
-            <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: "1rem" }}>
+            <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "1rem" }}>
               You are the organizer. Post decryption shares from all {orgSession.khShares.length} key-holders,
               then compute and finalize the tally.
             </p>
@@ -270,7 +270,7 @@ export default function TallyPage() {
                 onClick={handleComputeTally}
                 disabled={processing || shareCount < orgSession.khShares.length}
               >
-                {processing ? "Computing…" : "Compute &amp; Finalize Tally"}
+                {processing ? "Computing…" : "Compute & Finalize Tally"}
               </button>
             </div>
           </div>
@@ -283,12 +283,12 @@ export default function TallyPage() {
         )}
 
         {/* Info */}
-        <div className="card" style={{ borderColor: "#333" }}>
+        <div className="card">
           <h3>Decryption Protocol</h3>
-          <p style={{ color: "#888", fontSize: "0.85rem" }}>
-            Each key-holder computes D_ji = C1_i ^ sk_j (partial decryption).
-            The combined decryption D_i = Lagrange({"{D_ji}"}) recovers (v+1)·G.
-            Vote v is found by brute-force discrete-log search.
+          <p style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
+            Each key-holder computes D<sub>ji</sub> = C1<sub>i</sub><sup>sk<sub>j</sub></sup> (partial decryption).
+            The combined decryption D<sub>i</sub> = Lagrange({"{D_ji}"}) recovers (v+1)·G.
+            Vote v is found by brute-force discrete-log search over {"{1…options_count}"}.
             Chaum-Pedersen proofs are generated off-chain for verification.
           </p>
         </div>

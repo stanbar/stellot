@@ -22,6 +22,25 @@ const TAGS = [
   { label: "Stellar Soroban",        cls: "hero-tag-teal" },
 ];
 
+const FEATURES = [
+  {
+    title: "Anonymity",
+    desc: "Threshold ElGamal encryption with Ed25519-derived nullifiers severs the link between a voter's identity and their ballot, ensuring anonymity during and after the election.",
+  },
+  {
+    title: "Verifiability",
+    desc: "Every ballot is stored on Stellar Soroban. Any observer can independently recompute the tally from on-chain ciphertexts without trusting a central authority.",
+  },
+  {
+    title: "Threshold Trust",
+    desc: "No single entity controls decryption. A Feldman VSS DKG ceremony distributes key shares among m key-holders; t-of-m must collaborate to produce the tally.",
+  },
+  {
+    title: "Eligibility",
+    desc: "Voter eligibility is enforced via a SHA-256 Merkle root committed on-chain. Only registered public keys may obtain a casting account from the distributor committee.",
+  },
+];
+
 export default function HomePage() {
   const [elections, setElections] = useState<ElectionInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,21 +83,36 @@ export default function HomePage() {
           </div>
           <p className="hero-title">Threshold E-Voting on Stellar Soroban</p>
           <p className="hero-sub">
-            A cryptographically real PoC — no stubs, no shortcuts.
-            Every primitive implemented for real: from the DKG ceremony to on-chain tally.
+            A cryptographically complete proof-of-concept of the Stellot† e-voting protocol.
+            Designed with anonymity, verifiability, and threshold trust in mind — every
+            primitive is implemented for real, from the DKG ceremony to on-chain tallying.
           </p>
           <div className="hero-tags">
-            {TAGS.map((t) => (
-              <span key={t.label} className={`hero-tag ${t.cls}`}>
-                {t.label}
-              </span>
-            ))}
+            <div className="hero-tags-row">
+              {TAGS.filter((t) => t.cls === "hero-tag-accent").map((t) => (
+                <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
+              ))}
+            </div>
+            <div className="hero-tags-row">
+              {TAGS.filter((t) => t.cls === "hero-tag-teal").map((t) => (
+                <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
+              ))}
+            </div>
           </div>
           <Link href="/elections/create">
             <button className="btn btn-primary" style={{ fontSize: "0.85rem", padding: "0.65rem 2rem" }}>
               Create Election
             </button>
           </Link>
+        </div>
+
+        <div className="features">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="feature-item">
+              <p className="feature-title">{f.title}</p>
+              <p className="feature-desc">{f.desc}</p>
+            </div>
+          ))}
         </div>
 
         <hr className="hero-divider" />

@@ -211,15 +211,21 @@ export default function CreateElectionPage() {
               </button>
             </div>
             {generatedKeypairs.length > 0 && (
-              <div style={{ marginTop: "0.5rem", padding: "0.65rem 0.85rem", background: "#1a1a1a", borderRadius: "6px", border: "1px solid #333" }}>
-                <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.4rem" }}>
+              <div style={{ marginTop: "0.5rem" }}>
+                <p style={{ fontSize: "0.75rem", color: "var(--text-dim)", marginBottom: "0.4rem" }}>
                   Generated keypairs — save the secret keys before leaving this page:
                 </p>
                 {generatedKeypairs.map((kp, i) => (
-                  <div key={i} style={{ marginBottom: i < generatedKeypairs.length - 1 ? "0.65rem" : 0 }}>
-                    <p style={{ fontSize: "0.72rem", color: "#888", marginBottom: "0.15rem" }}>Voter {i + 1}</p>
-                    <p style={{ fontSize: "0.72rem", color: "#6af" }}>pk: <span className="mono">{kp.pk}</span></p>
-                    <p style={{ fontSize: "0.72rem", color: "#fa6" }}>sk: <span className="mono">{kp.sk}</span></p>
+                  <div key={i} className="key-box">
+                    <p className="key-box-label">Voter {i + 1}</p>
+                    <p style={{ fontSize: "0.72rem", marginBottom: "0.15rem" }}>
+                      <span style={{ color: "var(--text-muted)" }}>pk: </span>
+                      <span className="mono key-pk">{kp.pk}</span>
+                    </p>
+                    <p style={{ fontSize: "0.72rem" }}>
+                      <span style={{ color: "var(--text-muted)" }}>sk: </span>
+                      <span className="mono key-sk">{kp.sk}</span>
+                    </p>
                   </div>
                 ))}
               </div>
@@ -261,9 +267,9 @@ export default function CreateElectionPage() {
           {error && <p className="error" style={{ marginTop: "0.75rem" }}>{error}</p>}
         </div>
 
-        <div className="card" style={{ borderColor: "#554" }}>
+        <div className="card card-amber">
           <h3>Cryptographic design</h3>
-          <p style={{ color: "#888", fontSize: "0.85rem" }}>
+          <p style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
             The DKG runs Feldman VSS to derive a combined secp256k1 public key.
             The Merkle tree uses SHA-256 with domain separation
             (<code>stellot:leaf</code> / <code>stellot:node</code>).

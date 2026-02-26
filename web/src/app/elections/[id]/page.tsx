@@ -155,17 +155,17 @@ export default function ElectionPage() {
       </nav>
       <div className="container">
         <h1>{election.title}</h1>
-        <p style={{ color: "#888", marginBottom: "1rem" }}>
+        <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
           eid={election.eid.toString()} &middot; {election.optionsCount} options &middot;{" "}
           {ballotCount} ballot(s) cast
         </p>
-        <p style={{ color: "#888", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
           {new Date(Number(election.startTime) * 1000).toLocaleString()} &rarr;{" "}
           {new Date(Number(election.endTime) * 1000).toLocaleString()}
         </p>
 
         {election.tallied && (
-          <div className="card" style={{ borderColor: "#7eb8f7" }}>
+          <div className="card card-blue">
             <p>This election has been tallied.</p>
             <Link href={`/elections/${eid}/tally`}>
               <button className="btn btn-primary" style={{ marginTop: "0.5rem" }}>View Results</button>
@@ -175,13 +175,13 @@ export default function ElectionPage() {
 
         {/* Share distributor key with voters (organizer only) */}
         {orgSession && isActive && (
-          <div className="card" style={{ borderColor: "#554" }}>
-            <h3>Share with voters <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "#888" }}>(organizer only)</span></h3>
-            <p style={{ color: "#888", fontSize: "0.82rem", margin: "0.4rem 0" }}>
+          <div className="card card-amber">
+            <h3>Share with voters <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "var(--text-dim)" }}>(organizer only)</span></h3>
+            <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", margin: "0.4rem 0" }}>
               Voters in other browsers need this distributor key to register their casting account.
             </p>
-            <p style={{ fontSize: "0.75rem", color: "#888" }}>Distributor key (sk):</p>
-            <p className="mono" style={{ fontSize: "0.78rem", color: "#fa6", wordBreak: "break-all", marginTop: "0.2rem" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>Distributor key (sk):</p>
+            <p className="mono key-sk" style={{ marginTop: "0.2rem" }}>
               {orgSession.distSk}
             </p>
           </div>
@@ -227,14 +227,14 @@ export default function ElectionPage() {
         )}
 
         {voted && castNullifier && (
-          <div className="card" style={{ borderColor: "#4caf50" }}>
+          <div className="card card-green">
             <h2>Vote Cast</h2>
             <p>Your ballot has been encrypted and submitted.</p>
             <p style={{ marginTop: "0.5rem" }}>
               <strong>Cast nullifier:</strong>
             </p>
             <p className="mono" style={{ marginTop: "0.25rem" }}>{castNullifier}</p>
-            <p style={{ color: "#888", fontSize: "0.82rem", marginTop: "0.5rem" }}>
+            <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: "0.5rem" }}>
               You can use this nullifier to verify your ballot is included.
             </p>
           </div>
@@ -258,14 +258,14 @@ export default function ElectionPage() {
           </div>
         )}
 
-        <div className="card" style={{ marginTop: "1rem", borderColor: "#333" }}>
+        <div className="card" style={{ marginTop: "1rem" }}>
           <h3>Verify Ballot Inclusion</h3>
-          <p style={{ color: "#888", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+          <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginTop: "0.25rem" }}>
             Paste your cast nullifier (shown after voting) to confirm your ballot is on-chain.
           </p>
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
             <input
-              style={{ flex: 1, fontFamily: "monospace", fontSize: "0.8rem" }}
+              style={{ flex: 1, fontFamily: "var(--font-mono, monospace)", fontSize: "0.8rem" }}
               placeholder="cast nullifier (64 hex chars)"
               value={verifyNullifier}
               onChange={(e) => { setVerifyNullifier(e.target.value); setVerifyResult(null); }}
@@ -279,16 +279,16 @@ export default function ElectionPage() {
             </button>
           </div>
           {verifyResult === true && (
-            <p style={{ marginTop: "0.5rem", color: "#4caf50" }}>✓ Ballot is included on-chain.</p>
+            <p style={{ marginTop: "0.5rem", color: "var(--success)" }}>✓ Ballot is included on-chain.</p>
           )}
           {verifyResult === false && (
-            <p style={{ marginTop: "0.5rem", color: "#e57373" }}>✗ Nullifier not found — ballot was not recorded.</p>
+            <p style={{ marginTop: "0.5rem", color: "var(--error)" }}>✗ Nullifier not found — ballot was not recorded.</p>
           )}
           {castNullifier && verifyNullifier === "" && (
-            <p style={{ marginTop: "0.4rem", fontSize: "0.8rem", color: "#888" }}>
+            <p style={{ marginTop: "0.4rem", fontSize: "0.8rem", color: "var(--text-dim)" }}>
               Your nullifier from this session:{" "}
               <button
-                style={{ background: "none", border: "none", color: "#6af", cursor: "pointer", fontFamily: "monospace", fontSize: "0.8rem", padding: 0 }}
+                style={{ background: "none", border: "none", color: "var(--cornflower-light)", cursor: "pointer", fontFamily: "var(--font-mono, monospace)", fontSize: "0.8rem", padding: 0 }}
                 onClick={() => setVerifyNullifier(castNullifier)}
               >
                 {castNullifier.slice(0, 16)}…
@@ -297,7 +297,7 @@ export default function ElectionPage() {
           )}
         </div>
 
-        <div className="card" style={{ marginTop: "1rem", borderColor: "#333" }}>
+        <div className="card" style={{ marginTop: "1rem" }}>
           <h3>Combined KH Public Key</h3>
           <p className="mono" style={{ marginTop: "0.5rem" }}>
             {bytesToHex(election.encPubkey)}
