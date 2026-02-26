@@ -238,9 +238,15 @@ export async function issueAccount(
   nfIssue: Uint8Array,
   distSigs: Array<{ pk: Uint8Array; sig: Uint8Array }>,
 ): Promise<void> {
-  const sigsVal = nativeToScVal(
-    distSigs.map(({ pk, sig }) => [Buffer.from(pk), Buffer.from(sig)]),
-    { type: "vec" },
+  // dist_sigs: Vec<(BytesN<32>, BytesN<64>)>
+  // Soroban encodes tuples as inner scvVec, outer scvVec wraps the list.
+  const sigsVal = xdr.ScVal.scvVec(
+    distSigs.map(({ pk, sig }) =>
+      xdr.ScVal.scvVec([
+        xdr.ScVal.scvBytes(Buffer.from(pk)),
+        xdr.ScVal.scvBytes(Buffer.from(sig)),
+      ]),
+    ),
   );
 
   await submitTx(kp, "issue_account", [
@@ -279,9 +285,14 @@ export async function postShare(
   khPk: Uint8Array,
   sig: Uint8Array,
 ): Promise<number> {
-  const sharesVal = nativeToScVal(
-    shares.map(([c1, d]) => [Buffer.from(c1), Buffer.from(d)]),
-    { type: "vec" },
+  // shares: Vec<(Bytes, Bytes)> — same tuple encoding as dist_sigs
+  const sharesVal = xdr.ScVal.scvVec(
+    shares.map(([c1, d]) =>
+      xdr.ScVal.scvVec([
+        xdr.ScVal.scvBytes(Buffer.from(c1)),
+        xdr.ScVal.scvBytes(Buffer.from(d)),
+      ]),
+    ),
   );
 
   const result = await submitTx(kp, "post_share", [
@@ -301,7 +312,7 @@ export async function finalizeTally(
 ): Promise<void> {
   await submitTx(kp, "finalize_tally", [
     nativeToScVal(eid, { type: "u64" }),
-    nativeToScVal(tally, { type: "vec" }),
+    xdr.ScVal.scvVec(tally.map((v) => nativeToScVal(v, { type: "u32" }))),
   ]);
 }
 
@@ -358,6 +369,17 @@ export async function getTally(eid: bigint): Promise<number[] | null> {
   ]);
   const native = scValToNative(result) as number[] | null;
   return native;
+}
+
+export async function isCastNullifierUsed(
+  eid: bigint,
+  nf: Uint8Array,
+): Promise<boolean> {
+  const result = await callReadOnly("is_cast_nullifier_used", [
+    nativeToScVal(eid, { type: "u64" }),
+    xdr.ScVal.scvBytes(Buffer.from(nf)),
+  ]);
+  return scValToNative(result) as boolean;
 }
 
 export async function getKhShares(

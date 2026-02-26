@@ -1,0 +1,12 @@
+name = "stellot-dagger"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# Environment variables — set these in the Cloudflare dashboard for production
+# or in a .dev.vars file for local development
+#
+# [vars]
+# NEXT_PUBLIC_RPC_URL = "https://soroban-testnet.stellar.org"
+# NEXT_PUBLIC_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
+# NEXT_PUBLIC_CONTRACT_ID = "C..."

@@ -117,6 +117,8 @@ export default function CreateElectionPage() {
       // 6. Save organizer session
       saveOrganizerSession({
         eid: Number(eid),
+        distSk: bytesToHex(distSk),
+        distPk: bytesToHex(distPk),
         khShares: dkgOut.shares.map((s) => ({
           index: s.index,
           sk: s.sk.toString(16).padStart(64, "0"),

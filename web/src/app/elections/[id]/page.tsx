@@ -8,12 +8,14 @@ import {
   getBallotCount,
   issueAccount,
   castBallot,
+  isCastNullifierUsed,
   ElectionInfo,
 } from "@/lib/contract";
 import {
   generateCastingKeypair,
   elgamalEncrypt,
   nullifierCast,
+  nullifierIssue,
   issueMsgHash,
   castMsgHash,
   ed25519Sign,
@@ -37,6 +39,14 @@ export default function ElectionPage() {
 
   // For the PoC: a voter provides their voter secret key (hex) to derive nullifiers
   const [voterSkHex, setVoterSkHex] = useState("");
+  // Distributor key — auto-filled from organizer session; voter can paste it for cross-browser use
+  const orgSession = typeof window !== "undefined" ? loadOrganizerSession(Number(eid)) : null;
+  const [distSkHex, setDistSkHex] = useState(orgSession?.distSk ?? "");
+
+  // Ballot verification
+  const [verifyNullifier, setVerifyNullifier] = useState("");
+  const [verifyResult, setVerifyResult] = useState<boolean | null>(null);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -70,23 +80,22 @@ export default function ElectionPage() {
       // 1. Generate or load casting keypair
       const castKP = generateCastingKeypair();
 
-      // 2. Issue the casting account (PoC: single distributor self-signs)
-      //    In a real deployment the voter sends pk_cast + nf_issue to distributors.
+      // 2. Issue the casting account
       setStatus("Issuing casting account…");
       const voterSk = voterSkHex ? hexToBytes(voterSkHex) : castKP.sk;
-      const nfIssue = new Uint8Array(32); // PoC: use zeros; real: nullifierIssue(voterSk, eid)
+      // Unique per-voter nullifier derived from the voter's secret key
+      const nfIssue = nullifierIssue(voterSk, eid);
 
-      // For the PoC we skip the real distributor step and directly call issue_account
-      // with the organizer's distributor key (stored in session).
-      const orgSession = loadOrganizerSession(Number(eid));
       const kp = getSessionKeypair();
 
-      // Build issue msg and sign with a PoC distributor key
-      // (In real flow the distributor does this independently)
-      const issueMsg = issueMsgHash(eid, castKP.pk, nfIssue);
+      if (!/^[0-9a-fA-F]{64}$/.test(distSkHex)) {
+        throw new Error("Distributor key is required. Ask the election organizer for their distributor key.");
+      }
       const { ed25519: ed } = await import("@noble/curves/ed25519");
-      const distSk = ed.utils.randomPrivateKey(); // PoC: per-vote random distributor key
+      const distSk = hexToBytes(distSkHex);
       const distPk = ed.getPublicKey(distSk);
+
+      const issueMsg = issueMsgHash(eid, castKP.pk, nfIssue);
       const distSig = ed.sign(issueMsg, distSk);
 
       await issueAccount(kp, eid, castKP.pk, nfIssue, [
@@ -116,6 +125,18 @@ export default function ElectionPage() {
       setError(e.message ?? String(e));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleVerify() {
+    if (!/^[0-9a-fA-F]{64}$/.test(verifyNullifier.trim())) return;
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const included = await isCastNullifierUsed(eid, hexToBytes(verifyNullifier.trim()));
+      setVerifyResult(included);
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -151,17 +172,42 @@ export default function ElectionPage() {
           </div>
         )}
 
+        {/* Share distributor key with voters (organizer only) */}
+        {orgSession && isActive && (
+          <div className="card" style={{ borderColor: "#554" }}>
+            <h3>Share with voters <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "#888" }}>(organizer only)</span></h3>
+            <p style={{ color: "#888", fontSize: "0.82rem", margin: "0.4rem 0" }}>
+              Voters in other browsers need this distributor key to register their casting account.
+            </p>
+            <p style={{ fontSize: "0.75rem", color: "#888" }}>Distributor key (sk):</p>
+            <p className="mono" style={{ fontSize: "0.78rem", color: "#fa6", wordBreak: "break-all", marginTop: "0.2rem" }}>
+              {orgSession.distSk}
+            </p>
+          </div>
+        )}
+
         {isActive && !voted && (
           <div className="card">
             <h2>Cast Your Vote</h2>
             <div className="field" style={{ marginTop: "0.75rem" }}>
-              <label>Voter secret key (optional, 64 hex chars)</label>
+              <label>Voter secret key (64 hex chars) — used to derive your unique issue nullifier</label>
               <input
-                placeholder="Leave blank to use casting keypair directly"
+                placeholder="Paste your voter secret key (from Create Election screen)"
                 value={voterSkHex}
                 onChange={(e) => setVoterSkHex(e.target.value)}
               />
             </div>
+            {!orgSession && (
+              <div className="field">
+                <label>Distributor key (64 hex chars) — ask the election organizer</label>
+                <input
+                  placeholder="Paste the distributor secret key shared by the organizer"
+                  value={distSkHex}
+                  onChange={(e) => setDistSkHex(e.target.value)}
+                />
+              </div>
+            )}
+
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem" }}>
               {options.map((opt, i) => (
                 <button
@@ -210,6 +256,45 @@ export default function ElectionPage() {
             )}
           </div>
         )}
+
+        <div className="card" style={{ marginTop: "1rem", borderColor: "#333" }}>
+          <h3>Verify Ballot Inclusion</h3>
+          <p style={{ color: "#888", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+            Paste your cast nullifier (shown after voting) to confirm your ballot is on-chain.
+          </p>
+          <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+            <input
+              style={{ flex: 1, fontFamily: "monospace", fontSize: "0.8rem" }}
+              placeholder="cast nullifier (64 hex chars)"
+              value={verifyNullifier}
+              onChange={(e) => { setVerifyNullifier(e.target.value); setVerifyResult(null); }}
+            />
+            <button
+              className="btn btn-secondary"
+              onClick={handleVerify}
+              disabled={verifying || !/^[0-9a-fA-F]{64}$/.test(verifyNullifier.trim())}
+            >
+              {verifying ? "Checking…" : "Verify"}
+            </button>
+          </div>
+          {verifyResult === true && (
+            <p style={{ marginTop: "0.5rem", color: "#4caf50" }}>✓ Ballot is included on-chain.</p>
+          )}
+          {verifyResult === false && (
+            <p style={{ marginTop: "0.5rem", color: "#e57373" }}>✗ Nullifier not found — ballot was not recorded.</p>
+          )}
+          {castNullifier && verifyNullifier === "" && (
+            <p style={{ marginTop: "0.4rem", fontSize: "0.8rem", color: "#888" }}>
+              Your nullifier from this session:{" "}
+              <button
+                style={{ background: "none", border: "none", color: "#6af", cursor: "pointer", fontFamily: "monospace", fontSize: "0.8rem", padding: 0 }}
+                onClick={() => setVerifyNullifier(castNullifier)}
+              >
+                {castNullifier.slice(0, 16)}…
+              </button>
+            </p>
+          )}
+        </div>
 
         <div className="card" style={{ marginTop: "1rem", borderColor: "#333" }}>
           <h3>Combined KH Public Key</h3>

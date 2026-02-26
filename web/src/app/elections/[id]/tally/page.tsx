@@ -20,6 +20,7 @@ import {
   sharesMsgHash,
   ed25519Sign,
   bytesToHex,
+  hexToBytes,
 } from "@/lib/crypto";
 import { combinePartialDecryptions } from "@/lib/threshold";
 import { getSessionKeypair, loadOrganizerSession } from "@/lib/wallet";
@@ -105,17 +106,12 @@ export default function TallyPage() {
           return [b.c1, Dji];
         });
 
-        // Sign the shares blob
+        // Sign the shares blob with the KH's real Ed25519 identity key
         const blob = serialiseShares(shares);
         const msgHash = sharesMsgHash(eid, blob);
-
-        // Use commitment bytes as a proxy for the KH Ed25519 key in the PoC
-        // In production each KH has a separate Ed25519 identity key
-        const khSkSeed = new Uint8Array(32);
-        khSkSeed[0] = khShare.index;
-        const { ed25519: ed } = await import("@noble/curves/ed25519");
-        const khEdPk = ed.getPublicKey(khSkSeed);
-        const sig = ed25519Sign(khSkSeed, msgHash);
+        const khEdSk = hexToBytes(khShare.edSk);
+        const khEdPk = hexToBytes(khShare.edPk);
+        const sig = ed25519Sign(khEdSk, msgHash);
 
         await postShare(kp, eid, khShare.index - 1, shares, khEdPk, sig);
       }
@@ -221,6 +217,28 @@ export default function TallyPage() {
                     />
                   </div>
                   <span className="bar-count">{tally[i]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* KH secrets — visible to the organizer so keys can be verified / backed up */}
+        {orgSession && (
+          <div className="card" style={{ borderColor: "#554" }}>
+            <h3>Key Holder Secrets <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "#888" }}>(this browser only — copy to back up)</span></h3>
+            <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+              {orgSession.khShares.map((kh) => (
+                <div key={kh.index} style={{ padding: "0.5rem 0.75rem", background: "#1a1a1a", borderRadius: "6px", border: "1px solid #333" }}>
+                  <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.3rem" }}>KH {kh.index}</p>
+                  <p style={{ fontSize: "0.72rem" }}>
+                    <span style={{ color: "#888" }}>secp sk: </span>
+                    <span className="mono" style={{ color: "#6af", wordBreak: "break-all" }}>{kh.sk}</span>
+                  </p>
+                  <p style={{ fontSize: "0.72rem", marginTop: "0.2rem" }}>
+                    <span style={{ color: "#888" }}>ed25519 pk: </span>
+                    <span className="mono" style={{ color: "#aaa", wordBreak: "break-all" }}>{kh.edPk}</span>
+                  </p>
                 </div>
               ))}
             </div>

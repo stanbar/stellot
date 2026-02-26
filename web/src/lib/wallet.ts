@@ -68,6 +68,8 @@ export async function getFreighterPublicKey(): Promise<string | null> {
 
 export interface OrganizerSession {
   eid: number;
+  distSk: string;
+  distPk: string;
   khShares: Array<{ index: number; sk: string; commitment: string; edSk: string; edPk: string }>;
   merkleLeaves: string[];
   combinedPubkey: string;
