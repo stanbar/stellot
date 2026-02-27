@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Logo from "@/components/Logo";
+import Nav from "@/components/Nav";
 import { runDKG } from "@/lib/dkg";
 import { buildTree } from "@/lib/merkle";
 import { hexToBytes, bytesToHex } from "@/lib/crypto";
@@ -142,11 +141,7 @@ export default function CreateElectionPage() {
 
   return (
     <>
-      <nav>
-        <Link href="/" className="logo-wrap"><Logo size="sm" color="currentColor" /></Link>
-        <Link href="/">Elections</Link>
-        <Link href="/elections/create">Create</Link>
-      </nav>
+      <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
       <div className="container">
         <h1>Create Election</h1>
 

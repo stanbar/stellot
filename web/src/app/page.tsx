@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Nav from "@/components/Nav";
 import Logo from "@/components/Logo";
 import { getNextElectionId, getElection, ElectionInfo } from "@/lib/contract";
 
@@ -67,13 +68,7 @@ export default function HomePage() {
 
   return (
     <>
-      <nav>
-        <Link href="/" className="logo-wrap">
-          <Logo size="sm" color="currentColor" />
-        </Link>
-        <Link href="/">Elections</Link>
-        <Link href="/elections/create">Create</Link>
-      </nav>
+      <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
 
       <div className="container">
         {/* Hero */}

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import Logo from "@/components/Logo";
+import Nav from "@/components/Nav";
 import {
   getElection,
   getBallotCount,
@@ -192,11 +191,7 @@ export default function TallyPage() {
 
   return (
     <>
-      <nav>
-        <Link href="/" className="logo-wrap"><Logo size="sm" color="currentColor" /></Link>
-        <Link href="/">Elections</Link>
-        <Link href={`/elections/${id}`}>Election</Link>
-      </nav>
+      <Nav links={[{ href: "/", label: "Elections" }, { href: `/elections/${id}`, label: "Election" }]} />
       <div className="container">
         <h1>{election.title} — Tally</h1>
 
