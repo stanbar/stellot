@@ -242,13 +242,11 @@ export default function ElectionPage() {
             {now >= election.endTime && (
               <>
                 <p>Voting has closed.</p>
-                {loadOrganizerSession(Number(eid)) && (
-                  <Link href={`/elections/${eid}/tally`}>
-                    <button className="btn btn-primary" style={{ marginTop: "0.75rem" }}>
-                      Post Shares &amp; Tally
-                    </button>
-                  </Link>
-                )}
+                <Link href={`/elections/${eid}/tally`}>
+                  <button className="btn btn-primary" style={{ marginTop: "0.75rem" }}>
+                    Post Shares &amp; Tally
+                  </button>
+                </Link>
               </>
             )}
           </div>
