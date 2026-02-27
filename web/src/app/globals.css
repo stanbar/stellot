@@ -497,6 +497,7 @@ tr:last-child td { border-bottom: none; }
   display: flex;
   justify-content: center;
   margin-bottom: 1.25rem;
+  color: var(--logo-color);
 }
 .hero-title {
   font-size: clamp(1rem, 3vw, 1.2rem);

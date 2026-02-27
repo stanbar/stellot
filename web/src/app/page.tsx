@@ -74,7 +74,7 @@ export default function HomePage() {
         {/* Hero */}
         <div className="hero">
           <div className="hero-logo">
-            <Logo size="lg" color="white" />
+            <Logo size="lg" color="currentColor" />
           </div>
           <p className="hero-title">Threshold E-Voting on Stellar Soroban</p>
           <p className="hero-sub">
