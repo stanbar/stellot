@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Nav from "@/components/Nav";
 import {
@@ -8,6 +8,7 @@ import {
   getBallotCount,
   getBallot,
   getKhShares,
+  getKhRoster,
   getTally,
   postShare,
   finalizeTally,
@@ -40,6 +41,7 @@ export default function TallyPage() {
   const [ballotCount, setBallotCount] = useState(0);
   const [postedSlots, setPostedSlots] = useState<number[]>([]); // 0-based slots with on-chain data
   const [tally, setTally] = useState<number[] | null>(null);
+  const [khRoster, setKhRoster] = useState<Uint8Array[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -53,15 +55,22 @@ export default function TallyPage() {
   // Tally computation
   const [computingTally, setComputingTally] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     load();
   }, [eid]);
 
   async function load() {
     try {
-      const [info, count] = await Promise.all([getElection(eid), getBallotCount(eid)]);
+      const [info, count, roster] = await Promise.all([
+        getElection(eid),
+        getBallotCount(eid),
+        getKhRoster(eid),
+      ]);
       setElection(info);
       setBallotCount(count);
+      setKhRoster(roster);
       if (info) {
         await refreshPostedSlots();
       }
@@ -82,6 +91,36 @@ export default function TallyPage() {
     }
     setPostedSlots(slots);
     return slots;
+  }
+
+  /** Load credentials from a downloaded JSON file and pre-fill the form. */
+  async function handleLoadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset so same file can be re-selected if needed
+    e.target.value = "";
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text) as {
+        eid?: string;
+        khIndex?: number;
+        secpSk?: string;
+        edSk?: string;
+      };
+      if (json.eid !== undefined && BigInt(json.eid) !== eid) {
+        setError(
+          `Credential file is for election eid=${json.eid}, but you are on election eid=${eid.toString()}. Wrong file?`,
+        );
+        return;
+      }
+      if (json.khIndex !== undefined) setKhIdx(String(json.khIndex));
+      if (json.secpSk) setKhSecpSk(json.secpSk);
+      if (json.edSk) setKhEdSk(json.edSk);
+      setError(null);
+      setStatus("Credentials loaded from file.");
+    } catch {
+      setError("Could not parse credential file.");
+    }
   }
 
   async function handlePostMyShare() {
@@ -193,11 +232,21 @@ export default function TallyPage() {
   );
   const maxVotes = tally ? Math.max(...tally, 1) : 1;
 
+  // Derive expected ed25519 pk for the entered KH index (0-based roster lookup)
+  const khSlot = parseInt(khIdx) - 1;
+  const expectedEdPk =
+    khRoster.length > 0 && khSlot >= 0 && khSlot < khRoster.length
+      ? bytesToHex(khRoster[khSlot])
+      : null;
+
   return (
     <>
       <Nav links={[{ href: "/", label: "Elections" }, { href: `/elections/${id}`, label: "Election" }]} />
       <div className="container">
         <h1>{election.title} — Tally</h1>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+          eid={eid.toString()} &middot; {election.optionsCount} options &middot; {ballotCount} ballot(s)
+        </p>
 
         {error && <p className="error" style={{ marginBottom: "1rem" }}>{error}</p>}
         {status && <p className="success" style={{ marginBottom: "1rem" }}>{status}</p>}
@@ -226,9 +275,30 @@ export default function TallyPage() {
             <div className="card">
               <h2>Submit Your Decryption Share</h2>
               <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "1rem" }}>
-                Key holders: paste your credentials (from the JSON file you received) and submit
-                your partial decryption. Each key holder does this independently.
+                Key holders: load your credential JSON file (or paste manually) and submit your
+                partial decryption. Each key holder does this independently.
               </p>
+
+              {/* Load from file */}
+              <div style={{ marginBottom: "1rem" }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  style={{ display: "none" }}
+                  onChange={handleLoadFile}
+                />
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ fontSize: "0.82rem" }}
+                >
+                  Load credential JSON file
+                </button>
+                <span style={{ marginLeft: "0.75rem", fontSize: "0.78rem", color: "var(--text-dim)" }}>
+                  Automatically fills the fields below and validates the election id.
+                </span>
+              </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
                 <div className="field" style={{ marginBottom: 0 }}>
@@ -260,6 +330,13 @@ export default function TallyPage() {
                       style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.8rem" }}
                     />
                   </div>
+                  {/* Expected ed25519 public key hint */}
+                  {expectedEdPk && (
+                    <p style={{ fontSize: "0.72rem", color: "var(--text-dim)", margin: 0 }}>
+                      Expected Ed25519 pk for KH {khIdx} (from on-chain roster):{" "}
+                      <span className="mono" style={{ color: "var(--cornflower-light)" }}>{expectedEdPk}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 

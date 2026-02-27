@@ -382,6 +382,15 @@ export async function isCastNullifierUsed(
   return scValToNative(result) as boolean;
 }
 
+export async function getKhRoster(eid: bigint): Promise<Uint8Array[]> {
+  const result = await callReadOnly("get_kh_roster", [
+    nativeToScVal(eid, { type: "u64" }),
+  ]);
+  const native = scValToNative(result) as Buffer[] | null;
+  if (!native) return [];
+  return native.map((b) => Uint8Array.from(b));
+}
+
 export async function getKhShares(
   eid: bigint,
   khIdx: number,
