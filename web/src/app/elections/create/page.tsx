@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Nav from "@/components/Nav";
 import { runDKG } from "@/lib/dkg";
 import { buildTree } from "@/lib/merkle";
@@ -15,9 +15,20 @@ interface GeneratedKeypair {
   sk: string;
 }
 
-export default function CreateElectionPage() {
-  const router = useRouter();
+interface KHCredential {
+  index: number;   // 1-based
+  sk: string;      // secp256k1 secret scalar (hex)
+  edSk: string;    // Ed25519 secret key (hex)
+  edPk: string;    // Ed25519 public key (hex)
+}
 
+interface DeployedElection {
+  eid: bigint;
+  khCredentials: KHCredential[];
+  distSk: string;
+}
+
+export default function CreateElectionPage() {
   const [title, setTitle] = useState("My Election");
   const [options, setOptions] = useState(["Option A", "Option B"]);
   const [startTime, setStartTime] = useState("");
@@ -31,6 +42,9 @@ export default function CreateElectionPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [generatedKeypairs, setGeneratedKeypairs] = useState<GeneratedKeypair[]>([]);
+
+  // Set after successful deploy — switches to credentials view
+  const [deployed, setDeployed] = useState<DeployedElection | null>(null);
 
   function generateTestKeypair() {
     const sk = ed25519.utils.randomPrivateKey();
@@ -52,6 +66,21 @@ export default function CreateElectionPage() {
     setOptions(options.filter((_, idx) => idx !== i));
   }
 
+  function downloadKH(kh: KHCredential, eid: bigint) {
+    const payload = JSON.stringify(
+      { eid: eid.toString(), khIndex: kh.index, secpSk: kh.sk, edSk: kh.edSk, edPk: kh.edPk },
+      null,
+      2,
+    );
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `stellot-kh${kh.index}-eid${eid}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleSubmit() {
     setError(null);
     setStatus(null);
@@ -64,14 +93,11 @@ export default function CreateElectionPage() {
         .map((l) => l.trim())
         .filter((l) => l && !l.startsWith("#"));
 
-      if (voterHexes.length === 0) {
-        throw new Error("At least one eligible voter is required");
-      }
+      if (voterHexes.length === 0) throw new Error("At least one eligible voter is required");
 
       const voterPubkeys = voterHexes.map((h) => {
-        if (!/^[0-9a-fA-F]{64}$/.test(h)) {
+        if (!/^[0-9a-fA-F]{64}$/.test(h))
           throw new Error(`Invalid pubkey hex (must be 64 hex chars): ${h}`);
-        }
         return hexToBytes(h);
       });
 
@@ -82,8 +108,7 @@ export default function CreateElectionPage() {
       setStatus(`Running Feldman VSS DKG (${numKH}-of-${khThreshold})…`);
       const dkgOut = runDKG(numKH, khThreshold);
 
-      // 3. Build distributor roster (for PoC: use a single in-memory key)
-      //    In production each distributor manages their own key.
+      // 3. Distributor keypair (single key for PoC)
       const distSk = ed25519.utils.randomPrivateKey();
       const distPk = ed25519.getPublicKey(distSk);
 
@@ -114,10 +139,11 @@ export default function CreateElectionPage() {
         await setKhCommitment(kp, eid, i, dkgOut.shares[i].commitment);
       }
 
-      // 6. Save organizer session
+      // 6. Save full organizer session (for backward-compat / tally fallback)
+      const distSkHex = bytesToHex(distSk);
       saveOrganizerSession({
         eid: Number(eid),
-        distSk: bytesToHex(distSk),
+        distSk: distSkHex,
         distPk: bytesToHex(distPk),
         khShares: dkgOut.shares.map((s) => ({
           index: s.index,
@@ -130,8 +156,18 @@ export default function CreateElectionPage() {
         combinedPubkey: bytesToHex(dkgOut.combinedPubkey),
       });
 
-      setStatus(`Election deployed! eid=${eid}`);
-      setTimeout(() => router.push(`/elections/${eid}`), 1500);
+      // 7. Show credentials — don't redirect, let the organizer copy/download keys
+      setDeployed({
+        eid,
+        distSk: distSkHex,
+        khCredentials: dkgOut.shares.map((s) => ({
+          index: s.index,
+          sk: s.sk.toString(16).padStart(64, "0"),
+          edSk: bytesToHex(s.edSk),
+          edPk: bytesToHex(s.edPk),
+        })),
+      });
+      setStatus(null);
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
@@ -139,6 +175,75 @@ export default function CreateElectionPage() {
     }
   }
 
+  // ── Credentials view (shown after successful deploy) ──────────────────────────
+  if (deployed) {
+    return (
+      <>
+        <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
+        <div className="container">
+          <h1>Election Deployed</h1>
+          <p style={{ color: "var(--text-dim)", marginBottom: "1.5rem" }}>
+            eid={deployed.eid.toString()} — Distribute each key holder's credentials before
+            navigating away. These keys cannot be recovered after you leave this page.
+          </p>
+
+          {/* Distributor key */}
+          <div className="card card-amber">
+            <h3>Distributor Key <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "var(--text-dim)" }}>(share with voters so they can register)</span></h3>
+            <div style={{ marginTop: "0.75rem" }}>
+              <div className="key-box">
+                <p className="key-box-label">Distributor secret key</p>
+                <p className="mono key-sk">{deployed.distSk}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* KH credentials */}
+          <div className="card">
+            <h2>Key Holder Credentials</h2>
+            <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "1rem" }}>
+              Send each key holder their own credential file. They will use it on the tally page
+              to submit their partial decryption after voting closes.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {deployed.khCredentials.map((kh) => (
+                <div key={kh.index} className="key-box" style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <p className="key-box-label" style={{ marginBottom: 0 }}>Key Holder {kh.index}</p>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ fontSize: "0.72rem", padding: "0.25rem 0.65rem", letterSpacing: "0.02em", textTransform: "none" }}
+                      onClick={() => downloadKH(kh, deployed.eid)}
+                    >
+                      ↓ Download JSON
+                    </button>
+                  </div>
+                  <p style={{ fontSize: "0.72rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>secp256k1 sk: </span>
+                    <span className="mono key-sk">{kh.sk}</span>
+                  </p>
+                  <p style={{ fontSize: "0.72rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>ed25519 sk: </span>
+                    <span className="mono key-sk">{kh.edSk}</span>
+                  </p>
+                  <p style={{ fontSize: "0.72rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>ed25519 pk: </span>
+                    <span className="mono key-pk">{kh.edPk}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Link href={`/elections/${deployed.eid}`}>
+            <button className="btn btn-primary">Continue to Election →</button>
+          </Link>
+        </div>
+      </>
+    );
+  }
+
+  // ── Election creation form ────────────────────────────────────────────────────
   return (
     <>
       <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
@@ -164,9 +269,7 @@ export default function CreateElectionPage() {
                   }}
                 />
                 {options.length > 2 && (
-                  <button className="btn btn-danger" onClick={() => removeOption(i)}>
-                    ✕
-                  </button>
+                  <button className="btn btn-danger" onClick={() => removeOption(i)}>✕</button>
                 )}
               </div>
             ))}
@@ -250,11 +353,7 @@ export default function CreateElectionPage() {
             </div>
           </div>
 
-          <button
-            className="btn btn-primary"
-            onClick={handleSubmit}
-            disabled={submitting}
-          >
+          <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
             {submitting ? "Deploying…" : "Deploy Election"}
           </button>
 

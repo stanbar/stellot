@@ -17,16 +17,16 @@ import {
   partialDecrypt,
   elgamalDecrypt,
   serialiseShares,
+  deserialiseShares,
   sharesMsgHash,
   ed25519Sign,
   bytesToHex,
   hexToBytes,
 } from "@/lib/crypto";
 import { combinePartialDecryptions } from "@/lib/threshold";
-import { getSessionKeypair, loadOrganizerSession } from "@/lib/wallet";
-import { secp256k1 } from "@noble/curves/secp256k1";
+import { getSessionKeypair } from "@/lib/wallet";
 
-const SECP_Q = secp256k1.CURVE.n;
+const MAX_KH = 10; // maximum slots to probe on-chain
 
 function hexToBigInt(hex: string): bigint {
   return BigInt("0x" + hex);
@@ -38,98 +38,104 @@ export default function TallyPage() {
 
   const [election, setElection] = useState<ElectionInfo | null>(null);
   const [ballotCount, setBallotCount] = useState(0);
-  const [shareCount, setShareCount] = useState(0);
+  const [postedSlots, setPostedSlots] = useState<number[]>([]); // 0-based slots with on-chain data
   const [tally, setTally] = useState<number[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
 
-  const orgSession = typeof window !== "undefined"
-    ? loadOrganizerSession(Number(eid))
-    : null;
+  // Per-KH share submission form
+  const [khIdx, setKhIdx] = useState("1");
+  const [khSecpSk, setKhSecpSk] = useState("");
+  const [khEdSk, setKhEdSk] = useState("");
+  const [submittingShare, setSubmittingShare] = useState(false);
+
+  // Tally computation
+  const [computingTally, setComputingTally] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [info, count] = await Promise.all([
-          getElection(eid),
-          getBallotCount(eid),
-        ]);
-        setElection(info);
-        setBallotCount(count);
-        if (info) {
-          // Count how many KH shares are on-chain
-          let sc = 0;
-          const khRosterSize = 3; // approximate; could query from contract
-          for (let i = 0; i < khRosterSize; i++) {
-            const blob = await getKhShares(eid, i);
-            if (blob) sc++;
-          }
-          setShareCount(sc);
-        }
-        const storedTally = await getTally(eid);
-        if (storedTally) setTally(storedTally);
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
   }, [eid]);
 
-  async function handlePostShares() {
-    if (!orgSession || !election) return;
+  async function load() {
+    try {
+      const [info, count] = await Promise.all([getElection(eid), getBallotCount(eid)]);
+      setElection(info);
+      setBallotCount(count);
+      if (info) {
+        await refreshPostedSlots();
+      }
+      const storedTally = await getTally(eid);
+      if (storedTally) setTally(storedTally);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshPostedSlots() {
+    const slots: number[] = [];
+    for (let i = 0; i < MAX_KH; i++) {
+      const blob = await getKhShares(eid, i);
+      if (blob) slots.push(i);
+    }
+    setPostedSlots(slots);
+    return slots;
+  }
+
+  async function handlePostMyShare() {
     setError(null);
     setStatus(null);
-    setProcessing(true);
+    setSubmittingShare(true);
 
     try {
-      // Fetch all ballots
+      const idx = parseInt(khIdx);
+      if (isNaN(idx) || idx < 1) throw new Error("KH index must be ≥ 1");
+      if (!/^[0-9a-fA-F]{64}$/.test(khSecpSk.trim()))
+        throw new Error("secp256k1 secret key must be 64 hex chars");
+      if (!/^[0-9a-fA-F]{64}$/.test(khEdSk.trim()))
+        throw new Error("Ed25519 secret key must be 64 hex chars");
+
       setStatus("Fetching ballots…");
       const ballots = [];
       for (let i = 0; i < ballotCount; i++) {
         const b = await getBallot(eid, i);
         if (b) ballots.push(b);
       }
+      if (ballots.length === 0) throw new Error("No ballots cast yet");
 
-      // For each KH, compute partial decryptions and post
+      setStatus("Computing partial decryptions…");
+      const skBig = hexToBigInt(khSecpSk.trim());
+      const shares: Array<[Uint8Array, Uint8Array]> = ballots.map((b) => [
+        b.c1,
+        partialDecrypt(b.c1, skBig),
+      ]);
+
+      setStatus("Signing and posting shares…");
+      const blob = serialiseShares(shares);
+      const msgHash = sharesMsgHash(eid, blob);
+      const edSkBytes = hexToBytes(khEdSk.trim());
+      const edPkBytes = (await import("@noble/curves/ed25519")).ed25519.getPublicKey(edSkBytes);
+      const sig = ed25519Sign(edSkBytes, msgHash);
+
       const kp = getSessionKeypair();
+      await postShare(kp, eid, idx - 1, shares, edPkBytes, sig);
 
-      for (const khShare of orgSession.khShares) {
-        setStatus(`Posting shares for KH ${khShare.index}…`);
-        const skBig = hexToBigInt(khShare.sk);
-
-        const shares: Array<[Uint8Array, Uint8Array]> = ballots.map((b) => {
-          const Dji = partialDecrypt(b.c1, skBig);
-          return [b.c1, Dji];
-        });
-
-        // Sign the shares blob with the KH's real Ed25519 identity key
-        const blob = serialiseShares(shares);
-        const msgHash = sharesMsgHash(eid, blob);
-        const khEdSk = hexToBytes(khShare.edSk);
-        const khEdPk = hexToBytes(khShare.edPk);
-        const sig = ed25519Sign(khEdSk, msgHash);
-
-        await postShare(kp, eid, khShare.index - 1, shares, khEdPk, sig);
-      }
-
-      setStatus("All shares posted.");
-      setShareCount(orgSession.khShares.length);
+      setStatus("Share posted successfully.");
+      await refreshPostedSlots();
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
-      setProcessing(false);
+      setSubmittingShare(false);
     }
   }
 
   async function handleComputeTally() {
-    if (!orgSession || !election) return;
+    if (!election) return;
     setError(null);
     setStatus(null);
-    setProcessing(true);
+    setComputingTally(true);
 
     try {
       setStatus("Fetching ballots…");
@@ -139,32 +145,31 @@ export default function TallyPage() {
         if (b) ballots.push(b);
       }
 
-      setStatus("Computing partial decryptions…");
-      // Collect partial decryptions per ballot, from each KH
-      const allDecryptions: Array<Map<number, Uint8Array>> = ballots.map(
-        () => new Map(),
-      );
+      setStatus("Fetching on-chain decryption shares…");
+      // allDji[ballotIdx] = Map<khLagrangeIdx (1-based), D_ji bytes>
+      const allDji: Array<Map<number, Uint8Array>> = ballots.map(() => new Map());
 
-      for (const khShare of orgSession.khShares) {
-        const skBig = hexToBigInt(khShare.sk);
-        for (let i = 0; i < ballots.length; i++) {
-          const Dji = partialDecrypt(ballots[i].c1, skBig);
-          allDecryptions[i].set(khShare.index, Dji);
+      const slots = await refreshPostedSlots();
+      for (const slot of slots) {
+        const blob = await getKhShares(eid, slot);
+        if (!blob) continue;
+        const pairs = deserialiseShares(blob); // pairs[i] = (c1_i, D_ji)
+        const lagrangeIdx = slot + 1; // on-chain slot 0 → KH index 1
+        for (let i = 0; i < pairs.length && i < ballots.length; i++) {
+          allDji[i].set(lagrangeIdx, pairs[i][1]);
         }
       }
 
       setStatus("Running Lagrange interpolation…");
       const counts = new Array(election.optionsCount).fill(0);
-
       for (let i = 0; i < ballots.length; i++) {
-        const Di = combinePartialDecryptions(allDecryptions[i]);
+        if (allDji[i].size === 0) continue;
+        const Di = combinePartialDecryptions(allDji[i]);
         const vote = elgamalDecrypt(ballots[i].c2, Di, election.optionsCount);
-        if (vote >= 0 && vote < election.optionsCount) {
-          counts[vote]++;
-        }
+        if (vote >= 0 && vote < election.optionsCount) counts[vote]++;
       }
 
-      setStatus("Submitting tally to contract…");
+      setStatus("Submitting tally…");
       const kp = getSessionKeypair();
       await finalizeTally(kp, eid, counts);
 
@@ -173,7 +178,7 @@ export default function TallyPage() {
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
-      setProcessing(false);
+      setComputingTally(false);
     }
   }
 
@@ -182,7 +187,6 @@ export default function TallyPage() {
 
   const now = BigInt(Math.floor(Date.now() / 1000));
   const isClosed = now >= election.endTime;
-  const khThreshold = orgSession ? orgSession.khShares.length : 1; // PoC: all KHs post
   const optionLabels = Array.from(
     { length: election.optionsCount },
     (_, i) => `Option ${String.fromCharCode(65 + i)}`,
@@ -198,7 +202,7 @@ export default function TallyPage() {
         {error && <p className="error" style={{ marginBottom: "1rem" }}>{error}</p>}
         {status && <p className="success" style={{ marginBottom: "1rem" }}>{status}</p>}
 
-        {/* Tally results */}
+        {/* Results */}
         {tally && (
           <div className="card">
             <h2>Results</h2>
@@ -207,10 +211,7 @@ export default function TallyPage() {
                 <div key={i} className="bar-row">
                   <span className="bar-label">{label}</span>
                   <div className="bar-track">
-                    <div
-                      className="bar-fill"
-                      style={{ width: `${(tally[i] / maxVotes) * 100}%` }}
-                    />
+                    <div className="bar-fill" style={{ width: `${(tally[i] / maxVotes) * 100}%` }} />
                   </div>
                   <span className="bar-count">{tally[i]}</span>
                 </div>
@@ -219,56 +220,82 @@ export default function TallyPage() {
           </div>
         )}
 
-        {/* KH secrets — visible to the organizer so keys can be verified / backed up */}
-        {orgSession && (
-          <div className="card card-amber">
-            <h3>Key Holder Secrets <span style={{ fontWeight: 400, fontSize: "0.8rem", color: "var(--text-dim)" }}>(this browser only — copy to back up)</span></h3>
-            <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {orgSession.khShares.map((kh) => (
-                <div key={kh.index} className="key-box">
-                  <p className="key-box-label">KH {kh.index}</p>
-                  <p style={{ fontSize: "0.72rem", marginBottom: "0.15rem" }}>
-                    <span style={{ color: "var(--text-muted)" }}>secp sk: </span>
-                    <span className="mono key-pk">{kh.sk}</span>
-                  </p>
-                  <p style={{ fontSize: "0.72rem" }}>
-                    <span style={{ color: "var(--text-muted)" }}>ed25519 pk: </span>
-                    <span className="mono" style={{ color: "var(--text-dim)" }}>{kh.edPk}</span>
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Share status */}
+        {isClosed && !election.tallied && (
+          <>
+            <div className="card">
+              <h2>Submit Your Decryption Share</h2>
+              <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "1rem" }}>
+                Key holders: paste your credentials (from the JSON file you received) and submit
+                your partial decryption. Each key holder does this independently.
+              </p>
 
-        {/* Organizer controls */}
-        {orgSession && isClosed && !election.tallied && (
-          <div className="card">
-            <h2>Organizer Controls</h2>
-            <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "1rem" }}>
-              You are the organizer. Post decryption shares from all {orgSession.khShares.length} key-holders,
-              then compute and finalize the tally.
-            </p>
-            <p>
-              Shares posted: {shareCount} / {orgSession.khShares.length}
-            </p>
-            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                <div className="field" style={{ marginBottom: 0 }}>
+                  <label>KH Index</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={MAX_KH}
+                    value={khIdx}
+                    onChange={(e) => setKhIdx(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label>secp256k1 secret key (64 hex chars)</label>
+                    <input
+                      placeholder="from your credential file: secpSk"
+                      value={khSecpSk}
+                      onChange={(e) => setKhSecpSk(e.target.value)}
+                      style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.8rem" }}
+                    />
+                  </div>
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label>Ed25519 secret key (64 hex chars)</label>
+                    <input
+                      placeholder="from your credential file: edSk"
+                      value={khEdSk}
+                      onChange={(e) => setKhEdSk(e.target.value)}
+                      style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.8rem" }}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <button
                 className="btn btn-primary"
-                onClick={handlePostShares}
-                disabled={processing || shareCount >= orgSession.khShares.length}
+                onClick={handlePostMyShare}
+                disabled={submittingShare}
               >
-                {processing ? "Posting…" : "Post Decryption Shares"}
+                {submittingShare ? "Posting…" : "Submit My Decryption Share"}
               </button>
+            </div>
+
+            <div className="card">
+              <h2>Finalize Tally</h2>
+              <p style={{ color: "var(--text-dim)", fontSize: "0.85rem", marginBottom: "0.75rem" }}>
+                Once enough key holders have submitted their shares, compute the final tally from
+                the on-chain data.
+              </p>
+              <p style={{ marginBottom: "1rem" }}>
+                Shares posted:{" "}
+                <strong>{postedSlots.length}</strong>
+                {postedSlots.length > 0 && (
+                  <span style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
+                    {" "}(KH {postedSlots.map((s) => s + 1).join(", ")})
+                  </span>
+                )}
+              </p>
               <button
                 className="btn btn-secondary"
                 onClick={handleComputeTally}
-                disabled={processing || shareCount < orgSession.khShares.length}
+                disabled={computingTally || postedSlots.length === 0}
               >
-                {processing ? "Computing…" : "Compute & Finalize Tally"}
+                {computingTally ? "Computing…" : "Compute & Finalize Tally"}
               </button>
             </div>
-          </div>
+          </>
         )}
 
         {!isClosed && (
@@ -277,14 +304,14 @@ export default function TallyPage() {
           </div>
         )}
 
-        {/* Info */}
+        {/* Protocol note */}
         <div className="card">
           <h3>Decryption Protocol</h3>
           <p style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
-            Each key-holder computes D<sub>ji</sub> = C1<sub>i</sub><sup>sk<sub>j</sub></sup> (partial decryption).
-            The combined decryption D<sub>i</sub> = Lagrange({"{D_ji}"}) recovers (v+1)·G.
-            Vote v is found by brute-force discrete-log search over {"{1…options_count}"}.
-            Chaum-Pedersen proofs are generated off-chain for verification.
+            Each key holder computes D<sub>j</sub> = C1<sup>sk<sub>j</sub></sup> per ballot and
+            posts the result on-chain signed with their Ed25519 key. Once the threshold is met,
+            the combined decryption D = Lagrange({"{D_j}"}) is computed and the vote
+            (v+1)·G = C2 − D is recovered by brute-force discrete-log.
           </p>
         </div>
       </div>

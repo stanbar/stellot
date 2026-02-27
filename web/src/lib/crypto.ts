@@ -252,6 +252,29 @@ export function serialiseShares(
   return concatBytes(...parts);
 }
 
+/**
+ * Deserialise a shares blob (produced by serialiseShares / the Rust contract)
+ * back into an array of (c1, D_j) pairs.
+ */
+export function deserialiseShares(blob: Uint8Array): Array<[Uint8Array, Uint8Array]> {
+  let off = 0;
+  const readU32 = () => {
+    const v = blob[off] | (blob[off+1] << 8) | (blob[off+2] << 16) | (blob[off+3] << 24);
+    off += 4;
+    return v >>> 0; // unsigned
+  };
+  const count = readU32();
+  const result: Array<[Uint8Array, Uint8Array]> = [];
+  for (let i = 0; i < count; i++) {
+    const c1Len = readU32();
+    const c1 = blob.slice(off, off + c1Len); off += c1Len;
+    const dLen = readU32();
+    const d = blob.slice(off, off + dLen); off += dLen;
+    result.push([c1, d]);
+  }
+  return result;
+}
+
 // ── Utility ────────────────────────────────────────────────────────────────────
 
 function bigintToLE64(n: bigint): Uint8Array {
