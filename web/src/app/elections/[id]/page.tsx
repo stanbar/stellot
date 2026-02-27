@@ -10,6 +10,7 @@ import {
   issueAccount,
   castBallot,
   isCastNullifierUsed,
+  deleteElection,
   ElectionInfo,
 } from "@/lib/contract";
 import {
@@ -43,6 +44,9 @@ export default function ElectionPage() {
   // Distributor key — auto-filled from organizer session; voter can paste it for cross-browser use
   const orgSession = typeof window !== "undefined" ? loadOrganizerSession(Number(eid)) : null;
   const [distSkHex, setDistSkHex] = useState(orgSession?.distSk ?? "");
+
+  const [deleting, setDeleting] = useState(false);
+  const [deleted, setDeleted] = useState(false);
 
   // Ballot verification
   const [verifyNullifier, setVerifyNullifier] = useState("");
@@ -129,6 +133,21 @@ export default function ElectionPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!confirm(`Delete election "${election?.title}"? This cannot be undone.`)) return;
+    setError(null);
+    setDeleting(true);
+    try {
+      const kp = getSessionKeypair();
+      await deleteElection(kp, eid);
+      setDeleted(true);
+    } catch (e: any) {
+      setError(e.message ?? String(e));
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   async function handleVerify() {
     if (!/^[0-9a-fA-F]{64}$/.test(verifyNullifier.trim())) return;
     setVerifying(true);
@@ -142,6 +161,10 @@ export default function ElectionPage() {
   }
 
   if (loading) return <div className="container"><p>Loading…</p></div>;
+  if (deleted) return (
+    <><Nav links={[{ href: "/", label: "Elections" }]} />
+    <div className="container"><p className="success">Election deleted. <a href="/">← Back to list</a></p></div></>
+  );
   if (!election) return <div className="container"><p className="error">Election not found.</p></div>;
 
   const options = Array.from({ length: election.optionsCount }, (_, i) => `Option ${String.fromCharCode(65 + i)}`);
@@ -242,11 +265,19 @@ export default function ElectionPage() {
             {now >= election.endTime && (
               <>
                 <p>Voting has closed.</p>
-                <Link href={`/elections/${eid}/tally`}>
-                  <button className="btn btn-primary" style={{ marginTop: "0.75rem" }}>
-                    Post Shares &amp; Tally
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
+                  <Link href={`/elections/${eid}/tally`}>
+                    <button className="btn btn-primary">Post Shares &amp; Tally</button>
+                  </Link>
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    title="Permanently delete this election and all its data"
+                  >
+                    {deleting ? "Deleting…" : "Delete Election"}
                   </button>
-                </Link>
+                </div>
               </>
             )}
           </div>

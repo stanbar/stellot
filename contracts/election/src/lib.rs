@@ -438,4 +438,62 @@ impl ElectionContract {
     pub fn get_kh_commitment(env: Env, eid: u64, kh_idx: u32) -> Option<Bytes> {
         env.storage().persistent().get(&DataKey::KhCommitment(eid, kh_idx))
     }
+
+    // ── Admin ─────────────────────────────────────────────────────────────────
+
+    /// Upgrade the contract WASM in-place.
+    /// (PoC: no auth — testnet only)
+    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
+        env.deployer().update_current_contract_wasm(new_wasm_hash);
+    }
+
+    /// Delete an election and all its associated data.
+    ///
+    /// Only allowed when:
+    ///   - the election exists
+    ///   - voting window has closed (`now >= end_time`)
+    ///   - the election has not been tallied
+    ///
+    /// Note: individual nullifier / casting-account ledger entries are not
+    /// removed (they will expire naturally via Soroban TTL).
+    pub fn delete_election(env: Env, eid: u64) -> Result<(), ContractError> {
+        let params = load_election(&env, eid)?;
+
+        let now = env.ledger().timestamp();
+        if now < params.end_time {
+            return Err(ContractError::OutsideVotingWindow);
+        }
+        if params.tallied {
+            return Err(ContractError::AlreadyTallied);
+        }
+
+        // Ballots
+        let ballot_count: u32 = env
+            .storage().persistent().get(&DataKey::BallotCount(eid)).unwrap_or(0);
+        for i in 0..ballot_count {
+            env.storage().persistent().remove(&DataKey::Ballot(eid, i));
+        }
+        env.storage().persistent().remove(&DataKey::BallotCount(eid));
+
+        // KH shares and per-KH commitments
+        let kh_roster: Vec<BytesN<32>> = env
+            .storage().persistent().get(&DataKey::KhRoster(eid)).unwrap();
+        for i in 0..kh_roster.len() {
+            env.storage().persistent().remove(&DataKey::KhCommitment(eid, i));
+            env.storage().persistent().remove(&DataKey::KhShare(eid, i));
+        }
+        env.storage().persistent().remove(&DataKey::ShareCount(eid));
+
+        // Election metadata
+        env.storage().persistent().remove(&DataKey::EligibleRoot(eid));
+        env.storage().persistent().remove(&DataKey::DistRoster(eid));
+        env.storage().persistent().remove(&DataKey::DistThreshold(eid));
+        env.storage().persistent().remove(&DataKey::KhRoster(eid));
+        env.storage().persistent().remove(&DataKey::KhThreshold(eid));
+        env.storage().persistent().remove(&DataKey::Election(eid));
+
+        env.events().publish((symbol_short!("deleted"), eid), ());
+
+        Ok(())
+    }
 }

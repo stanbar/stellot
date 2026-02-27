@@ -382,6 +382,12 @@ export async function isCastNullifierUsed(
   return scValToNative(result) as boolean;
 }
 
+export async function deleteElection(kp: Keypair, eid: bigint): Promise<void> {
+  await submitTx(kp, "delete_election", [
+    nativeToScVal(eid, { type: "u64" }),
+  ]);
+}
+
 export async function getKhRoster(eid: bigint): Promise<Uint8Array[]> {
   const result = await callReadOnly("get_kh_roster", [
     nativeToScVal(eid, { type: "u64" }),
