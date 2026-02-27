@@ -70,37 +70,37 @@ export default function HomePage() {
     <>
       <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
 
-      <div className="container">
-        {/* Hero */}
-        <div className="hero">
-          <div className="hero-logo">
-            <Logo size="lg" color="currentColor" />
-          </div>
-          <p className="hero-title">Threshold E-Voting on Stellar Soroban</p>
-          <p className="hero-sub">
-            A cryptographically complete proof-of-concept of the Stellot† e-voting protocol.
-            Designed with anonymity, verifiability, and threshold trust in mind — every
-            primitive is implemented for real, from the DKG ceremony to on-chain tallying.
-          </p>
-          <div className="hero-tags">
-            <div className="hero-tags-row">
-              {TAGS.filter((t) => t.cls === "hero-tag-accent").map((t) => (
-                <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
-              ))}
-            </div>
-            <div className="hero-tags-row">
-              {TAGS.filter((t) => t.cls === "hero-tag-teal").map((t) => (
-                <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
-              ))}
-            </div>
-          </div>
-          <Link href="/elections/create">
-            <button className="btn btn-primary" style={{ fontSize: "0.85rem", padding: "0.65rem 2rem" }}>
-              Create Election
-            </button>
-          </Link>
+      {/* Hero — outside container so container padding doesn't create a gap above */}
+      <div className="hero">
+        <div className="hero-logo">
+          <Logo size="lg" color="currentColor" />
         </div>
+        <p className="hero-title">Threshold E-Voting on Stellar Soroban</p>
+        <p className="hero-sub">
+          A cryptographically complete proof-of-concept of the Stellot† e-voting protocol.
+          Designed with anonymity, verifiability, and threshold trust in mind — every
+          primitive is implemented for real, from the DKG ceremony to on-chain tallying.
+        </p>
+        <div className="hero-tags">
+          <div className="hero-tags-row">
+            {TAGS.filter((t) => t.cls === "hero-tag-accent").map((t) => (
+              <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
+            ))}
+          </div>
+          <div className="hero-tags-row">
+            {TAGS.filter((t) => t.cls === "hero-tag-teal").map((t) => (
+              <span key={t.label} className={`hero-tag ${t.cls}`}>{t.label}</span>
+            ))}
+          </div>
+        </div>
+        <Link href="/elections/create">
+          <button className="btn btn-primary" style={{ fontSize: "0.85rem", padding: "0.65rem 2rem" }}>
+            Create Election
+          </button>
+        </Link>
+      </div>
 
+      <div className="container">
         <div className="features">
           {FEATURES.map((f) => (
             <div key={f.title} className="feature-item">
