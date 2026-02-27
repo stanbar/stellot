@@ -79,13 +79,13 @@ const ORGANISER_KEY = (eid: number) => `stellot:organizer:${eid}`;
 
 export function saveOrganizerSession(data: OrganizerSession): void {
   if (typeof window !== "undefined") {
-    sessionStorage.setItem(ORGANISER_KEY(data.eid), JSON.stringify(data));
+    localStorage.setItem(ORGANISER_KEY(data.eid), JSON.stringify(data));
   }
 }
 
 export function loadOrganizerSession(eid: number): OrganizerSession | null {
   if (typeof window === "undefined") return null;
-  const raw = sessionStorage.getItem(ORGANISER_KEY(eid));
+  const raw = localStorage.getItem(ORGANISER_KEY(eid));
   if (!raw) return null;
   try {
     return JSON.parse(raw) as OrganizerSession;
