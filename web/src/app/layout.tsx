@@ -36,7 +36,13 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <footer>
+          <a href="https://github.com/stanbar/stellot" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://www.mdpi.com/2076-3417/10/21/7606/pdf" target="_blank" rel="noopener noreferrer">Whitepaper</a>
+        </footer>
+      </body>
     </html>
   );
 }

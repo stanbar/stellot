@@ -130,6 +130,8 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   line-height: 1.6;
   background-image:
     radial-gradient(ellipse 70% 50% at 15% 30%, rgba(108, 114, 249, 0.07) 0%, transparent 60%),
@@ -631,6 +633,23 @@ tr:last-child td { border-bottom: none; }
   line-height: 1.65;
   margin: 0;
 }
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+footer {
+  margin-top: auto;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+footer a {
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+footer a:hover { color: var(--cornflower-light); }
 
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
