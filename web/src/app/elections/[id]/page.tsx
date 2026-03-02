@@ -11,6 +11,8 @@ import {
   castBallot,
   isCastNullifierUsed,
   deleteElection,
+  explorerContractUrl,
+  explorerTxUrl,
   ElectionInfo,
 } from "@/lib/contract";
 import {
@@ -37,6 +39,7 @@ export default function ElectionPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [voted, setVoted] = useState(false);
   const [castNullifier, setCastNullifier] = useState<string | null>(null);
+  const [castTxHash, setCastTxHash] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // For the PoC: a voter provides their voter secret key (hex) to derive nullifiers
@@ -120,9 +123,10 @@ export default function ElectionPage() {
 
       // 6. Submit
       setStatus("Submitting ballot…");
-      await castBallot(kp, eid, nfCast, cipher.c1, cipher.c2, castKP.pk, castSig);
+      const { txHash: castTx } = await castBallot(kp, eid, nfCast, cipher.c1, cipher.c2, castKP.pk, castSig);
 
       setCastNullifier(bytesToHex(nfCast));
+      setCastTxHash(castTx);
       setVoted(true);
       setBallotCount((c) => c + 1);
       setStatus(null);
@@ -174,9 +178,17 @@ export default function ElectionPage() {
       <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
       <div className="container">
         <h1>{election.title}</h1>
-        <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
+        <p style={{ color: "var(--text-muted)", marginBottom: "0.4rem" }}>
           eid={election.eid.toString()} &middot; {election.optionsCount} options &middot;{" "}
           {ballotCount} ballot(s) cast
+        </p>
+        <p style={{ fontSize: "0.8rem", marginBottom: "1rem" }}>
+          {explorerContractUrl() && (
+            <a href={explorerContractUrl()!} target="_blank" rel="noopener noreferrer"
+               style={{ color: "var(--cornflower-light)" }}>
+              ↗ Contract on Stellar Expert
+            </a>
+          )}
         </p>
         <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
           {new Date(Number(election.startTime) * 1000).toLocaleString()} &rarr;{" "}
@@ -256,6 +268,14 @@ export default function ElectionPage() {
             <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: "0.5rem" }}>
               You can use this nullifier to verify your ballot is included.
             </p>
+            {castTxHash && (
+              <p style={{ marginTop: "0.5rem", fontSize: "0.82rem" }}>
+                <a href={explorerTxUrl(castTxHash)} target="_blank" rel="noopener noreferrer"
+                   style={{ color: "var(--cornflower-light)" }}>
+                  ↗ View transaction on Stellar Expert
+                </a>
+              </p>
+            )}
           </div>
         )}
 

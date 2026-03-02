@@ -6,7 +6,7 @@ import Nav from "@/components/Nav";
 import { runDKG } from "@/lib/dkg";
 import { buildTree } from "@/lib/merkle";
 import { hexToBytes, bytesToHex } from "@/lib/crypto";
-import { deployElection, setKhCommitment, fundAccountIfNeeded } from "@/lib/contract";
+import { deployElection, setKhCommitment, fundAccountIfNeeded, explorerTxUrl, explorerContractUrl } from "@/lib/contract";
 import { getSessionKeypair, saveOrganizerSession } from "@/lib/wallet";
 import { ed25519 } from "@noble/curves/ed25519";
 
@@ -24,6 +24,7 @@ interface KHCredential {
 
 interface DeployedElection {
   eid: bigint;
+  txHash: string;
   khCredentials: KHCredential[];
   distSk: string;
 }
@@ -120,7 +121,7 @@ export default function CreateElectionPage() {
       const startTs = BigInt(Math.floor(new Date(startTime).getTime() / 1000));
       const endTs = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
-      const eid = await deployElection(kp, {
+      const { eid, txHash: deployTxHash } = await deployElection(kp, {
         title,
         optionsCount: options.length,
         startTime: startTs,
@@ -159,6 +160,7 @@ export default function CreateElectionPage() {
       // 7. Show credentials — don't redirect, let the organizer copy/download keys
       setDeployed({
         eid,
+        txHash: deployTxHash,
         distSk: distSkHex,
         khCredentials: dkgOut.shares.map((s) => ({
           index: s.index,
@@ -182,9 +184,21 @@ export default function CreateElectionPage() {
         <Nav links={[{ href: "/", label: "Elections" }, { href: "/elections/create", label: "Create" }]} />
         <div className="container">
           <h1>Election Deployed</h1>
-          <p style={{ color: "var(--text-dim)", marginBottom: "1.5rem" }}>
+          <p style={{ color: "var(--text-dim)", marginBottom: "0.5rem" }}>
             eid={deployed.eid.toString()} — Distribute each key holder's credentials before
             navigating away. These keys cannot be recovered after you leave this page.
+          </p>
+          <p style={{ fontSize: "0.82rem", marginBottom: "1.5rem" }}>
+            <a href={explorerTxUrl(deployed.txHash)} target="_blank" rel="noopener noreferrer"
+               style={{ color: "var(--cornflower-light)" }}>
+              ↗ Deploy transaction on Stellar Expert
+            </a>
+            {explorerContractUrl() && (
+              <> &middot; <a href={explorerContractUrl()!} target="_blank" rel="noopener noreferrer"
+                 style={{ color: "var(--cornflower-light)" }}>
+                ↗ Contract on Stellar Expert
+              </a></>
+            )}
           </p>
 
           {/* Distributor key */}

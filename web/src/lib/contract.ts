@@ -28,6 +28,21 @@ export const NETWORK_PASSPHRASE =
 export const CONTRACT_ID =
   process.env.NEXT_PUBLIC_CONTRACT_ID ?? "";
 
+// ── Explorer URL helpers ────────────────────────────────────────────────────────
+
+function explorerNetwork(): string {
+  return NETWORK_PASSPHRASE.includes("Test") ? "testnet" : "public";
+}
+
+export function explorerContractUrl(): string | null {
+  if (!CONTRACT_ID) return null;
+  return `https://stellar.expert/explorer/${explorerNetwork()}/contract/${CONTRACT_ID}`;
+}
+
+export function explorerTxUrl(hash: string): string {
+  return `https://stellar.expert/explorer/${explorerNetwork()}/tx/${hash}`;
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 export interface ElectionInfo {
@@ -101,7 +116,7 @@ async function submitTx(
   kp: Keypair,
   methodName: string,
   args: xdr.ScVal[],
-): Promise<xdr.ScVal> {
+): Promise<{ retval: xdr.ScVal; txHash: string }> {
   const rpc = getRpc();
   await fundAccountIfNeeded(kp.publicKey());
   const account = await rpc.getAccount(kp.publicKey());
@@ -128,11 +143,13 @@ async function submitTx(
     throw new Error(`Send failed: ${JSON.stringify(sendResult)}`);
   }
 
+  const txHash = sendResult.hash;
+
   // Poll for completion
   let getResult;
   for (let i = 0; i < 20; i++) {
     await new Promise((r) => setTimeout(r, 500));
-    getResult = await rpc.getTransaction(sendResult.hash);
+    getResult = await rpc.getTransaction(txHash);
     if (getResult.status !== "NOT_FOUND") break;
   }
 
@@ -140,7 +157,7 @@ async function submitTx(
     throw new Error(`Transaction failed: ${JSON.stringify(getResult)}`);
   }
 
-  return getResult.returnValue ?? xdr.ScVal.scvVoid();
+  return { retval: getResult.returnValue ?? xdr.ScVal.scvVoid(), txHash };
 }
 
 // ── Call (read-only) helper ────────────────────────────────────────────────────
@@ -200,7 +217,7 @@ export async function deployElection(
     khRoster: Uint8Array[];
     khThreshold: number;
   },
-): Promise<bigint> {
+): Promise<{ eid: bigint; txHash: string }> {
   const args = [
     xdr.ScVal.scvBytes(Buffer.from(new TextEncoder().encode(params.title))),
     nativeToScVal(params.optionsCount, { type: "u32" }),
@@ -214,8 +231,8 @@ export async function deployElection(
     nativeToScVal(params.khThreshold, { type: "u32" }),
   ];
 
-  const result = await submitTx(kp, "deploy", args);
-  return scValToNative(result) as bigint;
+  const { retval, txHash } = await submitTx(kp, "deploy", args);
+  return { eid: scValToNative(retval) as bigint, txHash };
 }
 
 export async function setKhCommitment(
@@ -238,8 +255,6 @@ export async function issueAccount(
   nfIssue: Uint8Array,
   distSigs: Array<{ pk: Uint8Array; sig: Uint8Array }>,
 ): Promise<void> {
-  // dist_sigs: Vec<(BytesN<32>, BytesN<64>)>
-  // Soroban encodes tuples as inner scvVec, outer scvVec wraps the list.
   const sigsVal = xdr.ScVal.scvVec(
     distSigs.map(({ pk, sig }) =>
       xdr.ScVal.scvVec([
@@ -265,8 +280,8 @@ export async function castBallot(
   c2: Uint8Array,
   pkCast: Uint8Array,
   sig: Uint8Array,
-): Promise<number> {
-  const result = await submitTx(kp, "cast", [
+): Promise<{ ballotIndex: number; txHash: string }> {
+  const { retval, txHash } = await submitTx(kp, "cast", [
     nativeToScVal(eid, { type: "u64" }),
     xdr.ScVal.scvBytes(Buffer.from(nfCast)),
     xdr.ScVal.scvBytes(Buffer.from(c1)),
@@ -274,7 +289,7 @@ export async function castBallot(
     xdr.ScVal.scvBytes(Buffer.from(pkCast)),
     xdr.ScVal.scvBytes(Buffer.from(sig)),
   ]);
-  return scValToNative(result) as number;
+  return { ballotIndex: scValToNative(retval) as number, txHash };
 }
 
 export async function postShare(
@@ -284,8 +299,7 @@ export async function postShare(
   shares: Array<[Uint8Array, Uint8Array]>,
   khPk: Uint8Array,
   sig: Uint8Array,
-): Promise<number> {
-  // shares: Vec<(Bytes, Bytes)> — same tuple encoding as dist_sigs
+): Promise<{ shareCount: number; txHash: string }> {
   const sharesVal = xdr.ScVal.scvVec(
     shares.map(([c1, d]) =>
       xdr.ScVal.scvVec([
@@ -295,25 +309,33 @@ export async function postShare(
     ),
   );
 
-  const result = await submitTx(kp, "post_share", [
+  const { retval, txHash } = await submitTx(kp, "post_share", [
     nativeToScVal(eid, { type: "u64" }),
     nativeToScVal(khIdx, { type: "u32" }),
     sharesVal,
     xdr.ScVal.scvBytes(Buffer.from(khPk)),
     xdr.ScVal.scvBytes(Buffer.from(sig)),
   ]);
-  return scValToNative(result) as number;
+  return { shareCount: scValToNative(retval) as number, txHash };
 }
 
 export async function finalizeTally(
   kp: Keypair,
   eid: bigint,
   tally: number[],
-): Promise<void> {
-  await submitTx(kp, "finalize_tally", [
+): Promise<{ txHash: string }> {
+  const { txHash } = await submitTx(kp, "finalize_tally", [
     nativeToScVal(eid, { type: "u64" }),
     xdr.ScVal.scvVec(tally.map((v) => nativeToScVal(v, { type: "u32" }))),
   ]);
+  return { txHash };
+}
+
+export async function deleteElection(kp: Keypair, eid: bigint): Promise<{ txHash: string }> {
+  const { txHash } = await submitTx(kp, "delete_election", [
+    nativeToScVal(eid, { type: "u64" }),
+  ]);
+  return { txHash };
 }
 
 export async function getElection(eid: bigint): Promise<ElectionInfo | null> {
@@ -380,12 +402,6 @@ export async function isCastNullifierUsed(
     xdr.ScVal.scvBytes(Buffer.from(nf)),
   ]);
   return scValToNative(result) as boolean;
-}
-
-export async function deleteElection(kp: Keypair, eid: bigint): Promise<void> {
-  await submitTx(kp, "delete_election", [
-    nativeToScVal(eid, { type: "u64" }),
-  ]);
 }
 
 export async function getKhRoster(eid: bigint): Promise<Uint8Array[]> {

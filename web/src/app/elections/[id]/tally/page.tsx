@@ -12,6 +12,8 @@ import {
   getTally,
   postShare,
   finalizeTally,
+  explorerContractUrl,
+  explorerTxUrl,
   ElectionInfo,
 } from "@/lib/contract";
 import {
@@ -54,6 +56,7 @@ export default function TallyPage() {
 
   // Tally computation
   const [computingTally, setComputingTally] = useState(false);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -159,9 +162,10 @@ export default function TallyPage() {
       const sig = ed25519Sign(edSkBytes, msgHash);
 
       const kp = getSessionKeypair();
-      await postShare(kp, eid, idx - 1, shares, edPkBytes, sig);
+      const { txHash: shareTx } = await postShare(kp, eid, idx - 1, shares, edPkBytes, sig);
 
       setStatus("Share posted successfully.");
+      setLastTxHash(shareTx);
       await refreshPostedSlots();
     } catch (e: any) {
       setError(e.message ?? String(e));
@@ -210,10 +214,11 @@ export default function TallyPage() {
 
       setStatus("Submitting tally…");
       const kp = getSessionKeypair();
-      await finalizeTally(kp, eid, counts);
+      const { txHash: tallyTx } = await finalizeTally(kp, eid, counts);
 
       setTally(counts);
       setStatus("Tally finalized!");
+      setLastTxHash(tallyTx);
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
@@ -244,12 +249,28 @@ export default function TallyPage() {
       <Nav links={[{ href: "/", label: "Elections" }, { href: `/elections/${id}`, label: "Election" }]} />
       <div className="container">
         <h1>{election.title} — Tally</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "0.4rem" }}>
           eid={eid.toString()} &middot; {election.optionsCount} options &middot; {ballotCount} ballot(s)
+        </p>
+        <p style={{ fontSize: "0.8rem", marginBottom: "1.5rem" }}>
+          {explorerContractUrl() && (
+            <a href={explorerContractUrl()!} target="_blank" rel="noopener noreferrer"
+               style={{ color: "var(--cornflower-light)" }}>
+              ↗ Contract on Stellar Expert
+            </a>
+          )}
         </p>
 
         {error && <p className="error" style={{ marginBottom: "1rem" }}>{error}</p>}
-        {status && <p className="success" style={{ marginBottom: "1rem" }}>{status}</p>}
+        {status && (
+          <p className="success" style={{ marginBottom: "1rem" }}>
+            {status}
+            {lastTxHash && (
+              <> &middot; <a href={explorerTxUrl(lastTxHash)} target="_blank" rel="noopener noreferrer"
+                 style={{ color: "var(--success)" }}>↗ View transaction</a></>
+            )}
+          </p>
+        )}
 
         {/* Results */}
         {tally && (
