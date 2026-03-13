@@ -7,10 +7,10 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-soroban-sdk = { version = "22.0.0", features = ["alloc"] }
+soroban-sdk = { version = "22.0.11", features = ["alloc"] }
 
 [dev-dependencies]
-soroban-sdk = { version = "22.0.0", features = ["testutils"] }
+soroban-sdk = { version = "22.0.11", features = ["testutils"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand = "0.8"
 
