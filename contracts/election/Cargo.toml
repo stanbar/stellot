@@ -12,7 +12,7 @@ soroban-sdk = { version = "22.0.0", features = ["alloc"] }
 [dev-dependencies]
 soroban-sdk = { version = "22.0.0", features = ["testutils"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
-rand = "0.8"
+rand = "0.9"
 
 [features]
 testutils = ["soroban-sdk/testutils"]
